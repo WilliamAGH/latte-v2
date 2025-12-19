@@ -1,5 +1,9 @@
 package org.flatscrew.latte.input;
 
+/**
+ * Mouse button values.
+ * Bubble Tea: seeks to replicate charmbracelet/bubbletea/mouse.go MouseButton behavior.
+ */
 public enum MouseButton {
     MouseButtonNone("none"),
 

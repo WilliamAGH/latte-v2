@@ -2,6 +2,7 @@ package org.flatscrew.latte.input;
 
 /**
  * Tracks whether a left-button mouse selection is active and emits state transitions.
+ * Latte extension; no Bubble Tea equivalent.
  */
 public final class MouseSelectionTracker {
     private boolean selecting;
