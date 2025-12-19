@@ -1,33 +1,55 @@
 # Latte
-[![Build and test](https://github.com/flatscrew/latte/actions/workflows/build-and-test.yml/badge.svg)](https://github.com/flatscrew/latte/actions/workflows/build-and-test.yml) [![Maven Central](https://img.shields.io/maven-central/v/org.flatscrew/latte-tui)](https://central.sonatype.com/artifact/org.flatscrew/latte-tui)
 
 <img src="images/latte-logo.png" width="250">
 
 > Artwork by [m.art.i](https://www.instagram.com/m.art.i)
 
-Latte aims to be a Java port of Golang's [Bubble Tea](https://github.com/charmbracelet/bubbletea),
-[The Elm Architecture](https://guide.elm-lang.org/architecture/)–driven TUI framework.
+Latte is a Java port of Go's [Bubble Tea](https://github.com/charmbracelet/bubbletea), [The Elm Architecture](https://guide.elm-lang.org/architecture/)–driven TUI framework.
+
+Canonical repo: https://github.com/WilliamAGH/latte-v2
+
+This is a maintained fork of [flatscrew/latte](https://github.com/flatscrew/latte) with bug fixes and improvements. Made by [William Callahan](https://williamcallahan.com).
 
 ![Demo](latte-tui-examples/demo-tape.gif "Demo")
 
+## Installation
+
+### Maven
+
+```xml
+<dependency>
+    <groupId>io.github.williamagh</groupId>
+    <artifactId>latte-tui</artifactId>
+    <version>0.2.0</version>
+</dependency>
+```
+
+### Gradle
+
+```groovy
+implementation 'io.github.williamagh:latte-tui:0.2.0'
+```
+
 ## Examples
-See all the [examples](latte-tui-examples) ported so far and some new ones as well ;)
+
+See all the [examples](latte-tui-examples) ported so far and some new ones as well!
 
 ![Conway](latte-tui-examples/conway-tape.gif)
 
+## Porting Status
 
-## Porting status
-Check out [this page](STATUS.md) to see porting status.
+Check out [this page](STATUS.md) to see porting status from the original Bubble Tea.
 
 ## Tutorial
-For this tutorial, we're making a coffee ordering application (by the way, the non-annotated source code for this program is available [on GitHub](https://github.com/flatscrew/latte/tree/main/latte-tui-examples/src/main/java/org/flatscrew/latte/examples/demo)).
+
+For this tutorial, we're making a coffee ordering application (the non-annotated source code is available [on GitHub](https://github.com/WilliamAGH/latte-v2/tree/main/latte-tui-examples/src/main/java/org/flatscrew/latte/examples/demo)).
 
 Everything starts with a **model** – an implementation of the `org.flatscrew.latte.Model` interface that describes the application state and three simple methods on that model:
 
 - **init**, a method that returns an initial command for the application to run,
 - **update**, a method that handles incoming events and updates the model accordingly,
 - **view**, that renders the UI based on the data in the model.
-  
+
 ```mermaid
 graph TD
     I[Init] -->|Command| ML[Main Loop]
@@ -41,8 +63,8 @@ graph TD
     style ML fill:#fbb,stroke:#fff,color:#000
 ```
 
-  
 ### The Model
+
 So let's start by defining our model which will store our application's state. It can be any type implementing the `org.flatscrew.latte.Model` interface.
 
 ```java
@@ -57,6 +79,7 @@ public class Demo implements Model {
 ```
 
 ### Initialization
+
 Next, we'll define our application's initial state. In this case, we're defining a variable pointing to a model instance; we could just as easily define a method to return our initial model, too.
 
 ```java
@@ -72,7 +95,8 @@ public Command init() {
 }
 ```
 
-### The update method
+### The Update Method
+
 Next up is the update method. It is called when "things happen". Its job is to look at what has happened and return an updated model in response. It can also return a `Command` to make more things happen, but for now don't worry about that part.
 
 In our case, when a user presses the down arrow, `update`'s job is to notice that the down arrow was pressed and move the cursor accordingly (or not).
@@ -142,7 +166,8 @@ private Model makeChoice() {
 
 You may have noticed that `q` above returns a `QuitMessage` command with the model. That's a special message which instructs the Latte runtime to quit, exiting the program.
 
-### The view method
+### The View Method
+
 At last, it's time to render our UI. Of all the methods, the view is the simplest. We look at the model in its current state and use it to return a `String`. That String is our UI!
 
 Because the view describes the entire UI of your application, you don't have to worry about redrawing logic and stuff like that. Latte takes care of it for you.
@@ -166,7 +191,8 @@ public String view() {
 }
 ```
 
-### All together now
+### All Together Now
+
 The last step is to simply run our program. We pass our initial model as an argument for a new instance of `org.flatscrew.latte.Program` and call the `run` method.
 
 ```java
@@ -181,3 +207,15 @@ public static void main(String[] args) {
     System.out.printf("\n---\nYou chose: %s!\n", demoModel.getChoice());
 }
 ```
+
+## Contributing
+
+Found a bug or have a feature request? Please [open an issue](https://github.com/WilliamAGH/latte-v2/issues/new) on GitHub. Contributions and feedback are welcome, and Pull Requests (PRs) are encouraged!
+
+## Acknowledgments
+
+This project is a fork of [flatscrew/latte](https://github.com/flatscrew/latte) by [Lukasz Grabski](https://github.com/activey). The original work is an excellent Java port of Go's [Bubble Tea](https://github.com/charmbracelet/bubbletea) by [Charm](https://charm.sh/).
+
+## License
+
+[MIT License](LICENSE) - see the LICENSE file for details.

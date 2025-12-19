@@ -4,12 +4,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.flatscrew</groupId>
+    <groupId>io.github.williamagh</groupId>
     <artifactId>latte-parent</artifactId>
-    <version>0.1.2</version>
+    <version>0.2.0</version>
     <packaging>pom</packaging>
-    <description>Terminal User Interface framework</description>
-    <url>https://github.com/flatscrew/latte</url>
+    <name>Latte TUI</name>
+    <description>Terminal User Interface framework for Java - a port of Go's Bubble Tea</description>
+    <url>https://github.com/WilliamAGH/latte-v2</url>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
@@ -51,7 +52,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-gpg-plugin</artifactId>
-                <version>1.5</version>
+                <version>3.2.7</version>
                 <executions>
                     <execution>
                         <id>sign-artifacts</id>
@@ -68,7 +69,7 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>org.flatscrew</groupId>
+                <groupId>io.github.williamagh</groupId>
                 <artifactId>latte-tui</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -77,15 +78,31 @@
 
     <developers>
         <developer>
+            <name>William Callahan</name>
+            <email>william@williamcallahan.com</email>
+            <url>https://williamcallahan.com</url>
+        </developer>
+        <developer>
             <name>Lukasz Grabski</name>
             <email>activey@doaplatform.org</email>
+            <organization>Flatscrew</organization>
+            <organizationUrl>https://github.com/flatscrew</organizationUrl>
+            <roles>
+                <role>Original Author</role>
+            </roles>
         </developer>
     </developers>
 
     <scm>
-        <connection>scm:git:git://github.com/flatscrew/latte.git</connection>
-        <url>https://github.com/flatscrew/latte</url>
+        <connection>scm:git:git://github.com/WilliamAGH/latte-v2.git</connection>
+        <developerConnection>scm:git:ssh://github.com:WilliamAGH/latte-v2.git</developerConnection>
+        <url>https://github.com/WilliamAGH/latte-v2</url>
     </scm>
+
+    <issueManagement>
+        <system>GitHub Issues</system>
+        <url>https://github.com/WilliamAGH/latte-v2/issues</url>
+    </issueManagement>
 
     <licenses>
         <license>
