@@ -12,13 +12,7 @@ import java.time.LocalDateTime;
 
 import static org.flatscrew.latte.Command.tick;
 
-class TickMessage implements Message {
-    private final LocalDateTime time;
-
-    public TickMessage(LocalDateTime time) {
-        this.time = time;
-    }
-}
+record TickMessage(LocalDateTime time) implements Message {}
 
 public class FullscreenExample implements Model {
 
