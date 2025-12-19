@@ -38,6 +38,16 @@ See all the [examples](latte-tui-examples) ported so far and some new ones as we
 
 ![Conway](latte-tui-examples/conway-tape.gif)
 
+## Built with Latte
+
+Projects and applications using Latte in the wild:
+
+| Project | Description |
+|---------|-------------|
+| [Brief](https://github.com/WilliamAGH/brief) | Terminal UI chat client with slash-command palette and local tool execution for chatting with any AI/LLM. Available via Homebrew. |
+
+**Using Latte in your project?** We'd love to feature it! [Open an issue](https://github.com/WilliamAGH/latte-v2/issues/new?title=Add%20project%20to%20Built%20with%20Latte&labels=showcase) or submit a PR to add your project to this list.
+
 ## Porting Status
 
 Check out [this page](STATUS.md) to see porting status from the original Bubble Tea.
