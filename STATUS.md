@@ -17,58 +17,57 @@ conform it
 
 `🟢 Done` It's done like DONE, the example works 100% the same as original code does.
 
-`🔴 Won't do` It won't be done because of some technical limitations or was done some other way with explanation in *
-*Notes**.
+`🔴 Won't do` It won't be done because of some technical limitations or was done some other way with explanation in **Notes**.
 
-| Example           | Status        | Notes                                                                                                            |
-|-------------------|---------------|------------------------------------------------------------------------------------------------------------------|
-| altscreen-toggle  | `🟢 Done`     |                                                                                                                  |
-| autocomplete      | `⚪ TODO`      | Needs **help**, **key** and **textinput** bubbles.                                                               |
-| cellbuffer        | `⚪ TODO`      | Any reasonable port of **harmonica** is needed.                                                                  |
-| chat              | `⚪ TODO`      | Needs **textarea** and **viewport** bubbles.                                                                     |
-| composable-views  | `⚪ TODO`      | Needs **timer** bubble.                                                                                          |
-| credit-card-form  | `⚪ TODO`      |                                                                                                                  |
-| debounce          | `⚪ TODO`      |                                                                                                                  |
-| exec              | `⚪ TODO`      |                                                                                                                  |
-| file-picker       | `⚪ TODO`      | Needs **filepicker** bubble.                                                                                     |
-| focus-blur        | `🟢 Done`     |                                                                                                                  |
-| fullscreen        | `🟢 Done`     |                                                                                                                  |
-| glamour           | `⚪ TODO`      | Needs any reasonable port of **glamour**.                                                                        |
-| help              | `⚪ TODO`      | Needs **help** and **key** bubbles.                                                                              |
-| http              | `🟢 Done`     |                                                                                                                  |
-| list-default      | `🟢 Done`     |                                                                                                                  |
-| list-fancy        | `🟢 Done`     |                                                                                                                  |
-| list-simple       | `🟢 Done`     |                                                                                                                  |
-| mouse             | `🟢 Done`     |                                                                                                                  |
-| package-manager   | `⚪ TODO`      | Needs **progress** bubble.                                                                                       |
-| pager             | `⚪ TODO`      | Needs **viewport** bubble.                                                                                       |
-| paginator         | `⚪ TODO`      | `🟢 Done`                                                                                                        |
-| pipe              | `⚪ TODO`      |                                                                                                                  |
-| prevent-quit      | `⚪ TODO`      | Needs **help**, **key** and **textarea** bubbles.                                                                |
-| progress-animated | `⚪ TODO`      | Needs **progress** bubble.                                                                                       |
-| progress-download | `⚪ TODO`      | Needs **progress** bubble.                                                                                       |
-| progress-static   | `⚪ TODO`      | Needs **progress** bubble.                                                                                       |
-| realtime          | `⚪ TODO`      |                                                                                                                  |
-| result            | `🔴 Won't do` | Rewritten as **demo** example.                                                                                   |
-| send-msg          | `⚪ TODO`      |                                                                                                                  |
-| sequence          | `🟢 Done`     | Nested sequences and batches are not supported yet,<br>needs to be revisited as golang implementation feels odd. |
-| set-window-title  | `🟢 Done`     |                                                                                                                  |
-| simple            | `⚪ TODO`      |                                                                                                                  |
-| spinner           | `🟢 Done`     |                                                                                                                  |
-| spinners          | `⚪ TODO`      |                                                                                                                  |
-| split-editors     | `⚪ TODO`      |                                                                                                                  |
-| stopwatch         | `⚪ TODO`      | Needs **help**, **key** and **stopwatch** bubbles.                                                               |
-| suspend           | `⚪ TODO`      |                                                                                                                  |
-| table             | `⚪ TODO`      | Needs **table** bubble.                                                                                          |
-| table-resize      | `⚪ TODO`      |                                                                                                                  |
-| tabs              | `⚪ TODO`      |                                                                                                                  |
-| textarea          | `⚪ TODO`      | Needs **textarea** bubble.                                                                                       |
-| textinput         | `🟢 Done`     |                                                                                                                  |
-| textinputs        | `🟢 Done`     |                                                                                                                  |
-| timer             | `⚪ TODO`      | Needs **help**, **key** and **timer** bubbles.                                                                   |
-| tui-daemon-combo  | `⚪ TODO`      |                                                                                                                  |
-| views             | `⚪ TODO`      |                                                                                                                  |
-| window-size       | `🟢 Done`     |                                                                                                                  |
+| Example           | Status        | Notes                                                              |
+|-------------------|---------------|--------------------------------------------------------------------|
+| altscreen-toggle  | `🟢 Done`     |                                                                    |
+| autocomplete      | `⚪ TODO`     | Needs **help**, **key** and **textinput** bubbles.                 |
+| cellbuffer        | `⚪ TODO`     | Any reasonable port of **harmonica** is needed.                    |
+| chat              | `⚪ TODO`     | Needs **textarea** and **viewport** bubbles.                       |
+| composable-views  | `⚪ TODO`     | Needs **timer** bubble.                                            |
+| credit-card-form  | `⚪ TODO`     |                                                                    |
+| debounce          | `⚪ TODO`     |                                                                    |
+| exec              | `⚪ TODO`     |                                                                    |
+| file-picker       | `⚪ TODO`     | Needs **filepicker** bubble.                                       |
+| focus-blur        | `🟢 Done`     |                                                                    |
+| fullscreen        | `🟢 Done`     |                                                                    |
+| glamour           | `⚪ TODO`     | Needs any reasonable port of **glamour**.                          |
+| help              | `⚪ TODO`     | Needs **help** and **key** bubbles.                                |
+| http              | `🟢 Done`     |                                                                    |
+| list-default      | `🟢 Done`     |                                                                    |
+| list-fancy        | `🟢 Done`     |                                                                    |
+| list-simple       | `🟢 Done`     |                                                                    |
+| mouse             | `🟢 Done`     |                                                                    |
+| package-manager   | `⚪ TODO`     | Needs **progress** bubble.                                         |
+| pager             | `⚪ TODO`     | Needs **viewport** bubble.                                         |
+| paginator         | `🟢 Done`     |                                                                    |
+| pipe              | `⚪ TODO`     |                                                                    |
+| prevent-quit      | `⚪ TODO`     | Needs **help**, **key** and **textarea** bubbles.                  |
+| progress-animated | `⚪ TODO`     | Needs **progress** bubble.                                         |
+| progress-download | `⚪ TODO`     | Needs **progress** bubble.                                         |
+| progress-static   | `⚪ TODO`     | Needs **progress** bubble.                                         |
+| realtime          | `⚪ TODO`     |                                                                    |
+| result            | `🔴 Won't do` | Rewritten as **demo** example.                                     |
+| send-msg          | `⚪ TODO`     |                                                                    |
+| sequence          | `🟢 Done`     | Nested sequences and batches not yet supported, needs revisiting.  |
+| set-window-title  | `🟢 Done`     |                                                                    |
+| simple            | `⚪ TODO`     |                                                                    |
+| spinner           | `🟢 Done`     |                                                                    |
+| spinners          | `⚪ TODO`     |                                                                    |
+| split-editors     | `⚪ TODO`     |                                                                    |
+| stopwatch         | `⚪ TODO`     | Needs **help**, **key** and **stopwatch** bubbles.                 |
+| suspend           | `⚪ TODO`     |                                                                    |
+| table             | `⚪ TODO`     | Needs **table** bubble.                                            |
+| table-resize      | `⚪ TODO`     |                                                                    |
+| tabs              | `⚪ TODO`     |                                                                    |
+| textarea          | `⚪ TODO`     | Needs **textarea** bubble.                                         |
+| textinput         | `🟢 Done`     |                                                                    |
+| textinputs        | `🟢 Done`     |                                                                    |
+| timer             | `⚪ TODO`     | Needs **help**, **key** and **timer** bubbles.                     |
+| tui-daemon-combo  | `⚪ TODO`     |                                                                    |
+| views             | `⚪ TODO`     |                                                                    |
+| window-size       | `🟢 Done`     |                                                                    |
 
 ## Bubbles
 
@@ -77,35 +76,34 @@ This table covers all the Bubble's ported so far. The same status labels apply.
 | Bubble     | Status    | Notes                          |
 |------------|-----------|--------------------------------|
 | cursor     | `🟢 Done` |                                |
-| filepicker | `⚪ TODO`  |                                |
-| filepicker | `⚪ TODO`  |                                |
+| filepicker | `⚪ TODO` |                                |
 | help       | `🟢 Done` |                                |
 | key        | `🟢 Done` |                                |
 | list       | `🟢 Done` |                                |
 | paginator  | `🟢 Done` |                                |
-| progress   | `⚪ TODO`  |                                |
+| progress   | `⚪ TODO` |                                |
 | runeutil   | `🟢 Done` |                                |
 | spinner    | `🟢 Done` |                                |
-| stopwatch  | `⚪ TODO`  |                                |
-| table      | `⚪ TODO`  | Needs **table** from lipgloss. |
-| textarea   | `⚪ TODO`  |                                |
+| stopwatch  | `⚪ TODO` |                                |
+| table      | `⚪ TODO` | Needs **table** from lipgloss. |
+| textarea   | `⚪ TODO` |                                |
 | textinput  | `🟢 Done` |                                |
-| timer      | `⚪ TODO`  |                                |
-| viewport   | `⚪ TODO`  |                                |
+| timer      | `⚪ TODO` |                                |
+| viewport   | `⚪ TODO` |                                |
 
 ## Lipgloss
 
 This table represents porting status of each part of Lipgloss that can be anyway measured.
 
-| What                         | Status    | Notes                                                                                                |
-|------------------------------|-----------|------------------------------------------------------------------------------------------------------|
-| Colors and color profiles    | `🟢 Done` |                                                                                                      |
-| Borders                      | `🟢 Done` |                                                                                                      |
-| Margins and paddings         | `🟢 Done` |                                                                                                      |
-| Width and wrapping           | `🟢 Done` | Few test cases for text width measurements are failing (OSC, CSI), <br/>needs further investigation. |
-| Alignment                    | `🟢 Done` |                                                                                                      |
-| Max width and max height     | `⚪ TODO`  |                                                                                                      |
-| Horizontal and vertical join | `🟢 Done` |                                                                                                      |
-| List component               | `🟢 Done` |                                                                                                      |
-| Tree component               | `🟢 Done` |                                                                                                      |
-| Table component              | `⚪ TODO`  |                                                                                                      |
+| What                         | Status    | Notes                                                     |
+|------------------------------|-----------|-----------------------------------------------------------|
+| Colors and color profiles    | `🟢 Done` |                                                           |
+| Borders                      | `🟢 Done` |                                                           |
+| Margins and paddings         | `🟢 Done` |                                                           |
+| Width and wrapping           | `🟢 Done` | Some text width tests failing (OSC, CSI).                 |
+| Alignment                    | `🟢 Done` |                                                           |
+| Max width and max height     | `⚪ TODO` |                                                           |
+| Horizontal and vertical join | `🟢 Done` |                                                           |
+| List component               | `🟢 Done` |                                                           |
+| Tree component               | `🟢 Done` |                                                           |
+| Table component              | `⚪ TODO` |                                                           |
