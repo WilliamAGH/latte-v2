@@ -1,6 +1,16 @@
 package org.flatscrew.latte;
 
 import org.flatscrew.latte.input.InputHandler;
+import org.flatscrew.latte.input.MouseAction;
+import org.flatscrew.latte.input.MouseClickMessage;
+import org.flatscrew.latte.input.MouseClickTracker;
+import org.flatscrew.latte.input.MouseHoverTextDetector;
+import org.flatscrew.latte.input.MouseMessage;
+import org.flatscrew.latte.input.MouseSelectionTracker;
+import org.flatscrew.latte.input.MouseSelectionUpdate;
+import org.flatscrew.latte.input.MouseTarget;
+import org.flatscrew.latte.input.MouseTargetProvider;
+import org.flatscrew.latte.input.MouseTargets;
 import org.flatscrew.latte.input.NewInputHandler;
 import org.flatscrew.latte.message.BatchMessage;
 import org.flatscrew.latte.message.CheckWindowSizeMessage;
@@ -8,6 +18,7 @@ import org.flatscrew.latte.message.ClearScreenMessage;
 import org.flatscrew.latte.message.EnterAltScreen;
 import org.flatscrew.latte.message.ErrorMessage;
 import org.flatscrew.latte.message.ExitAltScreen;
+import org.flatscrew.latte.message.OpenUrlMessage;
 import org.flatscrew.latte.message.QuitMessage;
 import org.flatscrew.latte.message.SequenceMessage;
 import org.flatscrew.latte.message.WindowSizeMessage;
@@ -40,6 +51,15 @@ public class Program {
     private volatile Model currentModel;
     private final Renderer renderer;
     private final Terminal terminal;
+    private final MouseSelectionTracker mouseSelectionTracker = new MouseSelectionTracker();
+    private final MouseHoverTextDetector mouseHoverTextDetector = new MouseHoverTextDetector();
+    private final MouseClickTracker mouseClickTracker = new MouseClickTracker();
+    private boolean extendSelectionOnScroll;
+    private boolean manageMouseSelectionCursor;
+    private boolean mouseSelectionCursorActive;
+    private boolean hoverTextCursorEnabled;
+    private boolean hoverTextCursorActive;
+    private boolean mouseClicksEnabled;
 
     public Program(Model initialModel) {
         this.currentModel = initialModel;
@@ -52,7 +72,6 @@ public class Program {
                     .build();
             terminal.enterRawMode();
 
-            // terminal info provider here
             TerminalInfo.provide(new JLineTerminalInfoProvider(terminal));
 
             this.renderer = new StandardRenderer(terminal);
@@ -78,6 +97,45 @@ public class Program {
         return this;
     }
 
+    public Program withMouseCellMotion() {
+        renderer.enableMouseCellMotion();
+        renderer.enableMouseSGRMode();
+        return this;
+    }
+
+    /**
+     * While selecting, translate wheel events into selection motion updates.
+     */
+    public Program withMouseSelectionExtendOnScroll() {
+        this.extendSelectionOnScroll = true;
+        return this;
+    }
+
+    /**
+     * Manage the mouse cursor during selection (OSC 22).
+     */
+    public Program withMouseSelectionCursor() {
+        this.manageMouseSelectionCursor = true;
+        return this;
+    }
+
+    /**
+     * Manage the mouse cursor when hovering non-whitespace text (OSC 22).
+     * Requires mouse motion events (e.g. {@link #withMouseAllMotion()}).
+     */
+    public Program withMouseHoverTextCursor() {
+        this.hoverTextCursorEnabled = true;
+        return this;
+    }
+
+    /**
+     * When enabled, emits {@link MouseClickMessage} on press/release clicks.
+     * Latte extension; no Bubble Tea equivalent.
+     */
+    public Program withMouseClicks() {
+        this.mouseClicksEnabled = true;
+        return this;
+    }
     public void run() {
         if (!isRunning.compareAndSet(false, true)) {
             throw new IllegalStateException("Program is already running!");
@@ -112,6 +170,13 @@ public class Program {
         renderer.write(finalModel.view());
         renderer.showCursor();
         renderer.stop();
+
+        if (manageMouseSelectionCursor && mouseSelectionCursorActive) {
+            renderer.resetMouseCursor();
+        }
+        if (hoverTextCursorEnabled && hoverTextCursorActive) {
+            renderer.resetMouseCursor();
+        }
 
         // disabling mouse support
         disableMouse();
@@ -195,6 +260,15 @@ public class Program {
                 } else if (msg instanceof CheckWindowSizeMessage) {
                     commandExecutor.executeIfPresent(this::checkSize, this::send, this::sendError);
                     continue;
+                } else if (msg instanceof OpenUrlMessage openUrlMessage) {
+                    openUrl(openUrlMessage.url());
+                    continue;
+                }
+
+                if (msg instanceof MouseMessage mouseMessage) {
+                    handleMouseClickTracking(mouseMessage);
+                    handleMouseSelectionTracking(mouseMessage);
+                    handleMouseHoverCursor(mouseMessage);
                 }
 
                 // process internal messages for the renderer
@@ -211,6 +285,105 @@ public class Program {
 
         }
         return currentModel;
+    }
+
+    private void handleMouseSelectionTracking(MouseMessage mouseMessage) {
+        MouseSelectionUpdate selectionUpdate = mouseSelectionTracker.update(mouseMessage);
+
+        if (extendSelectionOnScroll && selectionUpdate.selectionScrollUpdate() != null) {
+            send(selectionUpdate.selectionScrollUpdate());
+        }
+
+        if (!manageMouseSelectionCursor) {
+            return;
+        }
+
+        if (selectionUpdate.selectionStarted()) {
+            setMouseSelectionCursorText();
+            return;
+        }
+
+        if (selectionUpdate.selectionEnded()) {
+            resetMouseSelectionCursor();
+            return;
+        }
+
+        if (selectionUpdate.selectionActive()) {
+            if (mouseMessage.isWheel()) {
+                resetMouseSelectionCursor();
+                return;
+            }
+
+            if (mouseMessage.getAction() == MouseAction.MouseActionMotion
+                    || mouseMessage.getAction() == MouseAction.MouseActionPress) {
+                setMouseSelectionCursorText();
+            }
+        }
+    }
+
+    private void handleMouseHoverCursor(MouseMessage mouseMessage) {
+        if (!hoverTextCursorEnabled) {
+            return;
+        }
+        if (mouseSelectionTracker.isSelecting() || mouseSelectionCursorActive) {
+            return;
+        }
+        if (mouseMessage.isWheel()) {
+            return;
+        }
+        if (mouseMessage.getAction() != MouseAction.MouseActionMotion
+                && mouseMessage.getAction() != MouseAction.MouseActionPress
+                && mouseMessage.getAction() != MouseAction.MouseActionRelease) {
+            return;
+        }
+
+        boolean overText = mouseHoverTextDetector.isHoveringText(
+                currentModel.view(),
+                mouseMessage.column(),
+                mouseMessage.row()
+        );
+
+        if (overText && !hoverTextCursorActive) {
+            renderer.setMouseCursorText();
+            hoverTextCursorActive = true;
+        } else if (!overText && hoverTextCursorActive) {
+            renderer.resetMouseCursor();
+            hoverTextCursorActive = false;
+        }
+    }
+
+    private void setMouseSelectionCursorText() {
+        if (mouseSelectionCursorActive) {
+            return;
+        }
+        renderer.setMouseCursorText();
+        mouseSelectionCursorActive = true;
+    }
+
+    private void resetMouseSelectionCursor() {
+        if (!mouseSelectionCursorActive) {
+            return;
+        }
+        renderer.resetMouseCursor();
+        mouseSelectionCursorActive = false;
+    }
+
+    private void handleMouseClickTracking(MouseMessage mouseMessage) {
+        if (!mouseClicksEnabled) {
+            return;
+        }
+        MouseTarget target = resolveMouseTarget(mouseMessage);
+        MouseClickMessage clickMessage = mouseClickTracker.handle(mouseMessage, target);
+        if (clickMessage != null) {
+            send(clickMessage);
+        }
+    }
+
+    private MouseTarget resolveMouseTarget(MouseMessage mouseMessage) {
+        if (!(currentModel instanceof MouseTargetProvider provider)) {
+            return null;
+        }
+        return MouseTargets.hitTest(provider.mouseTargets(), mouseMessage.column(), mouseMessage.row());
     }
 
     private Message checkSize() {
@@ -238,6 +411,24 @@ public class Program {
 
     private void disableMouse() {
         renderer.disableMouseSGRMode();
+        renderer.disableMouseCellMotion();
         renderer.disableMouseAllMotion();
+    }
+
+    private void openUrl(String url) {
+        if (url == null || url.isBlank()) {
+            return;
+        }
+        try {
+            String os = System.getProperty("os.name", "").toLowerCase();
+            if (os.contains("mac")) {
+                new ProcessBuilder("open", url).start();
+            } else if (os.contains("nix") || os.contains("nux") || os.contains("linux")) {
+                new ProcessBuilder("xdg-open", url).start();
+            } else if (os.contains("win")) {
+                new ProcessBuilder("rundll32", "url.dll,FileProtocolHandler", url).start();
+            }
+        } catch (Exception ignored) {
+        }
     }
 }
