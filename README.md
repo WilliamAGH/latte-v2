@@ -20,14 +20,14 @@ This is a maintained fork of the marvelous OG [flatscrew/latte](https://github.c
 <dependency>
     <groupId>io.github.williamagh</groupId>
     <artifactId>latte-tui</artifactId>
-    <version>0.2.1</version>
+    <version>0.2.2</version>
 </dependency>
 ```
 
 ### Gradle
 
 ```groovy
-implementation 'io.github.williamagh:latte-tui:0.2.1'
+implementation 'io.github.williamagh:latte-tui:0.2.2'
 ```
 
 ## Examples
