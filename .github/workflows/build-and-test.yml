@@ -13,6 +13,10 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      MAVEN_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+      MAVEN_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+      GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
 
     steps:
       - uses: actions/checkout@v5
@@ -35,10 +39,6 @@ jobs:
       - name: Deploy SNAPSHOT to OSSRH
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: mvn deploy -Psnapshot -pl latte-tui -DskipTests
-        env:
-          MAVEN_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
-          MAVEN_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
-          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
 
       - name: Update dependency graph
         uses: advanced-security/maven-dependency-submission-action@v5

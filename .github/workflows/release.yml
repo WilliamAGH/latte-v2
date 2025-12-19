@@ -7,6 +7,10 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
+    env:
+      MAVEN_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+      MAVEN_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+      GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
 
     steps:
       - uses: actions/checkout@v5
@@ -41,7 +45,3 @@ jobs:
 
       - name: Deploy to Maven Central
         run: mvn deploy -Prelease -pl latte-tui -DskipTests
-        env:
-          MAVEN_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
-          MAVEN_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
-          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
