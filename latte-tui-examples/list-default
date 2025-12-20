@@ -1,3 +1,0 @@
-#!/bin/sh
-SCRIPT_DIR="$( cd "$( dirname "$0" )" && pwd )"
-java -cp $SCRIPT_DIR/target/latte-tui-examples-*.jar org.flatscrew.latte.examples.listdefault.ListDefaultExample
