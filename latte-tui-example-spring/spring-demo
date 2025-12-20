@@ -1,4 +1,0 @@
-#!/bin/sh
-SCRIPT_DIR="$( cd "$( dirname "$0" )" && pwd )"
-
-java -jar $SCRIPT_DIR/target/latte-tui-example-spring-0.1.0.jar

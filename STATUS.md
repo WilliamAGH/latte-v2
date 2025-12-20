@@ -1,18 +1,18 @@
 # Porting status
 
-This page covers the current status of porting Bubble Tea to Latte.
+This page covers the current status of porting Bubble Tea to TUI4J.
 
 ## Examples
 
 Table presents an overall status of porting code available under **examples** directory of Bubble Tea codebase. The idea
-is to rewrite all the code samples and enhance Latte logic with missing parts found during implementation.
+is to rewrite all the code samples and enhance TUI4J logic with missing parts found during implementation.
 
 Each entry below represents a single example code fragment and the status of its migration into Java equivalent which is
 represented by one of the labels:
 
 `⚪ TODO` No effort have been put into this one yet
 
-`🟡 In Progress` It's currently under development, and it might be some notable changes will be applied to Latte logic to
+`🟡 In Progress` It's currently under development, and it might be some notable changes will be applied to TUI4J logic to
 conform it
 
 `🟢 Done` It's done like DONE, the example works 100% the same as original code does.

@@ -1,13 +1,13 @@
-# Using the `List` Component in Latte
+# Using the `List` Component in TUI4J
 
-The `List` component in Latte is a powerful and flexible way to display lists of items in a terminal UI. You can use it in two different ways:
+The `List` component in TUI4J is a powerful and flexible way to display lists of items in a terminal UI. You can use it in two different ways:
 
 1. **With a static array of items** – Best for small, predefined lists.
 2. **With a dynamic data source** – Recommended for large datasets, such as database-backed lists.
 
 ## 1. Using a Static Array of Items
 
-For small lists, you can pass an array of `Item` objects directly. If you're using the default rendering behavior, Latte provides `DefaultDelegate`, which requires that each item implements `DefaultItem`.
+For small lists, you can pass an array of `Item` objects directly. If you're using the default rendering behavior, TUI4J provides `DefaultDelegate`, which requires that each item implements `DefaultItem`.
 
 ### Defining a Default Item
 To use `DefaultDelegate`, your item must implement `DefaultItem`, which extends `Item` and provides `title()` and `description()` methods.
@@ -40,7 +40,7 @@ public class ProductItem implements DefaultItem {
 ```
 
 ### Creating a List with a Static Array
-If you want to use `DefaultDelegate`, Latte provides a constructor that automatically assigns it:
+If you want to use `DefaultDelegate`, TUI4J provides a constructor that automatically assigns it:
 
 ```java
 Item[] items = {
@@ -98,7 +98,7 @@ public class ProductDataSource implements ListDataSource {
 ```
 
 ### Creating a List with a Dynamic Data Source
-Similar to static lists, Latte provides a constructor that automatically assigns `DefaultDelegate`:
+Similar to static lists, TUI4J provides a constructor that automatically assigns `DefaultDelegate`:
 
 ```java
 ListDataSource productDataSource = new ProductDataSource(productRepository);
@@ -114,7 +114,7 @@ List list = new List(productDataSource, new DefaultDelegate(), 40, 10);
 ```
 
 ## DefaultDelegate and DefaultItem
-The `DefaultDelegate` class (located in `org.flatscrew.latte.spice.list`) requires that all items implement `DefaultItem`.
+The `DefaultDelegate` class (located in `com.williamcallahan.tui4j.compat.bubbletea.bubbles.list`) requires that all items implement `DefaultItem`.
 `DefaultItem` extends `Item` and ensures that the list can properly render titles and descriptions.
 
 ```java

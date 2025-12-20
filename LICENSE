@@ -1,6 +1,12 @@
 MIT License
 
+Copyright (c) 2025 William Callahan
+
+This project is a maintained fork of 'latte' (https://github.com/flatscrew/latte).
 Copyright (c) 2024 Flatscrew
+
+This project includes code ported from 'bubbletea' (https://github.com/charmbracelet/bubbletea). 
+Copyright (c) 2020-2024 Charmbracelet, Inc.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

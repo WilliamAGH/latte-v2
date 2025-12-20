@@ -1,0 +1,3 @@
+#!/bin/sh
+SCRIPT_DIR="$( cd "$( dirname "$0" )" && pwd )"
+java -cp $SCRIPT_DIR/target/tui4j-examples-*.jar com.williamcallahan.tui4j.examples.listdefault.ListDefaultExample

@@ -1,0 +1,4 @@
+#!/bin/sh
+SCRIPT_DIR="$( cd "$( dirname "$0" )" && pwd )"
+
+java -jar $SCRIPT_DIR/target/tui4j-example-spring-0.1.0.jar

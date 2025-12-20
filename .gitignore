@@ -58,6 +58,12 @@ bin/
 # Maven settings (contains secrets)
 settings.xml
 **/settings.xml
+.claude
 
 # Flatten plugin generated files
 .flattened-pom.xml
+.gh-cache
+.cache/
+.tmp/
+
+.gradle/
