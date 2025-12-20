@@ -21,7 +21,14 @@ jobs:
         with:
           java-version: '21'
           distribution: 'temurin'
-          cache: gradle
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "9.2.1"
+
+      - name: Generate Gradle wrapper
+        run: gradle wrapper
 
       - name: Extract version from tag
         id: version
