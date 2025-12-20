@@ -26,17 +26,20 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: "9.2.0"
+          gradle-version: "9.2.1"
+
+      - name: Generate Gradle wrapper
+        run: gradle wrapper
 
       - name: Build and test
-        run: gradle build examplesClasses
+        run: ./gradlew build examplesClasses
 
       - name: Publish SNAPSHOT (main only)
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         env:
           SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
           SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
-        run: gradle publish -x test
+        run: ./gradlew publish -x test
 
       - name: Update dependency graph
         uses: gradle/actions/dependency-submission@v5

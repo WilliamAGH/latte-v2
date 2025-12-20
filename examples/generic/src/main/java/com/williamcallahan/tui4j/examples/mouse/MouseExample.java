@@ -21,7 +21,7 @@ public class MouseExample implements Model {
     private static final int BOX_INNER_WIDTH = 20;
     private static final int BOX_INNER_HEIGHT = 5;
     private static final int BOX_LEFT = 2;
-    private static final int HEADER_LINES = 6;
+    private static final int HEADER_LINES = 9;
 
     private MouseMode mode = MouseMode.AllMotion;
     private MouseMessage lastMouse;
