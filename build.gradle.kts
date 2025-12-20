@@ -58,6 +58,7 @@ dependencies {
     api(libs.org.jline.jline.terminal.jni)
     api(libs.com.ibm.icu.icu4j)
     api(libs.org.apache.commons.commons.text)
+    api(libs.org.apache.commons.commons.lang3) // CVE-2024-48949 fix: explicit 3.17.0+
     
     testImplementation(libs.org.junit.jupiter.junit.jupiter)
     testImplementation(libs.org.mockito.mockito.core)
@@ -126,7 +127,7 @@ dependencies {
     "examplesGenericImplementation"(sourceSets.main.get().output)
     "examplesGenericImplementation"(libs.com.squareup.okhttp3.okhttp)
 
-    "examplesSpringImplementation"(platform("org.springframework.boot:spring-boot-dependencies:3.3.5"))
+    "examplesSpringImplementation"(platform("org.springframework.boot:spring-boot-dependencies:3.5.9"))
     "examplesSpringImplementation"(sourceSets.main.get().output)
     "examplesSpringImplementation"(libs.org.springframework.boot.spring.boot.starter.data.jpa) {
         exclude(group = "org.yaml", module = "snakeyaml")
@@ -134,7 +135,7 @@ dependencies {
     "examplesSpringImplementation"(libs.com.github.javafaker.javafaker) {
         exclude(group = "org.yaml", module = "snakeyaml")
     }
-    "examplesSpringImplementation"("org.yaml:snakeyaml:2.2@jar")
+    "examplesSpringImplementation"("org.yaml:snakeyaml:2.3@jar")
     "examplesSpringRuntimeOnly"(libs.com.h2database.h2)
     "examplesSpringCompileOnly"(libs.org.projectlombok.lombok)
     "examplesSpringAnnotationProcessor"(libs.org.projectlombok.lombok)
@@ -237,7 +238,7 @@ publishing {
                 scm {
                     url.set("https://github.com/WilliamAGH/tui4j")
                     connection.set("scm:git:git://github.com/WilliamAGH/tui4j.git")
-                    developerConnection.set("scm:git:ssh://github.com:WilliamAGH/tui4j.git")
+                    developerConnection.set("scm:git:ssh://git@github.com/WilliamAGH/tui4j.git")
                 }
             }
         }
