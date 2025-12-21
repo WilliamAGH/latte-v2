@@ -1,6 +1,6 @@
 package com.williamcallahan.tui4j.springexample.view;
 
-import com.williamcallahan.tui4j.Message;
+import com.williamcallahan.tui4j.compat.bubbletea.Message;
 
 /**
  * Example program for book removed message.

@@ -1,10 +1,10 @@
 package com.williamcallahan.tui4j.examples.textinputs;
 
-import com.williamcallahan.tui4j.Command;
-import com.williamcallahan.tui4j.Message;
-import com.williamcallahan.tui4j.Model;
-import com.williamcallahan.tui4j.Program;
-import com.williamcallahan.tui4j.UpdateResult;
+import com.williamcallahan.tui4j.compat.bubbletea.Command;
+import com.williamcallahan.tui4j.compat.bubbletea.Message;
+import com.williamcallahan.tui4j.compat.bubbletea.Model;
+import com.williamcallahan.tui4j.compat.bubbletea.Program;
+import com.williamcallahan.tui4j.compat.bubbletea.UpdateResult;
 import com.williamcallahan.tui4j.compat.bubbletea.lipgloss.Style;
 import com.williamcallahan.tui4j.compat.bubbletea.lipgloss.color.Color;
 import com.williamcallahan.tui4j.compat.bubbletea.message.KeyPressMessage;
@@ -16,8 +16,8 @@ import com.williamcallahan.tui4j.compat.bubbletea.bubbles.textinput.TextInput;
 import java.util.LinkedList;
 import java.util.List;
 
-import static com.williamcallahan.tui4j.Command.batch;
-import static com.williamcallahan.tui4j.Command.quit;
+import static com.williamcallahan.tui4j.compat.bubbletea.Command.batch;
+import static com.williamcallahan.tui4j.compat.bubbletea.Command.quit;
 
 /**
  * Example program for text inputs.

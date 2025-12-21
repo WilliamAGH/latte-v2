@@ -1,15 +1,15 @@
 package com.williamcallahan.tui4j.examples.sequence;
 
-import com.williamcallahan.tui4j.Command;
-import com.williamcallahan.tui4j.Message;
-import com.williamcallahan.tui4j.Model;
-import com.williamcallahan.tui4j.Program;
-import com.williamcallahan.tui4j.UpdateResult;
+import com.williamcallahan.tui4j.compat.bubbletea.Command;
+import com.williamcallahan.tui4j.compat.bubbletea.Message;
+import com.williamcallahan.tui4j.compat.bubbletea.Model;
+import com.williamcallahan.tui4j.compat.bubbletea.Program;
+import com.williamcallahan.tui4j.compat.bubbletea.UpdateResult;
 import com.williamcallahan.tui4j.compat.bubbletea.message.KeyPressMessage;
 import com.williamcallahan.tui4j.compat.bubbletea.message.QuitMessage;
 
-import static com.williamcallahan.tui4j.Command.println;
-import static com.williamcallahan.tui4j.Command.sequence;
+import static com.williamcallahan.tui4j.compat.bubbletea.Command.println;
+import static com.williamcallahan.tui4j.compat.bubbletea.Command.sequence;
 
 // TODO nested sequences are not supported yet!
 /**
