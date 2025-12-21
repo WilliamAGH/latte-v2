@@ -135,7 +135,7 @@ dependencies {
     "examplesSpringImplementation"(libs.com.github.javafaker.javafaker) {
         exclude(group = "org.yaml", module = "snakeyaml")
     }
-    "examplesSpringImplementation"("org.yaml:snakeyaml:2.3@jar")
+    "examplesSpringImplementation"("org.yaml:snakeyaml:2.5@jar")
     "examplesSpringRuntimeOnly"(libs.com.h2database.h2)
     "examplesSpringCompileOnly"(libs.org.projectlombok.lombok)
     "examplesSpringAnnotationProcessor"(libs.org.projectlombok.lombok)
