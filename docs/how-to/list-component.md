@@ -128,6 +128,6 @@ list.setStatusMessageLifetime(Duration.ofSeconds(5));
 ## Examples
 
 See working examples in the repository:
-- [`listdefault/`](../src/main/resources/examples/compat/bubbletea/listdefault/) — Basic list with DefaultDelegate
-- [`listsimple/`](../src/main/resources/examples/compat/bubbletea/listsimple/) — Minimal list setup
-- [`listfancy/`](../src/main/resources/examples/compat/bubbletea/listfancy/) — Styled list with custom delegate
+- [`listdefault/`](../../src/main/resources/examples/compat/bubbletea/listdefault/) — Basic list with DefaultDelegate
+- [`listsimple/`](../../src/main/resources/examples/compat/bubbletea/listsimple/) — Minimal list setup
+- [`listfancy/`](../../src/main/resources/examples/compat/bubbletea/listfancy/) — Styled list with custom delegate
