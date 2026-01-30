@@ -8,7 +8,7 @@ import java.security.NoSuchAlgorithmException;
  * <p>
  * Port of {@code bubbles/textarea/memoization/memoization.go} hashing helpers.
  */
-final class MemoizationHashing {
+public final class MemoizationHashing {
 
     /** Prevents instantiation of this utility class. */
     private MemoizationHashing() {}
@@ -19,7 +19,7 @@ final class MemoizationHashing {
      * @param input input bytes
      * @return hex digest
      */
-    static String sha256Hex(byte[] input) {
+    public static String sha256Hex(byte[] input) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             byte[] hash = digest.digest(input);
