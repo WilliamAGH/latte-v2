@@ -64,4 +64,20 @@ final class WrapSupport {
         }
         return false;
     }
+
+    /**
+     * Reports whether the given code point is contained in the breakpoint string.
+     * This compares full code points rather than individual UTF-8 bytes,
+     * avoiding false positives when multi-byte characters share byte prefixes.
+     *
+     * @param codePoint code point to test
+     * @param breakpoints breakpoint string (may be null or empty)
+     * @return true if the code point is a breakpoint character
+     */
+    static boolean containsBreakpointCodePoint(int codePoint, String breakpoints) {
+        if (codePoint < 0 || breakpoints == null || breakpoints.isEmpty()) {
+            return false;
+        }
+        return breakpoints.codePoints().anyMatch(cp -> cp == codePoint);
+    }
 }
