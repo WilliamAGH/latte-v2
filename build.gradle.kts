@@ -184,6 +184,8 @@ tasks.register<Test>("examplesSpringTest") {
 
 tasks.withType<Test>().configureEach {
     useJUnitPlatform()
+    // Disable clipboard operations during tests to avoid side effects on real system clipboard
+    systemProperty("tui4j.clipboard.disabled", "true")
     testLogging {
         events(
             org.gradle.api.tasks.testing.logging.TestLogEvent.FAILED,
