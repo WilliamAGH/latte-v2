@@ -30,11 +30,17 @@ public final class Clipboard {
      * Attempts to copy text to the clipboard.
      * <p>
      * Tries the local system clipboard first (AWT/CLI).
+     * <p>
+     * Can be disabled by setting system property {@code tui4j.clipboard.disabled=true},
+     * useful for testing to avoid side effects on the real system clipboard.
      *
      * @param content the text to copy
      * @return true if copied via local mechanism, false otherwise
      */
     public static boolean tryCopy(String content) {
+        if (Boolean.getBoolean("tui4j.clipboard.disabled")) {
+            return false;
+        }
         if (tryLocalClipboard(content)) {
             return true;
         }
