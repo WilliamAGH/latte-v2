@@ -97,7 +97,7 @@ public final class WordWrap {
                         wordLen = 0;
                     }
                     buffer.writeBytes(clusterBytes);
-                    curWidth++;
+                    curWidth += width;
                 } else {
                     word.writeBytes(clusterBytes);
                     wordLen += width;
