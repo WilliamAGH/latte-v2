@@ -59,6 +59,79 @@ class WordWrapTest {
         }
     }
 
+    /**
+     * Tests that breakpoints match by codepoint, not bytes.
+     * When comparing UTF-8 bytes instead of codepoints, different emoji characters
+     * that share byte prefixes would falsely match as breakpoints.
+     */
+    @Test
+    void testBreakpointCodepointMatching() {
+        // 😃 (U+1F603) and 🫧 (U+1FAE7) are different emoji but their UTF-8 encodings share leading bytes
+        // This test ensures we compare by codepoint, not bytes
+
+        // Should NOT break at 🫧 when breakpoint is 😃 - they are different emoji
+        String textWithBubble = "foo🫧bar";
+        String result = WordWrap.wordWrap(textWithBubble, 4, "😃");
+        assertEquals("foo🫧bar", result, "Should not break at 🫧 when breakpoint is 😃");
+
+        // SHOULD break at 😃 when breakpoint is 😃
+        String textWithSmiley = "foo😃bar";
+        result = WordWrap.wordWrap(textWithSmiley, 4, "😃");
+        assertEquals("foo😃\nbar", result, "Should break at 😃 when breakpoint is 😃");
+    }
+
+    /**
+     * Tests that wide whitespace (U+3000 - ideographic space) is counted by display width
+     * not byte length when determining wrap points. U+3000 has display width 2 but is 3 bytes in UTF-8.
+     * When wrap happens, the space that triggered it is discarded (same as regular spaces).
+     */
+    @Test
+    void testWideWhitespaceWidthTracking() {
+        // U+3000 (ideographic space) is 3 bytes in UTF-8 but display width 2
+        // Text: "あ　い" - あ (width 2) + wide space (width 2) + い (width 2) = 6 total width
+        // With limit 4, あ(2) + wide space(2) = 4, then い would make 6 > 4, so wrap happens
+        // The wide space is discarded when it causes the wrap (same as regular space behavior)
+
+        String textWithWideSpaces = "あ\u3000い";
+        String result = WordWrap.wordWrap(textWithWideSpaces, 4, "");
+        assertEquals("あ\nい", result,
+            "Wide whitespace counted by display width (2), not byte length (3). Wraps correctly at limit 4.");
+
+        // Verify byte-based width would give wrong result:
+        // If we used byte length: "あ" (3 bytes) + "\u3000" (3 bytes) = 6 bytes
+        // With limit 4, a byte-based implementation would break prematurely at wrong position.
+    }
+
+    /**
+     * Tests that having multiple different emoji as breakpoints doesn't cause false matches
+     * due to shared byte prefixes in UTF-8 encoding.
+     */
+    @Test
+    void testMultipleEmojiBreakpoints() {
+        // Mix of emoji with different codepoints but potentially overlapping byte sequences
+        String breakpoints = "😃🫧🔥🎉";
+
+        // Should break at 😃
+        String result = WordWrap.wordWrap("hello😃world", 6, breakpoints);
+        assertEquals("hello😃\nworld", result, "Should break at matching emoji 😃");
+
+        // Should break at 🫧
+        result = WordWrap.wordWrap("hello🫧world", 6, breakpoints);
+        assertEquals("hello🫧\nworld", result, "Should break at matching emoji 🫧");
+
+        // Should break at 🔥
+        result = WordWrap.wordWrap("hello🔥world", 6, breakpoints);
+        assertEquals("hello🔥\nworld", result, "Should break at matching emoji 🔥");
+
+        // Should break at 🎉
+        result = WordWrap.wordWrap("hello🎉world", 6, breakpoints);
+        assertEquals("hello🎉\nworld", result, "Should break at matching emoji 🎉");
+
+        // Should NOT break at other emoji not in breakpoints
+        result = WordWrap.wordWrap("hello🎄world", 6, breakpoints);
+        assertEquals("hello🎄world", result, "Should not break at 🎄 (not in breakpoints)");
+    }
+
     /** Test case for word wrap. */
     private static final class Case {
         private final String name;
