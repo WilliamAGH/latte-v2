@@ -112,6 +112,9 @@ class TextareaTest {
         textarea.view();
     }
 
+    /**
+     * Verifies the cursor renders on the correct wrapped line after scrolling.
+     */
     @Test
     void testCursorRendersOnWrappedLine() {
         Textarea textarea = new Textarea();
@@ -144,6 +147,9 @@ class TextareaTest {
         assertEquals(0, cursorLineIndex, "Cursor should render on the visible line after scrolling");
     }
 
+    /**
+     * Verifies the cursor renders as a visible space when at end-of-line.
+     */
     @Test
     void testCursorVisibleAtEndOfLine() {
         Textarea textarea = new Textarea();
