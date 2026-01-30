@@ -133,8 +133,13 @@ class ListTest {
     }
 
     private static void applyMessageInner(List list, Message msg) {
-        // Avoid infinite spinner ticks in unit tests (they're time-based in real programs).
+        // Avoid infinite time-based messages in unit tests (they're async in real programs).
         if (msg instanceof com.williamcallahan.tui4j.compat.bubbles.spinner.TickMessage) {
+            return;
+        }
+        // Filter cursor blink messages (package-private, check by class name)
+        String className = msg.getClass().getSimpleName();
+        if (className.equals("InitialBlinkMessage") || className.equals("BlinkMessage")) {
             return;
         }
 
