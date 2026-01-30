@@ -21,6 +21,160 @@ public final class WordWrap {
     }
 
     /**
+     * Accumulator for wrapping state to reduce parameter count.
+     */
+    private static final class WrapAccumulator {
+        private final ByteArrayOutputStream buffer;
+        private final ByteArrayOutputStream word;
+        private final ByteArrayOutputStream space;
+        private int curWidth;
+        private int spaceWidth;
+
+        WrapAccumulator(int bufferSize) {
+            this.buffer = new ByteArrayOutputStream(bufferSize);
+            this.word = new ByteArrayOutputStream();
+            this.space = new ByteArrayOutputStream();
+            this.curWidth = 0;
+            this.spaceWidth = 0;
+        }
+
+        /**
+         * Flushes the pending space buffer to the output.
+         *
+         * @return updated width
+         */
+        int flushSpace() {
+            if (space.size() == 0) {
+                return curWidth;
+            }
+            buffer.writeBytes(space.toByteArray());
+            curWidth += spaceWidth;
+            space.reset();
+            spaceWidth = 0;
+            return curWidth;
+        }
+
+        /**
+         * Flushes the pending word buffer to the output.
+         *
+         * @param wordLen word width
+         * @return updated width
+         */
+        int flushWord(int wordLen) {
+            if (word.size() == 0) {
+                return curWidth;
+            }
+            flushSpace();
+            buffer.writeBytes(word.toByteArray());
+            word.reset();
+            curWidth += wordLen;
+            return curWidth;
+        }
+
+        /**
+         * Flushes remaining space without exceeding limit.
+         *
+         * @param limit the wrap width limit
+         */
+        void flushSpaceIfFits(int limit) {
+            if (curWidth + spaceWidth > limit) {
+                curWidth = 0;
+            } else {
+                buffer.writeBytes(space.toByteArray());
+            }
+            space.reset();
+            spaceWidth = 0;
+        }
+
+        /**
+         * Resets the accumulator for a new line.
+         */
+        void resetLine() {
+            curWidth = 0;
+            space.reset();
+            spaceWidth = 0;
+        }
+
+        /**
+         * Writes a character to the space buffer.
+         *
+         * @param b byte to write
+         * @param width display width
+         */
+        void writeSpace(byte b, int width) {
+            space.write(b);
+            spaceWidth += width;
+        }
+
+        /**
+         * Writes bytes to the space buffer.
+         *
+         * @param bytes bytes to write
+         * @param width display width
+         */
+        void writeSpaceBytes(byte[] bytes, int width) {
+            space.writeBytes(bytes);
+            spaceWidth += width;
+        }
+
+        /**
+         * Writes a character to the main buffer.
+         *
+         * @param b byte to write
+         * @param width display width
+         */
+        void writeBuffer(byte b, int width) {
+            buffer.write(b);
+            curWidth += width;
+        }
+
+        /**
+         * Writes bytes to the main buffer.
+         *
+         * @param bytes bytes to write
+         * @param width display width
+         */
+        void writeBufferBytes(byte[] bytes, int width) {
+            buffer.writeBytes(bytes);
+            curWidth += width;
+        }
+
+        /**
+         * Writes a newline to the main buffer.
+         */
+        void writeNewline() {
+            buffer.write('\n');
+        }
+
+        /**
+         * Returns the current width.
+         *
+         * @return current width
+         */
+        int getCurWidth() {
+            return curWidth;
+        }
+
+        /**
+         * Returns the current space width.
+         *
+         * @return space width
+         */
+        int getSpaceWidth() {
+            return spaceWidth;
+        }
+
+        /**
+         * Returns the final wrapped string.
+         *
+         * @return wrapped string
+         */
+        String toResult() {
+            return buffer.toString(StandardCharsets.UTF_8);
+        }
+    }
+
+    /**
      * Word-wraps a string using grapheme width.
      *
      * @param input input string
@@ -59,11 +213,7 @@ public final class WordWrap {
         }
 
         byte[] bytes = input.getBytes(StandardCharsets.UTF_8);
-        ByteArrayOutputStream buffer = new ByteArrayOutputStream(bytes.length);
-        ByteArrayOutputStream word = new ByteArrayOutputStream();
-        ByteArrayOutputStream space = new ByteArrayOutputStream();
-        int[] spaceWidth = {0};
-        int curWidth = 0;
+        WrapAccumulator acc = new WrapAccumulator(bytes.length);
         int wordLen = 0;
         TransitionTable table = TransitionTable.get();
         State pstate = State.GROUND;
@@ -86,27 +236,23 @@ public final class WordWrap {
                 int codePoint = WrapSupport.firstCodePoint(clusterBytes);
                 if (codePoint >= 0 && WrapSupport.isWhitespace(codePoint) && codePoint != WrapSupport.NON_BREAKING_SPACE) {
                     if (wordLen > 0) {
-                        curWidth = flushWord(buffer, word, space, curWidth, wordLen, spaceWidth);
+                        acc.flushWord(wordLen);
                         wordLen = 0;
                     }
-                    space.writeBytes(clusterBytes);
-                    spaceWidth[0] += width;
+                    acc.writeSpaceBytes(clusterBytes, width);
                 } else if (WrapSupport.containsBreakpointCodePoint(codePoint, breakpoints)) {
-                    curWidth = flushSpace(buffer, space, curWidth, spaceWidth);
+                    acc.flushSpace();
                     if (wordLen > 0) {
-                        curWidth = flushWord(buffer, word, space, curWidth, wordLen, spaceWidth);
+                        acc.flushWord(wordLen);
                         wordLen = 0;
                     }
-                    buffer.writeBytes(clusterBytes);
-                    curWidth += width;
+                    acc.writeBufferBytes(clusterBytes, width);
                 } else {
-                    word.writeBytes(clusterBytes);
+                    acc.word.writeBytes(clusterBytes);
                     wordLen += width;
-                    if (curWidth + spaceWidth[0] + wordLen > limit && wordLen < limit) {
-                        buffer.write('\n');
-                        curWidth = 0;
-                        space.reset();
-                        spaceWidth[0] = 0;
+                    if (acc.getCurWidth() + acc.getSpaceWidth() + wordLen > limit && wordLen < limit) {
+                        acc.writeNewline();
+                        acc.resetLine();
                     }
                 }
 
@@ -120,47 +266,35 @@ public final class WordWrap {
                     switch (ch) {
                         case '\n' -> {
                             if (wordLen == 0) {
-                                if (curWidth + spaceWidth[0] > limit) {
-                                    curWidth = 0;
-                                } else {
-                                    buffer.writeBytes(space.toByteArray());
-                                }
-                                space.reset();
-                                spaceWidth[0] = 0;
+                                acc.flushSpaceIfFits(limit);
                             }
-                            curWidth = flushWord(buffer, word, space, curWidth, wordLen, spaceWidth);
+                            acc.flushWord(wordLen);
                             wordLen = 0;
-                            buffer.write('\n');
-                            curWidth = 0;
-                            space.reset();
-                            spaceWidth[0] = 0;
+                            acc.writeNewline();
+                            acc.resetLine();
                         }
                         default -> {
                             if (Character.isWhitespace(ch)) {
-                                curWidth = flushWord(buffer, word, space, curWidth, wordLen, spaceWidth);
+                                acc.flushWord(wordLen);
                                 wordLen = 0;
-                                space.write(bytes[i]);
-                                spaceWidth[0] += 1;
+                                acc.writeSpace(bytes[i], 1);
                             } else if (ch == '-' || containsBreakpointChar(ch, breakpoints)) {
-                                curWidth = flushSpace(buffer, space, curWidth, spaceWidth);
-                                curWidth = flushWord(buffer, word, space, curWidth, wordLen, spaceWidth);
+                                acc.flushSpace();
+                                acc.flushWord(wordLen);
                                 wordLen = 0;
-                                buffer.write(bytes[i]);
-                                curWidth++;
+                                acc.writeBuffer(bytes[i], 1);
                             } else {
-                                word.write(bytes[i]);
+                                acc.word.write(bytes[i]);
                                 wordLen++;
-                                if (curWidth + spaceWidth[0] + wordLen > limit && wordLen < limit) {
-                                    buffer.write('\n');
-                                    curWidth = 0;
-                                    space.reset();
-                                    spaceWidth[0] = 0;
+                                if (acc.getCurWidth() + acc.getSpaceWidth() + wordLen > limit && wordLen < limit) {
+                                    acc.writeNewline();
+                                    acc.resetLine();
                                 }
                             }
                         }
                     }
                 }
-                default -> word.write(bytes[i]);
+                default -> acc.word.write(bytes[i]);
             }
 
             if (pstate != State.UTF8) {
@@ -169,55 +303,9 @@ public final class WordWrap {
             i++;
         }
 
-        curWidth = flushWord(buffer, word, space, curWidth, wordLen, spaceWidth);
+        acc.flushWord(wordLen);
 
-        return buffer.toString(StandardCharsets.UTF_8);
-    }
-
-    /**
-     * Flushes the pending space buffer to the output.
-     *
-     * @param buffer output buffer
-     * @param space space buffer
-     * @param curWidth current width
-     * @param spaceWidth display width accumulator for spaces
-     * @return updated width
-     */
-    private static int flushSpace(ByteArrayOutputStream buffer, ByteArrayOutputStream space, int curWidth, int[] spaceWidth) {
-        if (space.size() == 0) {
-            return curWidth;
-        }
-        buffer.writeBytes(space.toByteArray());
-        curWidth += spaceWidth[0];
-        space.reset();
-        spaceWidth[0] = 0;
-        return curWidth;
-    }
-
-    /**
-     * Flushes the pending word buffer to the output.
-     *
-     * @param buffer output buffer
-     * @param word word buffer
-     * @param space space buffer
-     * @param curWidth current width
-     * @param wordLen word width
-     * @param spaceWidth display width accumulator for spaces
-     * @return updated width
-     */
-    private static int flushWord(ByteArrayOutputStream buffer,
-                                 ByteArrayOutputStream word,
-                                 ByteArrayOutputStream space,
-                                 int curWidth,
-                                 int wordLen,
-                                 int[] spaceWidth) {
-        if (word.size() == 0) {
-            return curWidth;
-        }
-        curWidth = flushSpace(buffer, space, curWidth, spaceWidth);
-        buffer.writeBytes(word.toByteArray());
-        word.reset();
-        return curWidth + wordLen;
+        return acc.toResult();
     }
 
     /**
