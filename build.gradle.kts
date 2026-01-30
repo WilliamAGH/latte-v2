@@ -176,16 +176,10 @@ tasks.register<Test>("examplesSpringTest") {
     classpath = sourceSets["examplesSpringTest"].runtimeClasspath
 }
 
-// Collect test failures for end-of-run summary
-data class TestFailure(val className: String, val testName: String, val message: String)
-val testFailures = mutableListOf<TestFailure>()
-
 tasks.withType<Test>().configureEach {
     useJUnitPlatform()
     testLogging {
         events(
-            org.gradle.api.tasks.testing.logging.TestLogEvent.STARTED,
-            org.gradle.api.tasks.testing.logging.TestLogEvent.PASSED,
             org.gradle.api.tasks.testing.logging.TestLogEvent.FAILED,
             org.gradle.api.tasks.testing.logging.TestLogEvent.SKIPPED
         )
@@ -193,23 +187,7 @@ tasks.withType<Test>().configureEach {
         showExceptions = true
         showCauses = true
         showStackTraces = true
-        showStandardStreams = true
     }
-
-    // Print failures immediately and collect for summary
-    afterTest(KotlinClosure2<TestDescriptor, TestResult, Unit>({ desc, result ->
-        if (result.resultType == TestResult.ResultType.FAILURE) {
-            val message = result.exceptions.firstOrNull()?.message ?: "Unknown error"
-            testFailures.add(TestFailure(desc.className ?: "Unknown", desc.name, message))
-            logger.lifecycle("\n\u001B[31m✗ FAILED: ${desc.className}.${desc.name}\u001B[0m")
-            result.exceptions.forEach { e ->
-                logger.lifecycle("  ${e.message}")
-                e.stackTrace.take(10).forEach { frame ->
-                    logger.lifecycle("    at $frame")
-                }
-            }
-        }
-    }))
 
     afterSuite(KotlinClosure2<TestDescriptor, TestResult, Unit>({ desc, result ->
         if (desc.parent == null) {
@@ -219,18 +197,6 @@ tasks.withType<Test>().configureEach {
                     "${result.failedTestCount} failed, " +
                     "${result.skippedTestCount} skipped)"
             )
-            // Print failure summary at end
-            if (testFailures.isNotEmpty()) {
-                logger.lifecycle("\n\u001B[31m═══════════════════════════════════════════════════════════════\u001B[0m")
-                logger.lifecycle("\u001B[31m FAILED TESTS SUMMARY (${testFailures.size} failures)\u001B[0m")
-                logger.lifecycle("\u001B[31m═══════════════════════════════════════════════════════════════\u001B[0m")
-                testFailures.forEach { failure ->
-                    logger.lifecycle("\u001B[31m ✗ ${failure.className}.${failure.testName}\u001B[0m")
-                    logger.lifecycle("   ${failure.message}")
-                }
-                logger.lifecycle("\u001B[31m═══════════════════════════════════════════════════════════════\u001B[0m\n")
-                testFailures.clear()
-            }
         }
     }))
 }
