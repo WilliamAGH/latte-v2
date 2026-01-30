@@ -15,6 +15,7 @@ import com.williamcallahan.tui4j.input.MouseHoverTextDetector;
 import com.williamcallahan.tui4j.input.MouseSelectionAutoScroller;
 import com.williamcallahan.tui4j.input.MouseSelectionTracker;
 import com.williamcallahan.tui4j.input.MouseSelectionUpdate;
+import com.williamcallahan.tui4j.input.MouseCursor;
 import com.williamcallahan.tui4j.input.MouseTarget;
 import com.williamcallahan.tui4j.input.MouseTargetProvider;
 import com.williamcallahan.tui4j.input.MouseTargets;
@@ -98,6 +99,8 @@ public class Program {
     private boolean mouseSelectionCursorActive;
     private boolean hoverTextCursorEnabled;
     private boolean hoverTextCursorActive;
+    private boolean mouseTargetCursorEnabled;
+    private MouseCursor currentTargetCursor;
     private boolean mouseClicksEnabled;
     private volatile boolean isSuspended = false;
 
@@ -392,6 +395,19 @@ public class Program {
     }
 
     /**
+     * Manage the mouse cursor based on MouseTarget cursor hints (OSC 22).
+     * When hovering a target with {@link MouseCursor#POINTER}, shows pointer cursor.
+     * Requires mouse motion events (e.g. {@link #withMouseAllMotion()}).
+     * tui4j extension; no Bubble Tea equivalent.
+     *
+     * @return this program for chaining
+     */
+    public Program withMouseTargetCursor() {
+        this.mouseTargetCursorEnabled = true;
+        return this;
+    }
+
+    /**
      * When enabled, emits {@link MouseClickMessage} on press/release clicks.
      * tui4j extension; no Bubble Tea equivalent.
      *
@@ -508,6 +524,9 @@ public class Program {
             renderer.resetMouseCursor();
         }
         if (hoverTextCursorEnabled && hoverTextCursorActive) {
+            renderer.resetMouseCursor();
+        }
+        if (mouseTargetCursorEnabled && currentTargetCursor != null && currentTargetCursor != MouseCursor.DEFAULT) {
             renderer.resetMouseCursor();
         }
 
@@ -670,6 +689,7 @@ public class Program {
                     handleMouseClickTracking(mouseMessage);
                     handleMouseSelectionTracking(mouseMessage);
                     handleMouseHoverCursor(mouseMessage);
+                    handleMouseTargetCursor(mouseMessage);
                 }
 
                 // process internal messages for the renderer
@@ -891,6 +911,47 @@ public class Program {
             renderer.resetMouseCursor();
             hoverTextCursorActive = false;
         }
+    }
+
+    /**
+     * Handles mouse cursor changes based on MouseTarget cursor hints.
+     *
+     * @param mouseMessage mouse message
+     */
+    private void handleMouseTargetCursor(MouseMessage mouseMessage) {
+        if (!mouseTargetCursorEnabled) {
+            return;
+        }
+        if (mouseSelectionTracker.isSelecting() || mouseSelectionCursorActive) {
+            return;
+        }
+        if (hoverTextCursorActive) {
+            return;
+        }
+        if (mouseMessage.isWheel()) {
+            return;
+        }
+        if (
+            mouseMessage.getAction() != MouseAction.MouseActionMotion &&
+            mouseMessage.getAction() != MouseAction.MouseActionPress &&
+            mouseMessage.getAction() != MouseAction.MouseActionRelease
+        ) {
+            return;
+        }
+
+        MouseTarget target = resolveMouseTarget(mouseMessage);
+        MouseCursor desiredCursor = (target != null) ? target.cursor() : MouseCursor.DEFAULT;
+
+        if (desiredCursor == currentTargetCursor) {
+            return;
+        }
+
+        switch (desiredCursor) {
+            case POINTER -> renderer.setMouseCursorPointer();
+            case TEXT -> renderer.setMouseCursorText();
+            default -> renderer.resetMouseCursor();
+        }
+        currentTargetCursor = desiredCursor;
     }
 
     /**

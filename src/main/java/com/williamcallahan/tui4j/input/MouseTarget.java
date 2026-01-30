@@ -32,6 +32,20 @@ public record MouseTarget(
         return new MouseTarget(id, new MouseBounds(left, top, width, height), 0, MouseCursor.DEFAULT, null);
     }
 
+
+    /**
+     * Creates a button target with pointer cursor and no hyperlink.
+     *
+     * @param id target id
+     * @param left left column
+     * @param top top row
+     * @param width width in columns
+     * @param height height in rows
+     * @return mouse target
+     */
+    public static MouseTarget button(String id, int left, int top, int width, int height) {
+        return new MouseTarget(id, new MouseBounds(left, top, width, height), 0, MouseCursor.POINTER, null);
+    }
     /**
      * Creates a link target with pointer cursor.
      *
