@@ -1,6 +1,6 @@
 package com.williamcallahan.tui4j.compat.bubbles.textarea;
 
-import com.ibm.icu.lang.UCharacter;
+import com.williamcallahan.tui4j.ansi.TextWidth;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,11 +13,7 @@ import java.util.List;
  */
 final class TextAreaWrap {
 
-    /**
-     * Prevents instantiation.
-     */
-    private TextAreaWrap() {
-    }
+    private TextAreaWrap() {}
 
     /**
      * Wraps a line of runes to the given width.
@@ -28,133 +24,94 @@ final class TextAreaWrap {
      */
     static List<int[]> wrap(int[] runes, int width) {
         if (width <= 0) {
-            return List.of(Arrays.copyOf(runes, runes.length));
+            return new ArrayList<>(List.of(Arrays.copyOf(runes, runes.length)));
         }
 
         List<int[]> lines = new ArrayList<>();
-        lines.add(new int[0]);
-        int row = 0;
-        int spaces = 0;
-        IntAccumulator word = new IntAccumulator();
+        int[] currentLine = new int[0];
+        int[] word = new int[0];
+        int[] spaces = new int[0];
 
         for (int rune : runes) {
-            if (UCharacter.isWhitespace(rune)) {
-                spaces++;
-            } else {
-                word.add(rune);
-            }
+            if (Character.isWhitespace(rune)) {
+                // If we have a word accumulated, process it first before the space
+                if (word.length > 0) {
+                    int lineW = cellWidth(currentLine);
+                    int wordW = cellWidth(word);
+                    int spaceW = cellWidth(spaces);
 
-            if (spaces > 0) {
-                int currentLineWidth = TextAreaRunes.cellWidth(lines.get(row));
-                int wordWidth = TextAreaRunes.cellWidth(word.toArray());
-                if (currentLineWidth + wordWidth + spaces > width) {
-                    row++;
-                    lines.add(word.toArray());
-                    lines.set(row, TextAreaRunes.concat(lines.get(row), repeatSpaces(spaces)));
-                    spaces = 0;
-                    word.clear();
-                } else {
-                    lines.set(row, TextAreaRunes.concat(lines.get(row), word.toArray()));
-                    lines.set(row, TextAreaRunes.concat(lines.get(row), repeatSpaces(spaces)));
-                    spaces = 0;
-                    word.clear();
-                }
-            } else if (!word.isEmpty()) {
-                int lastCharWidth = TextAreaRunes.cellWidth(new int[]{word.last()});
-                int wordWidth = TextAreaRunes.cellWidth(word.toArray());
-                if (wordWidth + lastCharWidth > width) {
-                    if (lines.get(row).length > 0) {
-                        row++;
-                        lines.add(new int[0]);
+                    // Check if adding the spaces + word exceeds the width
+                    if (lineW + spaceW + wordW > width) {
+                        if (lineW > 0) {
+                            // Current line is full, push it.
+                            lines.add(currentLine);
+                            currentLine = new int[0];
+                            lineW = 0;
+                        }
+                        
+                        // We must preserve spaces. Attach them to the start of the new line (or current if empty).
+                        // In standard text editing, spaces at EOL might wrap or be hidden, but for cursor
+                        // consistency, they must exist somewhere. Attaching to new line ensures index count matches.
+                        currentLine = concat(currentLine, spaces);
+                        currentLine = concat(currentLine, word);
+                    } else {
+                        // Fits on current line
+                        currentLine = concat(currentLine, spaces);
+                        currentLine = concat(currentLine, word);
                     }
-                    lines.set(row, TextAreaRunes.concat(lines.get(row), word.toArray()));
-                    word.clear();
+                    word = new int[0];
+                    spaces = new int[0];
                 }
+                spaces = append(spaces, rune);
+            } else {
+                word = append(word, rune);
             }
         }
 
-        int currentLineWidth = TextAreaRunes.cellWidth(lines.get(row));
-        int wordWidth = TextAreaRunes.cellWidth(word.toArray());
-        if (currentLineWidth + wordWidth + spaces >= width) {
-            lines.add(word.toArray());
-            row++;
-            spaces++;
-            lines.set(row, TextAreaRunes.concat(lines.get(row), repeatSpaces(spaces)));
+        // Flush remaining content
+        int lineW = cellWidth(currentLine);
+        int wordW = cellWidth(word);
+        int spaceW = cellWidth(spaces);
+
+        if (lineW + spaceW + wordW > width) {
+            if (lineW > 0) {
+                lines.add(currentLine);
+                currentLine = new int[0];
+            }
+            currentLine = concat(currentLine, spaces); // Preserve trailing spaces on wrap
+            currentLine = concat(currentLine, word);
         } else {
-            lines.set(row, TextAreaRunes.concat(lines.get(row), word.toArray()));
-            spaces++;
-            lines.set(row, TextAreaRunes.concat(lines.get(row), repeatSpaces(spaces)));
+            currentLine = concat(currentLine, spaces);
+            currentLine = concat(currentLine, word);
+        }
+        
+        if (currentLine.length > 0 || lines.isEmpty()) {
+             lines.add(currentLine);
         }
 
         return lines;
     }
-
-    /**
-     * Returns a run of space runes.
-     *
-     * @param count number of spaces
-     * @return space runes
-     */
-    private static int[] repeatSpaces(int count) {
-        if (count <= 0) {
-            return new int[0];
-        }
-        int[] spaces = new int[count];
-        Arrays.fill(spaces, ' ');
-        return spaces;
+    
+    private static int cellWidth(int[] runes) {
+        if (runes == null || runes.length == 0) return 0;
+        StringBuilder sb = new StringBuilder();
+        for (int r : runes) sb.appendCodePoint(r);
+        return TextWidth.measureCellWidth(sb.toString());
     }
 
-    /**
-     * Simple growable int accumulator.
-     */
-    private static final class IntAccumulator {
-        private int[] buffer = new int[8];
-        private int size;
+    private static int[] concat(int[] a, int[] b) {
+        if (a.length == 0) return b;
+        if (b.length == 0) return a;
+        int[] result = new int[a.length + b.length];
+        System.arraycopy(a, 0, result, 0, a.length);
+        System.arraycopy(b, 0, result, a.length, b.length);
+        return result;
+    }
 
-        /**
-         * Appends a value.
-         *
-         * @param value value to append
-         */
-        void add(int value) {
-            if (size >= buffer.length) {
-                buffer = Arrays.copyOf(buffer, buffer.length * 2);
-            }
-            buffer[size++] = value;
-        }
-
-        /**
-         * Returns whether the accumulator is empty.
-         *
-         * @return true if empty
-         */
-        boolean isEmpty() {
-            return size == 0;
-        }
-
-        /**
-         * Returns the last appended value.
-         *
-         * @return last value
-         */
-        int last() {
-            return buffer[size - 1];
-        }
-
-        /**
-         * Clears the accumulator.
-         */
-        void clear() {
-            size = 0;
-        }
-
-        /**
-         * Returns the accumulated values.
-         *
-         * @return array of values
-         */
-        int[] toArray() {
-            return Arrays.copyOf(buffer, size);
-        }
+    private static int[] append(int[] a, int v) {
+        int[] result = new int[a.length + 1];
+        System.arraycopy(a, 0, result, 0, a.length);
+        result[a.length] = v;
+        return result;
     }
 }
