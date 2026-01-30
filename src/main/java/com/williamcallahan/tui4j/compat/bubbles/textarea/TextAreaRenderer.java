@@ -100,7 +100,7 @@ final class TextAreaRenderer {
                         state.cursor.setChar(" ");
                         builder.append(state.cursor.view());
                     } else {
-                        String cursorChar = "";
+                        String cursorChar = " ";  // Default to space when cursor at end of line
                         if (lineInfo.columnOffset() < wrappedLine.length) {
                             cursorChar = TextAreaRunes.toString(new int[]{wrappedLine[lineInfo.columnOffset()]});
                         }
