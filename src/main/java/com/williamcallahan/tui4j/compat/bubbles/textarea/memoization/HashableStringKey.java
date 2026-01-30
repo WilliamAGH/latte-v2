@@ -1,8 +1,6 @@
 package com.williamcallahan.tui4j.compat.bubbles.textarea.memoization;
 
 import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Objects;
 
 /**
@@ -39,26 +37,6 @@ public final class HashableStringKey implements Hasher {
      */
     @Override
     public String hash() {
-        return sha256Hex(value.getBytes(StandardCharsets.UTF_8));
-    }
-
-    /**
-     * Returns a SHA-256 hex digest of the input bytes.
-     *
-     * @param input input bytes
-     * @return hex digest
-     */
-    private static String sha256Hex(byte[] input) {
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] hash = digest.digest(input);
-            StringBuilder builder = new StringBuilder(hash.length * 2);
-            for (byte b : hash) {
-                builder.append(String.format("%02x", b));
-            }
-            return builder.toString();
-        } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException("SHA-256 not available", e);
-        }
+        return MemoizationHashing.sha256Hex(value.getBytes(StandardCharsets.UTF_8));
     }
 }
