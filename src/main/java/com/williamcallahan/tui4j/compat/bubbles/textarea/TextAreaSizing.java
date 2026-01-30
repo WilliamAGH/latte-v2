@@ -30,14 +30,21 @@ final class TextAreaSizing {
             reservedInner += state.lineNumberWidth;
         }
 
-        int minWidth = reservedInner + reservedOuter + 1;
-        int inputWidth = Math.max(width, minWidth);
+        // Ensure we have enough space for at least one character of content
+        int minTotalWidth = reservedOuter + reservedInner + 1;
+        int effectiveWidth = Math.max(width, minTotalWidth);
+        
+        // Respect max width if set
         if (state.maxWidth > 0) {
-            inputWidth = Math.min(inputWidth, state.maxWidth);
+            effectiveWidth = Math.min(effectiveWidth, state.maxWidth);
         }
 
-        state.viewport.setWidth(inputWidth - reservedOuter);
-        state.width = inputWidth - reservedOuter - reservedInner;
+        // Viewport gets the full inner width (total - outer border)
+        state.viewport.setWidth(effectiveWidth - reservedOuter);
+        
+        // Wrapping width gets the remaining space (viewport - prompt/numbers)
+        // Ensure strictly positive to avoid wrap failures
+        state.width = Math.max(1, effectiveWidth - reservedOuter - reservedInner);
     }
 
     /**

@@ -57,30 +57,30 @@ final class TextAreaNavigation {
      * @param state textarea state
      */
     void cursorDown(TextAreaState state) {
-        TextAreaLineInfo li = layout.lineInfo(state);
-        int charOffset = Math.max(state.lastCharOffset, li.charOffset());
+        TextAreaLineInfo lineInfo = layout.lineInfo(state);
+        int charOffset = Math.max(state.lastCharOffset, lineInfo.charOffset());
         state.lastCharOffset = charOffset;
 
-        if (li.rowOffset() + 1 >= li.height() && state.row < state.value.size() - 1) {
+        if (lineInfo.rowOffset() + 1 >= lineInfo.height() && state.row < state.value.size() - 1) {
             state.row++;
             state.col = 0;
         } else {
             int trailingSpace = 2;
             int rowLen = state.value.get(state.row).length;
-            state.col = rowLen == 0 ? 0 : Math.max(0, Math.min(li.startColumn() + li.width() + trailingSpace, rowLen - 1));
+            state.col = rowLen == 0 ? 0 : Math.max(0, Math.min(lineInfo.startColumn() + lineInfo.width() + trailingSpace, rowLen - 1));
         }
 
-        TextAreaLineInfo nli = layout.lineInfo(state);
-        state.col = nli.startColumn();
+        TextAreaLineInfo nextLineInfo = layout.lineInfo(state);
+        state.col = nextLineInfo.startColumn();
 
-        if (nli.width() <= 0) {
+        if (nextLineInfo.width() <= 0) {
             return;
         }
 
         int offset = 0;
         while (offset < charOffset) {
             int[] line = state.value.get(state.row);
-            if (state.row >= state.value.size() || state.col >= line.length || offset >= nli.charWidth() - 1) {
+            if (state.row >= state.value.size() || state.col >= line.length || offset >= nextLineInfo.charWidth() - 1) {
                 break;
             }
             offset += TextWidth.measureCellWidth(TextAreaRunes.toString(new int[]{line[state.col]}));
@@ -94,29 +94,29 @@ final class TextAreaNavigation {
      * @param state textarea state
      */
     void cursorUp(TextAreaState state) {
-        TextAreaLineInfo li = layout.lineInfo(state);
-        int charOffset = Math.max(state.lastCharOffset, li.charOffset());
+        TextAreaLineInfo lineInfo = layout.lineInfo(state);
+        int charOffset = Math.max(state.lastCharOffset, lineInfo.charOffset());
         state.lastCharOffset = charOffset;
 
-        if (li.rowOffset() <= 0 && state.row > 0) {
+        if (lineInfo.rowOffset() <= 0 && state.row > 0) {
             state.row--;
             state.col = state.value.get(state.row).length;
         } else {
             int trailingSpace = 2;
-            state.col = Math.max(0, li.startColumn() - trailingSpace);
+            state.col = Math.max(0, lineInfo.startColumn() - trailingSpace);
         }
 
-        TextAreaLineInfo nli = layout.lineInfo(state);
-        state.col = nli.startColumn();
+        TextAreaLineInfo nextLineInfo = layout.lineInfo(state);
+        state.col = nextLineInfo.startColumn();
 
-        if (nli.width() <= 0) {
+        if (nextLineInfo.width() <= 0) {
             return;
         }
 
         int offset = 0;
         while (offset < charOffset) {
             int[] line = state.value.get(state.row);
-            if (state.col >= line.length || offset >= nli.charWidth() - 1) {
+            if (state.col >= line.length || offset >= nextLineInfo.charWidth() - 1) {
                 break;
             }
             offset += TextWidth.measureCellWidth(TextAreaRunes.toString(new int[]{line[state.col]}));
