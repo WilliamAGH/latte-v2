@@ -45,6 +45,12 @@ configurations.configureEach {
         TargetJvmEnvironment.TARGET_JVM_ENVIRONMENT_ATTRIBUTE,
         objects.named(TargetJvmEnvironment.STANDARD_JVM)
     )
+    // CVE-2024-12798 / GHSA-pr98-23f8-jwxv: Logback class instantiation vulnerability
+    resolutionStrategy.eachDependency {
+        if (requested.group == "ch.qos.logback") {
+            useVersion(libs.versions.ch.qos.logback.get())
+        }
+    }
 }
 
 configurations.matching { it.name.startsWith("examples") && it.isCanBeResolved }.configureEach {
