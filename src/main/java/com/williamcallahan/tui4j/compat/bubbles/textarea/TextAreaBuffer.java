@@ -120,14 +120,10 @@ final class TextAreaBuffer {
             }
         }
 
-        if (oldCol > line.length) {
-            state.value.set(state.row, TextAreaRunes.slice(line, 0, state.col));
-        } else {
-            int[] newLine = TextAreaRunes.concat(
-                    TextAreaRunes.slice(line, 0, state.col),
-                    TextAreaRunes.slice(line, oldCol, line.length));
-            state.value.set(state.row, newLine);
-        }
+        int[] newLine = TextAreaRunes.concat(
+                TextAreaRunes.slice(line, 0, state.col),
+                TextAreaRunes.slice(line, oldCol, line.length));
+        state.value.set(state.row, newLine);
     }
 
     /**
