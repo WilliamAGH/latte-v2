@@ -16,6 +16,14 @@ public final class Clipboard {
 
     private Clipboard() {}
 
+    /**
+     * Attempts to copy text to the clipboard.
+     * <p>
+     * Tries the local system clipboard first (AWT/CLI).
+     *
+     * @param content the text to copy
+     * @return true if copied via local mechanism, false otherwise
+     */
     public static boolean tryCopy(String content) {
         if (tryLocalClipboard(content)) {
             return true;
