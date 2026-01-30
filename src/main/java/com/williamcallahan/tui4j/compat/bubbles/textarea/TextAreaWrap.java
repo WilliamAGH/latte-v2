@@ -1,7 +1,5 @@
 package com.williamcallahan.tui4j.compat.bubbles.textarea;
 
-import com.williamcallahan.tui4j.ansi.TextWidth;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -36,9 +34,9 @@ final class TextAreaWrap {
             if (Character.isWhitespace(rune)) {
                 // If we have a word accumulated, process it first before the space
                 if (word.length > 0) {
-                    int lineW = cellWidth(currentLine);
-                    int wordW = cellWidth(word);
-                    int spaceW = cellWidth(spaces);
+                    int lineW = TextAreaRunes.cellWidth(currentLine);
+                    int wordW = TextAreaRunes.cellWidth(word);
+                    int spaceW = TextAreaRunes.cellWidth(spaces);
 
                     // Check if adding the spaces + word exceeds the width
                     if (lineW + spaceW + wordW > width) {
@@ -49,15 +47,25 @@ final class TextAreaWrap {
                             lineW = 0;
                         }
                         
-                        // We must preserve spaces. Attach them to the start of the new line (or current if empty).
-                        // In standard text editing, spaces at EOL might wrap or be hidden, but for cursor
-                        // consistency, they must exist somewhere. Attaching to new line ensures index count matches.
-                        currentLine = concat(currentLine, spaces);
-                        currentLine = concat(currentLine, word);
+                        // We must preserve spaces. Attach them to the start of the new line.
+                        currentLine = TextAreaRunes.concat(currentLine, spaces);
+                        
+                        // Check if spaces + word fits on the NEW line
+                        // (e.g. width 5, "hello world" -> "hello" / " " / "world")
+                        int newLineW = TextAreaRunes.cellWidth(currentLine);
+                        if (newLineW + wordW > width) {
+                             if (newLineW > 0) {
+                                 lines.add(currentLine);
+                                 currentLine = new int[0];
+                             }
+                             currentLine = TextAreaRunes.concat(currentLine, word);
+                        } else {
+                             currentLine = TextAreaRunes.concat(currentLine, word);
+                        }
                     } else {
                         // Fits on current line
-                        currentLine = concat(currentLine, spaces);
-                        currentLine = concat(currentLine, word);
+                        currentLine = TextAreaRunes.concat(currentLine, spaces);
+                        currentLine = TextAreaRunes.concat(currentLine, word);
                     }
                     word = new int[0];
                     spaces = new int[0];
@@ -69,20 +77,31 @@ final class TextAreaWrap {
         }
 
         // Flush remaining content
-        int lineW = cellWidth(currentLine);
-        int wordW = cellWidth(word);
-        int spaceW = cellWidth(spaces);
+        int lineW = TextAreaRunes.cellWidth(currentLine);
+        int wordW = TextAreaRunes.cellWidth(word);
+        int spaceW = TextAreaRunes.cellWidth(spaces);
 
         if (lineW + spaceW + wordW > width) {
             if (lineW > 0) {
                 lines.add(currentLine);
                 currentLine = new int[0];
             }
-            currentLine = concat(currentLine, spaces); // Preserve trailing spaces on wrap
-            currentLine = concat(currentLine, word);
+            currentLine = TextAreaRunes.concat(currentLine, spaces);
+            
+            // Check overflow on new line again
+            int newLineW = TextAreaRunes.cellWidth(currentLine);
+            if (newLineW + wordW > width) {
+                 if (newLineW > 0) {
+                     lines.add(currentLine);
+                     currentLine = new int[0];
+                 }
+                 currentLine = TextAreaRunes.concat(currentLine, word);
+            } else {
+                 currentLine = TextAreaRunes.concat(currentLine, word);
+            }
         } else {
-            currentLine = concat(currentLine, spaces);
-            currentLine = concat(currentLine, word);
+            currentLine = TextAreaRunes.concat(currentLine, spaces);
+            currentLine = TextAreaRunes.concat(currentLine, word);
         }
         
         if (currentLine.length > 0 || lines.isEmpty()) {
@@ -91,27 +110,8 @@ final class TextAreaWrap {
 
         return lines;
     }
-    
-    private static int cellWidth(int[] runes) {
-        if (runes == null || runes.length == 0) return 0;
-        StringBuilder sb = new StringBuilder();
-        for (int r : runes) sb.appendCodePoint(r);
-        return TextWidth.measureCellWidth(sb.toString());
-    }
-
-    private static int[] concat(int[] a, int[] b) {
-        if (a.length == 0) return b;
-        if (b.length == 0) return a;
-        int[] result = new int[a.length + b.length];
-        System.arraycopy(a, 0, result, 0, a.length);
-        System.arraycopy(b, 0, result, a.length, b.length);
-        return result;
-    }
 
     private static int[] append(int[] a, int v) {
-        int[] result = new int[a.length + 1];
-        System.arraycopy(a, 0, result, 0, a.length);
-        result[a.length] = v;
-        return result;
+        return TextAreaRunes.concat(a, new int[]{v});
     }
 }
