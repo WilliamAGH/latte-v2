@@ -11,11 +11,11 @@ import com.williamcallahan.tui4j.compat.bubbletea.render.Renderer;
 import com.williamcallahan.tui4j.compat.bubbletea.render.StandardRenderer;
 import com.williamcallahan.tui4j.input.MouseClickMessage;
 import com.williamcallahan.tui4j.input.MouseClickTracker;
+import com.williamcallahan.tui4j.input.MouseCursor;
 import com.williamcallahan.tui4j.input.MouseHoverTextDetector;
 import com.williamcallahan.tui4j.input.MouseSelectionAutoScroller;
 import com.williamcallahan.tui4j.input.MouseSelectionTracker;
 import com.williamcallahan.tui4j.input.MouseSelectionUpdate;
-import com.williamcallahan.tui4j.input.MouseCursor;
 import com.williamcallahan.tui4j.input.MouseTarget;
 import com.williamcallahan.tui4j.input.MouseTargetProvider;
 import com.williamcallahan.tui4j.input.MouseTargets;
@@ -526,7 +526,11 @@ public class Program {
         if (hoverTextCursorEnabled && hoverTextCursorActive) {
             renderer.resetMouseCursor();
         }
-        if (mouseTargetCursorEnabled && currentTargetCursor != null && currentTargetCursor != MouseCursor.DEFAULT) {
+        if (
+            mouseTargetCursorEnabled &&
+            currentTargetCursor != null &&
+            currentTargetCursor != MouseCursor.DEFAULT
+        ) {
             renderer.resetMouseCursor();
         }
 
@@ -923,12 +927,15 @@ public class Program {
             return;
         }
         if (mouseSelectionTracker.isSelecting() || mouseSelectionCursorActive) {
+            currentTargetCursor = null; // Clear cache so next motion re-evaluates
             return;
         }
         if (hoverTextCursorActive) {
+            currentTargetCursor = null; // Clear cache so next motion re-evaluates
             return;
         }
         if (mouseMessage.isWheel()) {
+            currentTargetCursor = null; // Clear cache so next motion re-evaluates
             return;
         }
         if (
@@ -940,7 +947,9 @@ public class Program {
         }
 
         MouseTarget target = resolveMouseTarget(mouseMessage);
-        MouseCursor desiredCursor = (target != null) ? target.cursor() : MouseCursor.DEFAULT;
+        MouseCursor desiredCursor = (target != null)
+            ? target.cursor()
+            : MouseCursor.DEFAULT;
 
         if (desiredCursor == currentTargetCursor) {
             return;

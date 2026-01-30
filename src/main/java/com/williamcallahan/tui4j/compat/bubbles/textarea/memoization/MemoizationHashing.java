@@ -10,8 +10,8 @@ import java.security.NoSuchAlgorithmException;
  */
 final class MemoizationHashing {
 
-    private MemoizationHashing() {
-    }
+    /** Prevents instantiation of this utility class. */
+    private MemoizationHashing() {}
 
     /**
      * Returns a SHA-256 hex digest of the input bytes.
