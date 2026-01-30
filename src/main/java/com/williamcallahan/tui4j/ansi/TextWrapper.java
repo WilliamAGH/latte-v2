@@ -123,6 +123,9 @@ public class TextWrapper {
             spaceWidth = 0;
         }
 
+        if (curWidth + wordLen + spaceWidth > limit) {
+            addNewLine(false);
+        }
         addWord();
         return buf.toString();
     }
@@ -167,6 +170,9 @@ public class TextWrapper {
             UCharacter.isWhitespace(codePoint) &&
             codePoint != NBSP.codePointAt(0)
         ) {
+            if (curWidth + wordLen + spaceWidth > limit) {
+                addNewLine(preserveStyle);
+            }
             addWord();
             space.append(grapheme);
             spaceWidth += width;
@@ -212,6 +218,9 @@ public class TextWrapper {
             addWord();
             addNewLine(preserveStyle);
         } else if (UCharacter.isWhitespace(ch)) {
+            if (curWidth + wordLen + spaceWidth > limit) {
+                addNewLine(preserveStyle);
+            }
             addWord();
             space.append(ch);
             spaceWidth++;
