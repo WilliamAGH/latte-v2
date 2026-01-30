@@ -4,6 +4,7 @@ import com.williamcallahan.tui4j.compat.bubbletea.Message;
 import com.williamcallahan.tui4j.ansi.Code;
 import com.williamcallahan.tui4j.ansi.Truncate;
 import com.williamcallahan.tui4j.compat.bubbletea.*;
+import com.williamcallahan.tui4j.term.Clipboard;
 import java.io.IOException;
 import org.jline.terminal.Terminal;
 import org.jline.utils.InfoCmp;
@@ -325,6 +326,9 @@ public class StandardRenderer implements Renderer {
     @Override
     // tui4j extension; no Bubble Tea equivalent.
     public void copyToClipboard(String text) {
+        // Try local clipboard first (best effort for local sessions)
+        Clipboard.tryCopy(text);
+        // Always write OSC 52 for remote/SSH sessions or terminals that support it
         writeToTerminal(Code.copyToClipboard(text));
     }
 
@@ -496,6 +500,8 @@ public class StandardRenderer implements Renderer {
         } else if (internalMsg instanceof WindowSizeMessage windowSizeMessage) {
             this.width = windowSizeMessage.width();
             this.height = windowSizeMessage.height();
+            // Force full repaint on resize to avoid ghosting artifacts
+            repaint();
         }
     }
 
