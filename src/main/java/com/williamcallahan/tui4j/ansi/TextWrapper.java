@@ -123,6 +123,9 @@ public class TextWrapper {
             spaceWidth = 0;
         }
 
+        if (curWidth + wordLen + spaceWidth > limit) {
+            addNewLine(false);
+        }
         addWord();
         return buf.toString();
     }

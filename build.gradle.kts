@@ -14,7 +14,7 @@ plugins {
 description = "TUI4J"
 
 group = providers.gradleProperty("group").orNull ?: "com.williamcallahan"
-version = providers.gradleProperty("version").orNull ?: "0.0.0-SNAPSHOT"
+version = providers.gradleProperty("version").orNull ?: "0.3.1"
 
 repositories {
     mavenCentral {
@@ -45,6 +45,12 @@ configurations.configureEach {
         TargetJvmEnvironment.TARGET_JVM_ENVIRONMENT_ATTRIBUTE,
         objects.named(TargetJvmEnvironment.STANDARD_JVM)
     )
+    // CVE-2024-12798 / GHSA-pr98-23f8-jwxv: Logback class instantiation vulnerability
+    resolutionStrategy.eachDependency {
+        if (requested.group == "ch.qos.logback") {
+            useVersion(libs.versions.ch.qos.logback.get())
+        }
+    }
 }
 
 configurations.matching { it.name.startsWith("examples") && it.isCanBeResolved }.configureEach {
@@ -178,21 +184,23 @@ tasks.register<Test>("examplesSpringTest") {
 
 tasks.withType<Test>().configureEach {
     useJUnitPlatform()
+    // Disable clipboard operations during tests to avoid side effects on real system clipboard
+    systemProperty("tui4j.clipboard.disabled", "true")
     testLogging {
         events(
             org.gradle.api.tasks.testing.logging.TestLogEvent.FAILED,
             org.gradle.api.tasks.testing.logging.TestLogEvent.SKIPPED
         )
-        exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.SHORT
-        showStandardStreams = false
+        exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+        showExceptions = true
+        showCauses = true
+        showStackTraces = true
     }
-}
 
-tasks.withType<Test>().configureEach {
     afterSuite(KotlinClosure2<TestDescriptor, TestResult, Unit>({ desc, result ->
         if (desc.parent == null) {
             logger.lifecycle(
-                "TESTS: ${result.resultType} (${result.testCount} tests, " +
+                "\nTESTS: ${result.resultType} (${result.testCount} tests, " +
                     "${result.successfulTestCount} passed, " +
                     "${result.failedTestCount} failed, " +
                     "${result.skippedTestCount} skipped)"

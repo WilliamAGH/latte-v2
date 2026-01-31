@@ -1,13 +1,11 @@
 package com.williamcallahan.tui4j.compat.bubbletea.render;
 
-import com.williamcallahan.tui4j.compat.bubbletea.Message;
 import com.williamcallahan.tui4j.ansi.Code;
 import com.williamcallahan.tui4j.ansi.Truncate;
 import com.williamcallahan.tui4j.compat.bubbletea.*;
+import com.williamcallahan.tui4j.compat.bubbletea.Message;
+import com.williamcallahan.tui4j.term.Clipboard;
 import java.io.IOException;
-import org.jline.terminal.Terminal;
-import org.jline.utils.InfoCmp;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -16,6 +14,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import org.jline.terminal.Terminal;
+import org.jline.utils.InfoCmp;
 
 /**
  * Default renderer backed by JLine.
@@ -75,7 +75,10 @@ public class StandardRenderer implements Renderer {
             // Log the error but fallback to safe defaults to prevent crash
             // The renderer can recover when a window size message is received later
             // Use system err/out sparingly or logger if available
-            System.err.println("Failed to get initial terminal size, defaulting to 80x24: " + t.getMessage());
+            System.err.println(
+                "Failed to get initial terminal size, defaulting to 80x24: " +
+                    t.getMessage()
+            );
             this.width = 80;
             this.height = 24;
         }
@@ -85,7 +88,12 @@ public class StandardRenderer implements Renderer {
     public void start() {
         if (!isRunning) {
             isRunning = true;
-            ticker.scheduleAtFixedRate(this::flush, 0, frameTime, TimeUnit.MILLISECONDS);
+            ticker.scheduleAtFixedRate(
+                this::flush,
+                0,
+                frameTime,
+                TimeUnit.MILLISECONDS
+            );
         }
     }
 
@@ -127,14 +135,22 @@ public class StandardRenderer implements Renderer {
             String[] newLines = buffer.toString().split("\n");
 
             if (height > 0 && newLines.length > height) {
-                newLines = Arrays.copyOfRange(newLines, newLines.length - height, newLines.length);
+                newLines = Arrays.copyOfRange(
+                    newLines,
+                    newLines.length - height,
+                    newLines.length
+                );
             }
 
             if (linesRendered > 1) {
-                outputBuffer.append("\033[").append(linesRendered - 1).append("A");
+                outputBuffer
+                    .append("\033[")
+                    .append(linesRendered - 1)
+                    .append("A");
             }
 
-            boolean flushQueuedMessages = !queuedMessageLines.isEmpty() && !isInAltScreen;
+            boolean flushQueuedMessages =
+                !queuedMessageLines.isEmpty() && !isInAltScreen;
             if (flushQueuedMessages) {
                 for (String line : queuedMessageLines) {
                     if (width > 0 && line.length() < width) {
@@ -148,9 +164,10 @@ public class StandardRenderer implements Renderer {
             }
 
             for (int i = 0; i < newLines.length; i++) {
-                boolean canSkip = !flushQueuedMessages &&
-                        lastRenderedLines.length > i &&
-                        newLines[i].equals(lastRenderedLines[i]);
+                boolean canSkip =
+                    !flushQueuedMessages &&
+                    lastRenderedLines.length > i &&
+                    newLines[i].equals(lastRenderedLines[i]);
 
                 if (canSkip) {
                     if (i < newLines.length - 1) {
@@ -197,8 +214,7 @@ public class StandardRenderer implements Renderer {
     @Override
     // Bubble Tea: seeks to replicate bubbletea/standard_renderer.go write behavior.
     public void write(String view) {
-        if (!isRunning)
-            return;
+        if (!isRunning) return;
 
         String string = view.isEmpty() ? " " : view;
 
@@ -322,9 +338,20 @@ public class StandardRenderer implements Renderer {
         writeToTerminal(Code.ResetMouseCursor.value());
     }
 
+    /**
+     * Copies text to the clipboard via local mechanisms and OSC 52.
+     * <p>
+     * tui4j extension with no Bubble Tea equivalent. Attempts local clipboard
+     * copy via {@link Clipboard#tryCopy}, then emits OSC 52 for remote/SSH terminals.
+     * Local copy is best-effort; OSC 52 always emitted for terminal support.
+     *
+     * @param text the text to copy to clipboard
+     */
     @Override
-    // tui4j extension; no Bubble Tea equivalent.
     public void copyToClipboard(String text) {
+        // Try local clipboard first (best effort for local sessions)
+        Clipboard.tryCopy(text);
+        // Always write OSC 52 for remote/SSH sessions or terminals that support it
         writeToTerminal(Code.copyToClipboard(text));
     }
 
@@ -353,13 +380,11 @@ public class StandardRenderer implements Renderer {
     // Bubble Tea: seeks to replicate bubbletea/standard_renderer.go enterAltScreen
     // behavior.
     public void enterAltScreen() {
-        if (isInAltScreen)
-            return;
+        if (isInAltScreen) return;
 
         renderLock.lock();
         try {
-            if (terminal.getType().equals("dumb"))
-                return;
+            if (terminal.getType().equals("dumb")) return;
 
             terminal.puts(InfoCmp.Capability.enter_ca_mode);
             terminal.puts(InfoCmp.Capability.clear_screen);
@@ -379,8 +404,7 @@ public class StandardRenderer implements Renderer {
     // Bubble Tea: seeks to replicate bubbletea/standard_renderer.go exitAltScreen
     // behavior.
     public void exitAltScreen() {
-        if (!altScreen())
-            return;
+        if (!altScreen()) return;
 
         renderLock.lock();
         try {
@@ -451,6 +475,25 @@ public class StandardRenderer implements Renderer {
         return bracketedPasteEnabled;
     }
 
+    private boolean kittyKeyboardEnabled;
+
+    @Override
+    public void enableKittyKeyboard() {
+        writeToTerminal(Code.EnableKittyKeyboard.value());
+        kittyKeyboardEnabled = true;
+    }
+
+    @Override
+    public void disableKittyKeyboard() {
+        writeToTerminal(Code.DisableKittyKeyboard.value());
+        kittyKeyboardEnabled = false;
+    }
+
+    @Override
+    public boolean kittyKeyboard() {
+        return kittyKeyboardEnabled;
+    }
+
     @Override
     // tui4j extension; no Bubble Tea equivalent.
     public void notifyModelChanged() {
@@ -472,7 +515,9 @@ public class StandardRenderer implements Renderer {
         Message internalMsg = normalizeMessage(msg);
         if (internalMsg instanceof PrintLineMessage printLineMessage) {
             queuePrintLine(printLineMessage.messageBody());
-        } else if (internalMsg instanceof SetWindowTitleMessage windowTitleMessage) {
+        } else if (
+            internalMsg instanceof SetWindowTitleMessage windowTitleMessage
+        ) {
             setWindowTitle(windowTitleMessage.title());
         } else if (internalMsg instanceof EnableMouseCellMotionMessage) {
             enableMouseCellMotion();
@@ -491,11 +536,16 @@ public class StandardRenderer implements Renderer {
             setMouseCursorPointer();
         } else if (internalMsg instanceof ResetMouseCursorMessage) {
             resetMouseCursor();
-        } else if (internalMsg instanceof CopyToClipboardMessage copyToClipboardMessage) {
+        } else if (
+            internalMsg instanceof CopyToClipboardMessage copyToClipboardMessage
+        ) {
             copyToClipboard(copyToClipboardMessage.text());
         } else if (internalMsg instanceof WindowSizeMessage windowSizeMessage) {
             this.width = windowSizeMessage.width();
             this.height = windowSizeMessage.height();
+            // Force full repaint on resize to avoid ghosting artifacts
+            needsRender = true;
+            repaint();
         }
     }
 

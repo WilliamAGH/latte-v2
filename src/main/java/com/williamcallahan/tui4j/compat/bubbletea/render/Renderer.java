@@ -184,6 +184,36 @@ public interface Renderer {
     boolean bracketedPaste();
 
     /**
+     * Enables Kitty keyboard protocol for enhanced key reporting.
+     * <p>
+     * This enables the terminal to report modifier keys on Enter (Shift+Enter, Ctrl+Enter)
+     * via CSI-u sequences. Supported by Kitty, Ghostty, WezTerm, and other modern terminals.
+     * <p>
+     * tui4j extension; no Bubble Tea equivalent.
+     *
+     * @see <a href="https://sw.kovidgoyal.net/kitty/keyboard-protocol/">Kitty Keyboard Protocol</a>
+     */
+    default void enableKittyKeyboard() {
+    }
+
+    /**
+     * Disables Kitty keyboard protocol.
+     * <p>
+     * tui4j extension; no Bubble Tea equivalent.
+     */
+    default void disableKittyKeyboard() {
+    }
+
+    /**
+     * Returns whether Kitty keyboard protocol is enabled.
+     *
+     * @return {@code true} when Kitty keyboard is enabled
+     */
+    default boolean kittyKeyboard() {
+        return false;
+    }
+
+    /**
      * Notifies the renderer that the model has changed and a render is needed.
      * <p>
      * tui4j extension; no Bubble Tea equivalent.

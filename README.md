@@ -19,19 +19,19 @@
 <dependency>
     <groupId>com.williamcallahan</groupId>
     <artifactId>tui4j</artifactId>
-    <version>0.3.0</version>
+    <version>0.3.1-preview</version>
 </dependency>
 ```
 
 ### Gradle
 
 ```groovy
-implementation 'com.williamcallahan:tui4j:0.3.0'
+implementation 'com.williamcallahan:tui4j:0.3.1-preview'
 ```
 
 ## Quick Start
 
-TUI4J uses [The Elm Architecture](docs/tutorial.md): implement a `Model` with `init()`, `update()`, and `view()` methods, then run it with `Program`:
+TUI4J uses [The Elm Architecture](docs/how-to/tutorial.md): implement a `Model` with `init()`, `update()`, and `view()` methods, then run it with `Program`:
 
 ```java
 new Program(new MyModel()).run();
@@ -45,10 +45,10 @@ The screenshots above show [Pulse](src/main/resources/examples/showcases/README.
 
 ## Documentation
 
-- [Tutorial](docs/tutorial.md) - Complete walkthrough
-- [List Component](docs/list-component.md) - List widget guide
-- [Compatibility Maps](docs/maps) - Charm API mappings
-- [Porting Status](docs/STATUS.md) - What's implemented
+- [Tutorial](docs/how-to/tutorial.md) - Complete walkthrough
+- [List Component](docs/how-to/list-component.md) - List widget guide
+- [Compatibility Maps](docs/compatibility) - Charm API mappings
+- [Porting Status](docs/compatibility/status.md) - What's implemented
 
 ## Built with TUI4J
 
@@ -72,7 +72,7 @@ TUI4J ports the [charmbracelet](https://github.com/charmbracelet) ecosystem to J
 
 TUI4J seeks to replicate upstream behavior as closely as possible, with a general 1:1 mapping for compatibility. When TUI4J adds functionality without a charmbracelet equivalent, those APIs are treated as additive extensions.
 
-Check [STATUS.md](docs/STATUS.md) and [docs/maps](docs/maps) for current porting status.
+Check [status.md](docs/compatibility/status.md) and [docs/compatibility](docs/compatibility) for current porting status.
 
 ## Contributing
 

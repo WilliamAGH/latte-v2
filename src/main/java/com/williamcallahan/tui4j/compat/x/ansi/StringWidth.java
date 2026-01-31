@@ -58,7 +58,8 @@ public final class StringWidth {
         State pstate = State.GROUND;
         int width = 0;
 
-        byte[] bytes = s.getBytes(StandardCharsets.UTF_8);
+        String normalized = normalizeC1Controls(s);
+        byte[] bytes = normalized.getBytes(StandardCharsets.UTF_8);
 
         for (int i = 0; i < bytes.length; i++) {
             TransitionTable.Transition transition = table.transition(pstate, bytes[i]);
@@ -83,5 +84,28 @@ public final class StringWidth {
         }
 
         return width;
+    }
+
+    private static String normalizeC1Controls(String s) {
+        for (int i = 0; i < s.length(); ) {
+            int codePoint = s.codePointAt(i);
+            if (codePoint >= 0x80 && codePoint <= 0x9F) {
+                StringBuilder normalized = new StringBuilder(s.length() + 4);
+                normalized.append(s, 0, i);
+                while (i < s.length()) {
+                    codePoint = s.codePointAt(i);
+                    if (codePoint >= 0x80 && codePoint <= 0x9F) {
+                        normalized.append(Ansi.ESC_CHAR);
+                        normalized.append((char) (codePoint - 0x40));
+                    } else {
+                        normalized.appendCodePoint(codePoint);
+                    }
+                    i += Character.charCount(codePoint);
+                }
+                return normalized.toString();
+            }
+            i += Character.charCount(codePoint);
+        }
+        return s;
     }
 }

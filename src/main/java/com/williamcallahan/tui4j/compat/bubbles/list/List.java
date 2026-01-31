@@ -846,10 +846,13 @@ public class List
         paginator.setPerPage(perPage);
         this.cursor = index % perPage;
 
-        if (paginator.page() >= paginator.totalPages()) {
-            paginator.setPage(Math.max(0, paginator.totalPages() - 1));
-            updateKeybindings();
-            return true;
+        if (paginator.page() >= paginator.totalPages() && paginator.totalPages() > 0) {
+            int newPage = paginator.totalPages() - 1;
+            if (paginator.page() != newPage) {
+                paginator.setPage(newPage);
+                updateKeybindings();
+                return true;
+            }
         }
 
         updateKeybindings();

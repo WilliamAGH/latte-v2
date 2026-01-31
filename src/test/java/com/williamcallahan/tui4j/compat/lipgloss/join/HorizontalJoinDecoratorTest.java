@@ -29,7 +29,9 @@ class HorizontalJoinDecoratorTest {
         return Stream.of(
                 Arguments.of("pos0", Position.Top, "A", "B\nB\nB\nB", "AB\n B\n B\n B"),
                 Arguments.of("pos1", Position.Bottom, "A", "B\nB\nB\nB", " B\n B\n B\nAB"),
-                Arguments.of("pos0.25", new Position(0.25d), "A", "B\nB\nB\nB", " B\nAB\n B\n B")
+                Arguments.of("pos0.25", new Position(0.25d), "A", "B\nB\nB\nB", " B\nAB\n B\n B"),
+                Arguments.of("pos0.5-odd", Position.Center, "A", "B\nB\nB\nB", " B\n B\nAB\n B"),
+                Arguments.of("pos0.5-even", Position.Center, "A", "B\nB\nB\nB\nB", " B\n B\nAB\n B\n B")
         );
     }
 }

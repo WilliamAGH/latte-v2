@@ -11,6 +11,7 @@ import com.williamcallahan.tui4j.compat.bubbletea.render.Renderer;
 import com.williamcallahan.tui4j.compat.bubbletea.render.StandardRenderer;
 import com.williamcallahan.tui4j.input.MouseClickMessage;
 import com.williamcallahan.tui4j.input.MouseClickTracker;
+import com.williamcallahan.tui4j.input.MouseCursor;
 import com.williamcallahan.tui4j.input.MouseHoverTextDetector;
 import com.williamcallahan.tui4j.input.MouseSelectionAutoScroller;
 import com.williamcallahan.tui4j.input.MouseSelectionTracker;
@@ -98,6 +99,8 @@ public class Program {
     private boolean mouseSelectionCursorActive;
     private boolean hoverTextCursorEnabled;
     private boolean hoverTextCursorActive;
+    private boolean mouseTargetCursorEnabled;
+    private MouseCursor currentTargetCursor;
     private boolean mouseClicksEnabled;
     private volatile boolean isSuspended = false;
 
@@ -122,6 +125,7 @@ public class Program {
     private boolean enableMouseAllMotion;
     private boolean enableMouseCellMotion;
     private boolean enableReportFocus;
+    private boolean enableKittyKeyboard;
     private BiFunction<Model, Message, Message> filter;
     private CompletableFuture<?> cancelSignal;
     private InputStream input = System.in;
@@ -290,6 +294,25 @@ public class Program {
     }
 
     /**
+     * Enables Kitty keyboard protocol for enhanced key reporting.
+     * <p>
+     * This enables the terminal to report modifier keys on Enter (Shift+Enter, Ctrl+Enter)
+     * via CSI-u sequences. Supported by Kitty, Ghostty, WezTerm, and other modern terminals.
+     * <p>
+     * tui4j extension; no Bubble Tea equivalent.
+     *
+     * @return this program for chaining
+     * @see <a href="https://sw.kovidgoyal.net/kitty/keyboard-protocol/">Kitty Keyboard Protocol</a>
+     */
+    public Program withKittyKeyboard() {
+        enableKittyKeyboard = true;
+        if (renderer != null) {
+            renderer.enableKittyKeyboard();
+        }
+        return this;
+    }
+
+    /**
      * Handles with mouse all motion for this component.
      *
      * @return result
@@ -388,6 +411,19 @@ public class Program {
      */
     public Program withMouseHoverTextCursor() {
         this.hoverTextCursorEnabled = true;
+        return this;
+    }
+
+    /**
+     * Manage the mouse cursor based on MouseTarget cursor hints (OSC 22).
+     * When hovering a target with {@link MouseCursor#POINTER}, shows pointer cursor.
+     * Requires mouse motion events (e.g. {@link #withMouseAllMotion()}).
+     * tui4j extension; no Bubble Tea equivalent.
+     *
+     * @return this program for chaining
+     */
+    public Program withMouseTargetCursor() {
+        this.mouseTargetCursorEnabled = true;
         return this;
     }
 
@@ -510,12 +546,23 @@ public class Program {
         if (hoverTextCursorEnabled && hoverTextCursorActive) {
             renderer.resetMouseCursor();
         }
+        if (
+            mouseTargetCursorEnabled &&
+            currentTargetCursor != null &&
+            currentTargetCursor != MouseCursor.DEFAULT
+        ) {
+            renderer.resetMouseCursor();
+        }
 
         // disabling mouse support
         disableMouse();
 
         if (renderer.reportFocus()) {
             renderer.disableReportFocus();
+        }
+
+        if (renderer.kittyKeyboard()) {
+            renderer.disableKittyKeyboard();
         }
 
         if (renderer.altScreen()) {
@@ -670,6 +717,7 @@ public class Program {
                     handleMouseClickTracking(mouseMessage);
                     handleMouseSelectionTracking(mouseMessage);
                     handleMouseHoverCursor(mouseMessage);
+                    handleMouseTargetCursor(mouseMessage);
                 }
 
                 // process internal messages for the renderer
@@ -891,6 +939,52 @@ public class Program {
             renderer.resetMouseCursor();
             hoverTextCursorActive = false;
         }
+    }
+
+    /**
+     * Handles mouse cursor changes based on MouseTarget cursor hints.
+     *
+     * @param mouseMessage mouse message
+     */
+    private void handleMouseTargetCursor(MouseMessage mouseMessage) {
+        if (!mouseTargetCursorEnabled) {
+            return;
+        }
+        if (mouseSelectionTracker.isSelecting() || mouseSelectionCursorActive) {
+            currentTargetCursor = null; // Clear cache so next motion re-evaluates
+            return;
+        }
+        if (hoverTextCursorActive) {
+            currentTargetCursor = null; // Clear cache so next motion re-evaluates
+            return;
+        }
+        if (mouseMessage.isWheel()) {
+            currentTargetCursor = null; // Clear cache so next motion re-evaluates
+            return;
+        }
+        if (
+            mouseMessage.getAction() != MouseAction.MouseActionMotion &&
+            mouseMessage.getAction() != MouseAction.MouseActionPress &&
+            mouseMessage.getAction() != MouseAction.MouseActionRelease
+        ) {
+            return;
+        }
+
+        MouseTarget target = resolveMouseTarget(mouseMessage);
+        MouseCursor desiredCursor = (target != null)
+            ? target.cursor()
+            : MouseCursor.DEFAULT;
+
+        if (desiredCursor == currentTargetCursor) {
+            return;
+        }
+
+        switch (desiredCursor) {
+            case POINTER -> renderer.setMouseCursorPointer();
+            case TEXT -> renderer.setMouseCursorText();
+            default -> renderer.resetMouseCursor();
+        }
+        currentTargetCursor = desiredCursor;
     }
 
     /**
@@ -1125,6 +1219,9 @@ public class Program {
         }
         if (enableReportFocus && !renderer.reportFocus()) {
             renderer.enableReportFocus();
+        }
+        if (enableKittyKeyboard && !renderer.kittyKeyboard()) {
+            renderer.enableKittyKeyboard();
         }
     }
 

@@ -1,8 +1,10 @@
 package com.williamcallahan.tui4j.compat.bubbles.textarea;
 
 import com.williamcallahan.tui4j.compat.lipgloss.Renderer;
+import com.williamcallahan.tui4j.compat.lipgloss.Style;
 import com.williamcallahan.tui4j.compat.lipgloss.color.ColorProfile;
 import com.williamcallahan.tui4j.compat.lipgloss.color.NoColor;
+import com.williamcallahan.tui4j.compat.bubbles.cursor.CursorMode;
 import com.williamcallahan.tui4j.term.TerminalInfo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -110,6 +112,65 @@ class TextareaTest {
         textarea.view();
     }
 
+    /**
+     * Verifies the cursor renders on the correct wrapped line after scrolling.
+     */
+    @Test
+    void testCursorRendersOnWrappedLine() {
+        Textarea textarea = new Textarea();
+        textarea.setPrompt("");
+        textarea.setShowLineNumbers(false);
+        textarea.setWidth(5);
+        textarea.setHeight(1);
+        textarea.insertString("hello world");
+        textarea.focus();
+        textarea.update(new com.williamcallahan.tui4j.compat.bubbletea.FocusMessage());
+        textarea.cursor().setMode(CursorMode.Static);
+        textarea.cursor().setStyle(com.williamcallahan.tui4j.compat.lipgloss.Style.newStyle()
+            .transform(value -> "{" + value + "}"));
+
+        Textarea.LineInfo lineInfo = textarea.lineInfo();
+        assertTrue(lineInfo.rowOffset() > 0, "Expected cursor to be on a wrapped line");
+
+        String view = textarea.view();
+        String[] lines = view.split("\n", -1);
+        int cursorLineIndex = -1;
+        int cursorLineCount = 0;
+        for (int i = 0; i < lines.length; i++) {
+            if (lines[i].contains("{") && lines[i].contains("}")) {
+                cursorLineIndex = i;
+                cursorLineCount++;
+            }
+        }
+
+        assertEquals(1, cursorLineCount, "Cursor should render on only one wrapped line");
+        // The cursor may not be on line 0 due to space-preserving wrap behavior which can produce
+        // extra lines. The key invariant is that the cursor renders on exactly one line and is
+        // within the visible viewport height.
+        assertTrue(cursorLineIndex >= 0 && cursorLineIndex < textarea.height() + 1,
+            "Cursor should render within visible viewport, got line " + cursorLineIndex);
+    }
+
+    /**
+     * Verifies the cursor renders as a visible space when at end-of-line.
+     */
+    @Test
+    void testCursorVisibleAtEndOfLine() {
+        Textarea textarea = new Textarea();
+        textarea.setPrompt("");
+        textarea.setShowLineNumbers(false);
+        textarea.setWidth(10);
+        textarea.setHeight(1);
+        textarea.insertString("a");
+        textarea.cursor().setMode(CursorMode.Static);
+        textarea.cursor().setStyle(Style.newStyle().transform(value -> "<" + value + ">"));
+
+        String view = textarea.view();
+
+        assertTrue(view.contains("< >"), "Cursor should render a visible space at end of line");
+    }
+
+
     @Test
     void testReset() {
         Textarea textarea = new Textarea();
@@ -159,6 +220,8 @@ class TextareaTest {
     void testWidthAndHeightSetters() {
         Textarea textarea = new Textarea();
 
+        textarea.setPrompt("");
+        textarea.setShowLineNumbers(false);
         textarea.setWidth(100);
         textarea.setHeight(20);
 

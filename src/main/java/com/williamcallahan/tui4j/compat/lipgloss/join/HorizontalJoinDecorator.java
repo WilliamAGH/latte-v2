@@ -78,9 +78,9 @@ public class HorizontalJoinDecorator {
 
                 String[] newBlock = new String[maxHeight];
                 Arrays.fill(newBlock, "");
-                System.arraycopy(extraLines, top, newBlock, 0, n - top);
-                System.arraycopy(blocks[i], 0, newBlock, n - top, blocks[i].length);
-                System.arraycopy(extraLines, 0, newBlock, n - top + blocks[i].length, bottom);
+                System.arraycopy(extraLines, top, newBlock, 0, bottom);
+                System.arraycopy(blocks[i], 0, newBlock, bottom, blocks[i].length);
+                System.arraycopy(extraLines, bottom, newBlock, bottom + blocks[i].length, top);
 
                 blocks[i] = newBlock;
             }

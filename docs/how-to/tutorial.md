@@ -162,5 +162,5 @@ public static void main(String[] args) {
 ## Next Steps
 
 - Explore the [examples](https://github.com/WilliamAGH/tui4j/tree/main/src/main/resources/examples) for more complex applications
-- Check [STATUS.md](https://github.com/WilliamAGH/tui4j/blob/main/docs/STATUS.md) for porting status from Bubble Tea
+- Check [status.md](https://github.com/WilliamAGH/tui4j/blob/main/docs/compatibility/status.md) for porting status from Bubble Tea
 - See [Brief](https://github.com/WilliamAGH/brief) for a real-world TUI4J application

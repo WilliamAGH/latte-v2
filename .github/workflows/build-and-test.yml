@@ -29,8 +29,19 @@ jobs:
       - name: Build and test
         run: ./gradlew build examplesClasses
 
+      - name: Check if SNAPSHOT version
+        id: version_check
+        run: |
+          VERSION=$(grep "^version=" gradle.properties | cut -d= -f2)
+          echo "Version: $VERSION"
+          if [[ "$VERSION" == *-SNAPSHOT ]]; then
+            echo "is_snapshot=true" >> $GITHUB_OUTPUT
+          else
+            echo "is_snapshot=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Publish SNAPSHOT (main only)
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.version_check.outputs.is_snapshot == 'true'
         env:
           SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
           SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
