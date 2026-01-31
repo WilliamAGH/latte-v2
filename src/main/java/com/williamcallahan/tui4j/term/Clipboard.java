@@ -62,9 +62,9 @@ public final class Clipboard {
                     .setContents(selection, selection);
                 return true;
             }
-        } catch (Throwable ignored) {
+        } catch (Throwable ex) {
             // AWT failed (headless or other issue), fall through to CLI
-            LOG.log(Level.FINE, "AWT clipboard access failed", ignored);
+            LOG.log(Level.FINE, "AWT clipboard access failed", ex);
         }
         return false;
     }
@@ -78,7 +78,8 @@ public final class Clipboard {
      * @return true if CLI command succeeded, false otherwise
      */
     private static boolean copyViaCommand(String content) {
-        String os = System.getProperty("os.name").toLowerCase();
+        String osName = System.getProperty("os.name");
+        String os = (osName != null) ? osName.toLowerCase() : "";
         ProcessBuilder pb = null;
 
         if (os.contains("mac")) {
@@ -90,7 +91,7 @@ public final class Clipboard {
             pb = new ProcessBuilder("xclip", "-selection", "clipboard");
         }
 
-        if (pb != null && tryProcess(pb, content)) {
+        if (tryProcess(pb, content)) {
             return true;
         }
 
