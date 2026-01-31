@@ -9,6 +9,8 @@ import java.util.List;
  * Text buffer mutations for textarea.
  * <p>
  * Port of {@code bubbles/textarea/textarea.go} buffer logic.
+ *
+ * @see <a href="https://github.com/charmbracelet/bubbles/blob/master/textarea/textarea.go">bubbles/textarea/textarea.go</a>
  */
 final class TextAreaBuffer {
 
