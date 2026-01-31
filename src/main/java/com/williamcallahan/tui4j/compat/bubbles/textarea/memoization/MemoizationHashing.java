@@ -10,6 +10,9 @@ import java.security.NoSuchAlgorithmException;
  */
 public final class MemoizationHashing {
 
+    /** Hex characters for SHA-256 digest formatting. */
+    private static final char[] HEX = "0123456789abcdef".toCharArray();
+
     /** Prevents instantiation of this utility class. */
     private MemoizationHashing() {}
 
@@ -25,7 +28,8 @@ public final class MemoizationHashing {
             byte[] hash = digest.digest(input);
             StringBuilder builder = new StringBuilder(hash.length * 2);
             for (byte b : hash) {
-                builder.append(String.format("%02x", b));
+                int v = b & 0xFF;
+                builder.append(HEX[v >>> 4]).append(HEX[v & 0x0F]);
             }
             return builder.toString();
         } catch (NoSuchAlgorithmException e) {
