@@ -14,7 +14,7 @@ plugins {
 description = "TUI4J"
 
 group = providers.gradleProperty("group").orNull ?: "com.williamcallahan"
-version = providers.gradleProperty("version").orNull ?: "0.3.1"
+version = providers.gradleProperty("version").orNull ?: "0.3.2-preview"
 
 repositories {
     mavenCentral {
