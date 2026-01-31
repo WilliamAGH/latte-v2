@@ -34,6 +34,16 @@ public enum Code {
     /** Disable bracketed paste mode. */
     DisableBracketedPaste("\u001b[?2004l"),
 
+    /**
+     * Enable Kitty keyboard protocol (progressive enhancement mode 1).
+     * This enables disambiguate escape codes, allowing terminals to report
+     * modifier keys on Enter (Shift+Enter, Ctrl+Enter) via CSI-u sequences.
+     * @see <a href="https://sw.kovidgoyal.net/kitty/keyboard-protocol/">Kitty Keyboard Protocol</a>
+     */
+    EnableKittyKeyboard("\u001b[>1u"),
+    /** Disable Kitty keyboard protocol (pop keyboard mode). */
+    DisableKittyKeyboard("\u001b[<u"),
+
     /** Set mouse cursor to text. */
     SetMouseTextCursor("\u001b]22;text\u001b\\"),
     /** Set mouse cursor to pointer. */

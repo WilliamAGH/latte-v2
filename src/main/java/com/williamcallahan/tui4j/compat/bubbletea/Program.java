@@ -125,6 +125,7 @@ public class Program {
     private boolean enableMouseAllMotion;
     private boolean enableMouseCellMotion;
     private boolean enableReportFocus;
+    private boolean enableKittyKeyboard;
     private BiFunction<Model, Message, Message> filter;
     private CompletableFuture<?> cancelSignal;
     private InputStream input = System.in;
@@ -288,6 +289,25 @@ public class Program {
         enableReportFocus = true;
         if (renderer != null) {
             renderer.enableReportFocus();
+        }
+        return this;
+    }
+
+    /**
+     * Enables Kitty keyboard protocol for enhanced key reporting.
+     * <p>
+     * This enables the terminal to report modifier keys on Enter (Shift+Enter, Ctrl+Enter)
+     * via CSI-u sequences. Supported by Kitty, Ghostty, WezTerm, and other modern terminals.
+     * <p>
+     * tui4j extension; no Bubble Tea equivalent.
+     *
+     * @return this program for chaining
+     * @see <a href="https://sw.kovidgoyal.net/kitty/keyboard-protocol/">Kitty Keyboard Protocol</a>
+     */
+    public Program withKittyKeyboard() {
+        enableKittyKeyboard = true;
+        if (renderer != null) {
+            renderer.enableKittyKeyboard();
         }
         return this;
     }
@@ -539,6 +559,10 @@ public class Program {
 
         if (renderer.reportFocus()) {
             renderer.disableReportFocus();
+        }
+
+        if (renderer.kittyKeyboard()) {
+            renderer.disableKittyKeyboard();
         }
 
         if (renderer.altScreen()) {
@@ -1195,6 +1219,9 @@ public class Program {
         }
         if (enableReportFocus && !renderer.reportFocus()) {
             renderer.enableReportFocus();
+        }
+        if (enableKittyKeyboard && !renderer.kittyKeyboard()) {
+            renderer.enableKittyKeyboard();
         }
     }
 

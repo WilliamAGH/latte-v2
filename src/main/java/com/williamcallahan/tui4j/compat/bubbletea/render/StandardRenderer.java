@@ -475,6 +475,25 @@ public class StandardRenderer implements Renderer {
         return bracketedPasteEnabled;
     }
 
+    private boolean kittyKeyboardEnabled;
+
+    @Override
+    public void enableKittyKeyboard() {
+        writeToTerminal(Code.EnableKittyKeyboard.value());
+        kittyKeyboardEnabled = true;
+    }
+
+    @Override
+    public void disableKittyKeyboard() {
+        writeToTerminal(Code.DisableKittyKeyboard.value());
+        kittyKeyboardEnabled = false;
+    }
+
+    @Override
+    public boolean kittyKeyboard() {
+        return kittyKeyboardEnabled;
+    }
+
     @Override
     // tui4j extension; no Bubble Tea equivalent.
     public void notifyModelChanged() {
