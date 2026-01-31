@@ -530,14 +530,14 @@ public class StandardRenderer implements Renderer {
             disableMouseNormalTracking();
             disableMouseCellMotion();
             disableMouseAllMotion();
-        } else if (internalMsg instanceof SetMouseCursorTextMessage) {
+        } else if (internalMsg instanceof com.williamcallahan.tui4j.message.SetMouseCursorTextMessage) {
             setMouseCursorText();
-        } else if (internalMsg instanceof SetMouseCursorPointerMessage) {
+        } else if (internalMsg instanceof com.williamcallahan.tui4j.message.SetMouseCursorPointerMessage) {
             setMouseCursorPointer();
-        } else if (internalMsg instanceof ResetMouseCursorMessage) {
+        } else if (internalMsg instanceof com.williamcallahan.tui4j.message.ResetMouseCursorMessage) {
             resetMouseCursor();
         } else if (
-            internalMsg instanceof CopyToClipboardMessage copyToClipboardMessage
+            internalMsg instanceof com.williamcallahan.tui4j.message.CopyToClipboardMessage copyToClipboardMessage
         ) {
             copyToClipboard(copyToClipboardMessage.text());
         } else if (internalMsg instanceof WindowSizeMessage windowSizeMessage) {
