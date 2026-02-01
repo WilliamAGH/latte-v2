@@ -1291,17 +1291,17 @@ public class List
                 paginator.page() * paginator.perPage() + i,
                 this.currentPageItems.get(i)
             );
-            if (i != items.size() - 1) {
+            if (i != this.currentPageItems.size() - 1) {
                 b.append("\n".repeat(itemDelegate.spacing() + 1));
             }
         }
 
-        int itemsOnPage = items.size();
+        int itemsOnPage = this.currentPageItems.size();
         if (itemsOnPage < paginator.perPage()) {
             int emptyLines =
                 (paginator.perPage() - itemsOnPage) *
                 (itemDelegate.height() + itemDelegate.spacing());
-            if (items.isEmpty()) {
+            if (emptyLines == 0) {
                 emptyLines -= itemDelegate.height() - 1; // Edge case adjustment
             }
             b.append("\n".repeat(emptyLines));
