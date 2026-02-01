@@ -33,6 +33,7 @@ import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
@@ -680,62 +681,64 @@ public class Program {
                 break;
             }
 
-            if (msg != null) {
-                if (filter != null) {
-                    msg = filter.apply(currentModel, msg);
-                }
-                if (msg == null) {
-                    continue;
-                }
-                Message internalMsg = normalizeMessage(msg);
-                Message updateMsg = internalMsg;
+            BiFunction<Model, Message, Message> filter =
+                  Optional.ofNullable(this.filter).orElseGet(() -> (__, message) -> message);
 
-                if (internalMsg instanceof SequencedMessage seqMsg) {
-                    if (seqMsg.sequenceId() < lastHandledSequenceId) {
-                        continue;
-                    }
-                    lastHandledSequenceId = seqMsg.sequenceId();
-                    updateMsg = normalizeMessage(seqMsg.message());
-                    internalMsg = updateMsg;
-                }
+            msg = Optional.ofNullable(msg).map(message -> filter.apply(currentModel, message)).orElse(null);
 
-                if (handleSystemMessage(internalMsg)) {
-                    continue;
-                }
-
-                if (internalMsg instanceof QuitMessage) {
-                    return currentModel;
-                } else if (internalMsg instanceof ErrorMessage errorMessage) {
-                    this.lastError = errorMessage.error();
-                    return currentModel;
-                }
-
-                if (internalMsg instanceof MouseMessage mouseMessage) {
-                    if (mouseSelectionAutoScroller != null) {
-                        mouseSelectionAutoScroller.onMouse(mouseMessage);
-                    }
-                    handleMouseClickTracking(mouseMessage);
-                    handleMouseSelectionTracking(mouseMessage);
-                    handleMouseHoverCursor(mouseMessage);
-                    handleMouseTargetCursor(mouseMessage);
-                }
-
-                // process internal messages for the renderer
-                renderer.handleMessage(internalMsg);
-
-                UpdateResult<? extends Model> updateResult =
-                    currentModel.update(updateMsg);
-
-                currentModel = updateResult.model();
-                renderer.notifyModelChanged();
-                commandExecutor.executeIfPresent(
-                    updateResult.command(),
-                    this::send,
-                    this::sendError
-                );
-
-                renderer.write(currentModel.view());
+            if (msg == null) {
+                continue;
             }
+
+            Message internalMsg = normalizeMessage(msg);
+            Message updateMsg = internalMsg;
+
+            if (internalMsg instanceof SequencedMessage seqMsg) {
+                if (seqMsg.sequenceId() < lastHandledSequenceId) {
+                    continue;
+                }
+                lastHandledSequenceId = seqMsg.sequenceId();
+                updateMsg = normalizeMessage(seqMsg.message());
+                internalMsg = updateMsg;
+            }
+
+            if (handleSystemMessage(internalMsg)) {
+                continue;
+            }
+
+            if (internalMsg instanceof QuitMessage) {
+                return currentModel;
+            } 
+
+            if (internalMsg instanceof ErrorMessage errorMessage) {
+                this.lastError = errorMessage.error();
+                return currentModel;
+            }
+
+            if (internalMsg instanceof MouseMessage mouseMessage) {
+                if (mouseSelectionAutoScroller != null) {
+                    mouseSelectionAutoScroller.onMouse(mouseMessage);
+                }
+                handleMouseClickTracking(mouseMessage);
+                handleMouseSelectionTracking(mouseMessage);
+                handleMouseHoverCursor(mouseMessage);
+            }
+
+            // process internal messages for the renderer
+            renderer.handleMessage(internalMsg);
+
+            UpdateResult<? extends Model> updateResult =
+                currentModel.update(updateMsg);
+
+            currentModel = updateResult.model();
+            renderer.notifyModelChanged();
+            commandExecutor.executeIfPresent(
+                updateResult.command(),
+                this::send,
+                this::sendError
+            );
+
+            renderer.write(currentModel.view());
         }
         return currentModel;
     }

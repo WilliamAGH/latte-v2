@@ -476,13 +476,7 @@ public class List
      * @return selected item or {@code null}
      */
     public Item selectedItem() {
-        int i = index();
-        java.util.List<FilteredItem> visibleItems = visibleItems();
-
-        if (i < 0 || visibleItems.isEmpty() || visibleItems.size() <= i) {
-            return null;
-        }
-        return visibleItems.get(i).item();
+        return this.currentPageItems.get(this.cursor).item();
     }
 
     /**
@@ -843,16 +837,18 @@ public class List
             1,
             availHeight / (itemDelegate.height() + itemDelegate.spacing())
         );
-        paginator.setPerPage(perPage);
-        this.cursor = index % perPage;
 
-        if (paginator.page() >= paginator.totalPages() && paginator.totalPages() > 0) {
-            int newPage = paginator.totalPages() - 1;
-            if (paginator.page() != newPage) {
-                paginator.setPage(newPage);
-                updateKeybindings();
-                return true;
-            }
+        int newCursor = index % perPage;
+        int newPage = (index / perPage);
+
+        paginator.setPerPage(perPage);
+
+        this.cursor = newCursor;
+
+        if (paginator.page() != newPage) {
+            paginator.setPage(newPage);
+            updateKeybindings();
+            return true;
         }
 
         updateKeybindings();
@@ -993,10 +989,7 @@ public class List
     }
 
     private void keepCursorInBounds() {
-        int itemsOnPage = visibleItems().size();
-        if (cursor > itemsOnPage - 1) {
-            this.cursor = Math.max(0, itemsOnPage - 1);
-        }
+        this.cursor = Math.min(this.cursor, this.currentPageItems.size() - 1);
     }
 
     /**
@@ -1005,34 +998,26 @@ public class List
      * @return command to refresh items, or {@code null} if no change
      */
     public Command cursorUp() {
-        this.cursor--;
-        if (cursor < 0) {
-            if (paginator.page() == 0) {
-                if (infiniteScrolling) {
-                    paginator.setPage(paginator.totalPages() - 1);
-                    return fetchCurrentPageItems(() ->
-                        cursor =
-                            paginator.itemsOnPage(visibleItems().size()) - 1
-                    );
-                }
+        if ((cursor - 1) > -1) {
+            this.cursor--;
+            return null;
+        }
 
-                this.cursor = 0;
-                return null;
-            }
-
-            if (infiniteScrolling) {
-                paginator.setPage(paginator.totalPages() - 1);
-                return fetchCurrentPageItems(() ->
-                    cursor = paginator.itemsOnPage(visibleItems().size()) - 1
-                );
-            }
-
+        if (paginator.page() != 0) {
             paginator.prevPage();
             return fetchCurrentPageItems(() ->
-                cursor = visibleItems().size() - 1
+                this.cursor = currentPageItems.size() - 1
             );
         }
-        return null;
+
+        if (!infiniteScrolling) {
+           return null;
+        }
+
+        paginator.setPage(paginator.totalPages() - 1);
+        return fetchCurrentPageItems(() ->
+            cursor = currentPageItems.size() - 1
+        );
     }
 
     /**
@@ -1041,10 +1026,8 @@ public class List
      * @return command to refresh items, or {@code null} if no change
      */
     public Command cursorDown() {
-        int itemsOnPage = visibleItems().size();
-        this.cursor++;
-
-        if (cursor < itemsOnPage) {
+        if ((cursor + 1) < currentPageItems.size()) {
+            this.cursor++;
             return null;
         }
 
@@ -1053,17 +1036,10 @@ public class List
             return fetchCurrentPageItems(() -> cursor = 0);
         }
 
-        if (cursor > itemsOnPage) {
-            this.cursor = 0;
-            return null;
-        }
-
-        this.cursor = itemsOnPage - 1;
-
         if (infiniteScrolling) {
+            paginator.setPage(0);
             return fetchCurrentPageItems(() -> cursor = 0);
         }
-
         return null;
     }
 
@@ -1086,8 +1062,7 @@ public class List
                 hideStatusMessage();
 
                 if (totalItems > 0) {
-                    java.util.List<FilteredItem> h = visibleItems();
-                    if (!h.isEmpty()) {
+                    if (!this.currentPageItems.isEmpty()) {
                         filterInput.blur();
                         this.filterState = FilterState.FilterApplied;
                         updateKeybindings();
@@ -1225,7 +1200,7 @@ public class List
 
     private String statusView() {
         StringBuilder status = new StringBuilder();
-        int visibleItems = visibleItems().size();
+        int visibleItems = this.currentPageItems.size();
 
         String itemName = itemNameSingular;
         if (visibleItems != 1) {
@@ -1309,12 +1284,12 @@ public class List
             return styles.noItems().render("No " + itemNamePlural + ".");
         }
 
-        for (int i = 0; i < items.size(); i++) {
+        for (int i = 0; i < this.currentPageItems.size(); i++) {
             itemDelegate.render(
                 b,
                 this,
                 paginator.page() * paginator.perPage() + i,
-                items.get(i)
+                this.currentPageItems.get(i)
             );
             if (i != items.size() - 1) {
                 b.append("\n".repeat(itemDelegate.spacing() + 1));
