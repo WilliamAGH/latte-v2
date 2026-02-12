@@ -148,10 +148,7 @@ public class ListSimpleExample implements Model {
 
         return Command.sequence(listInitCmd, () -> {
             list.setShowStatusBar(false);
-            // no-op
-            return new Message() {
-               
-            };
+            return null;
         });
     }
 

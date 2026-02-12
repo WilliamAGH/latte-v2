@@ -33,7 +33,6 @@ import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
-import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
@@ -681,10 +680,13 @@ public class Program {
                 break;
             }
 
-            BiFunction<Model, Message, Message> filter =
-                  Optional.ofNullable(this.filter).orElseGet(() -> (__, message) -> message);
+            if (msg == null) {
+                continue;
+            }
 
-            msg = Optional.ofNullable(msg).map(message -> filter.apply(currentModel, message)).orElse(null);
+            if (filter != null) {
+                msg = filter.apply(currentModel, msg);
+            }
 
             if (msg == null) {
                 continue;
@@ -698,6 +700,9 @@ public class Program {
                     continue;
                 }
                 lastHandledSequenceId = seqMsg.sequenceId();
+                if (seqMsg.message() == null) {
+                    continue;
+                }
                 updateMsg = normalizeMessage(seqMsg.message());
                 internalMsg = updateMsg;
             }
@@ -722,6 +727,7 @@ public class Program {
                 handleMouseClickTracking(mouseMessage);
                 handleMouseSelectionTracking(mouseMessage);
                 handleMouseHoverCursor(mouseMessage);
+                handleMouseTargetCursor(mouseMessage);
             }
 
             // process internal messages for the renderer
@@ -1357,7 +1363,9 @@ public class Program {
         }
         try {
             openedInput.close();
-        } catch (IOException ignored) {}
+        } catch (IOException e) {
+            logger.log(Level.FINE, "Failed to close opened input stream", e);
+        }
     }
 
     /**

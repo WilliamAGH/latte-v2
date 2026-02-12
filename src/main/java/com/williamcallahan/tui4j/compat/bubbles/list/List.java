@@ -476,6 +476,9 @@ public class List
      * @return selected item or {@code null}
      */
     public Item selectedItem() {
+        if (cursor < 0 || currentPageItems.isEmpty() || cursor >= currentPageItems.size()) {
+            return null;
+        }
         return this.currentPageItems.get(this.cursor).item();
     }
 
@@ -818,8 +821,6 @@ public class List
         int index = index();
         int availHeight = this.height;
 
-        paginator.setTotalPages(totalPages);
-
         if (showTitle || (showFilter && filteringEnabled)) {
             availHeight -= Size.height(titleView());
         }
@@ -838,10 +839,17 @@ public class List
             availHeight / (itemDelegate.height() + itemDelegate.spacing())
         );
 
-        int newCursor = index % perPage;
-        int newPage = (index / perPage);
-
         paginator.setPerPage(perPage);
+        int recalculatedTotalPages = calculateTotalPages(perPage);
+        paginator.setTotalPages(recalculatedTotalPages);
+
+        int newCursor = index % perPage;
+        int newPage = 0;
+        if (recalculatedTotalPages > 0) {
+            newPage = Math.min(index / perPage, recalculatedTotalPages - 1);
+        } else {
+            newCursor = 0;
+        }
 
         this.cursor = newCursor;
 
@@ -853,6 +861,20 @@ public class List
 
         updateKeybindings();
         return false;
+    }
+
+    /**
+     * Calculates page count for the current matched-item set and page size.
+     *
+     * @param perPage items per page
+     * @return computed total pages
+     */
+    private int calculateTotalPages(int perPage) {
+        if (matchedItems <= 0) {
+            return 0;
+        }
+        long pages = (matchedItems + perPage - 1) / perPage;
+        return (int) Math.min(pages, Integer.MAX_VALUE);
     }
 
     @Override
@@ -989,6 +1011,10 @@ public class List
     }
 
     private void keepCursorInBounds() {
+        if (currentPageItems.isEmpty()) {
+            this.cursor = 0;
+            return;
+        }
         this.cursor = Math.min(this.cursor, this.currentPageItems.size() - 1);
     }
 
@@ -1200,17 +1226,14 @@ public class List
 
     private String statusView() {
         StringBuilder status = new StringBuilder();
-        int visibleItems = this.currentPageItems.size();
+        long matchedCount = this.matchedItems;
 
-        String itemName = itemNameSingular;
-        if (visibleItems != 1) {
-            itemName = itemNamePlural;
-        }
+        String itemName = matchedCount == 1 ? itemNameSingular : itemNamePlural;
 
-        String itemsDisplay = "%d %s".formatted(matchedItems, itemName);
+        String itemsDisplay = "%d %s".formatted(matchedCount, itemName);
 
         if (filterState == FilterState.Filtering) {
-            if (visibleItems == 0) {
+            if (matchedCount == 0) {
                 status = new StringBuilder(
                     styles.statusEmpty().render("Nothing matched")
                 );
@@ -1237,7 +1260,7 @@ public class List
             filterState == FilterState.Filtering ||
             filterState == FilterState.FilterApplied
         ) {
-            long numFiltered = totalItems - visibleItems;
+            long numFiltered = totalItems - matchedCount;
             if (numFiltered > 0) {
                 status
                     .append(styles.dividerDot().render())
@@ -1273,11 +1296,9 @@ public class List
     }
 
     private String populatedView() {
-        java.util.List<FilteredItem> items = visibleItems();
-
         StringBuilder b = new StringBuilder();
 
-        if (items.isEmpty()) {
+        if (this.matchedItems == 0) {
             if (filterState == FilterState.Filtering) {
                 return "";
             }
@@ -1301,9 +1322,6 @@ public class List
             int emptyLines =
                 (paginator.perPage() - itemsOnPage) *
                 (itemDelegate.height() + itemDelegate.spacing());
-            if (emptyLines == 0) {
-                emptyLines -= itemDelegate.height() - 1; // Edge case adjustment
-            }
             b.append("\n".repeat(emptyLines));
         }
         return b.toString();
