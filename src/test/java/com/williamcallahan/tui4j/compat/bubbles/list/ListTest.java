@@ -181,8 +181,8 @@ class ListTest {
         applyCommand(list, list.select(1));
         applyCommand(list, list.cursorUp());
 
-        assertThat(list.cursor()).isEqualTo(0);
-        assertThat(list.index()).isEqualTo(0);
+        assertThat(list.cursor()).isZero();
+        assertThat(list.index()).isZero();
     }
 
     private static List createList(Item... items) {
@@ -244,20 +244,6 @@ class ListTest {
         }
         if (msg instanceof SequenceMessage sequenceMessage) {
             for (Command c : sequenceMessage.commands()) {
-                applyCommand(list, c);
-            }
-            return;
-        }
-
-        // Also handle the legacy message forms that may be emitted internally.
-        if (msg instanceof com.williamcallahan.tui4j.compat.bubbletea.BatchMessage batchMsg) {
-            for (Command c : batchMsg.commands()) {
-                applyCommand(list, c);
-            }
-            return;
-        }
-        if (msg instanceof com.williamcallahan.tui4j.compat.bubbletea.SequenceMessage sequenceMsg) {
-            for (Command c : sequenceMsg.commands()) {
                 applyCommand(list, c);
             }
             return;

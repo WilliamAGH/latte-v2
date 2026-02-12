@@ -852,13 +852,8 @@ public class List
         int recalculatedTotalPages = calculateTotalPages(perPage);
         paginator.setTotalPages(recalculatedTotalPages);
 
+        int newPage = Math.min(index / perPage, recalculatedTotalPages - 1);
         int newCursor = index % perPage;
-        int newPage = 0;
-        if (recalculatedTotalPages > 0) {
-            newPage = Math.min(index / perPage, recalculatedTotalPages - 1);
-        } else {
-            newCursor = 0;
-        }
 
         this.cursor = newCursor;
 
