@@ -4,6 +4,9 @@ import com.williamcallahan.tui4j.compat.bubbletea.Command;
 import com.williamcallahan.tui4j.compat.bubbletea.BatchMessage;
 import com.williamcallahan.tui4j.compat.bubbletea.Message;
 import com.williamcallahan.tui4j.compat.bubbletea.SequenceMessage;
+import com.williamcallahan.tui4j.compat.bubbletea.KeyPressMessage;
+import com.williamcallahan.tui4j.compat.bubbletea.input.key.Key;
+import com.williamcallahan.tui4j.compat.bubbletea.input.key.KeyType;
 import com.williamcallahan.tui4j.compat.lipgloss.Renderer;
 import com.williamcallahan.tui4j.compat.lipgloss.color.ColorProfile;
 import com.williamcallahan.tui4j.compat.lipgloss.color.NoColor;
@@ -91,6 +94,53 @@ class ListTest {
         applyCommand(list, list.setFilterState(FilterState.FilterApplied));
         footer = footerLine(list.view());
         assertThat(footer).contains("clear");
+    }
+
+    @Test
+    void testResizeKeepsAbsoluteSelectionIndex() {
+        Item[] items = new Item[100];
+        for (int i = 0; i < items.length; i++) {
+            items[i] = new TestItem("item-" + i);
+        }
+        List list = createList(items);
+
+        applyCommand(list, list.setShowTitle(false));
+        list.setShowFilter(false);
+        list.setShowStatusBar(false);
+        list.setShowPagination(false);
+        applyCommand(list, list.setShowHelp(false));
+        applyCommand(list, list.refresh());
+
+        applyCommand(list, list.select(80));
+        assertThat(list.index()).isEqualTo(80);
+
+        applyCommand(list, list.setSize(10, 5));
+        assertThat(list.index()).isEqualTo(80);
+        assertThat(list.selectedItem().filterValue()).isEqualTo("item-80");
+    }
+
+    @Test
+    void testPopulatedViewDoesNotShowEmptyStateWhenMatchesExist() {
+        ListDataSource dataSource = (page, perPage, filterValue) ->
+            new FetchedItems(java.util.List.of(), 5, 5, 5);
+        List list = new List(dataSource, new TestDelegate(), 10, 5);
+        applyCommand(list, list.init());
+
+        assertThat(populatedView(list)).doesNotContain("No items.");
+    }
+
+    @Test
+    void testAcceptFilteringUsesMatchedItemsNotCurrentPageSlice() {
+        ListDataSource dataSource = (page, perPage, filterValue) ->
+            new FetchedItems(java.util.List.of(), 3, 5, 1);
+        List list = new List(dataSource, new TestDelegate(), 10, 5);
+        applyCommand(list, list.init());
+        applyCommand(list, list.setFilterText("x"));
+        applyCommand(list, list.setFilterState(FilterState.Filtering));
+
+        applyMessage(list, new KeyPressMessage(new Key(KeyType.keyCR)));
+
+        assertThat(list.filterState()).isEqualTo(FilterState.FilterApplied);
     }
 
     private static List createList(Item... items) {
@@ -184,6 +234,16 @@ class ListTest {
             return (String) method.invoke(list);
         } catch (ReflectiveOperationException e) {
             throw new IllegalStateException("Failed to read status view", e);
+        }
+    }
+
+    private static String populatedView(List list) {
+        try {
+            Method method = List.class.getDeclaredMethod("populatedView");
+            method.setAccessible(true);
+            return (String) method.invoke(list);
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalStateException("Failed to read populated view", e);
         }
     }
 
