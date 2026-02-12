@@ -143,6 +143,19 @@ class ListTest {
         assertThat(list.filterState()).isEqualTo(FilterState.FilterApplied);
     }
 
+    @Test
+    void testEmptyResultsStayOnSinglePageWithPaginationDisabled() {
+        ListDataSource dataSource = (page, perPage, filterValue) ->
+            new FetchedItems(java.util.List.of(), 0, 0, 0);
+        List list = new List(dataSource, new TestDelegate(), 10, 5);
+        applyCommand(list, list.init());
+
+        assertThat(list.nextPage()).isNull();
+        assertThat(list.prevPage()).isNull();
+        assertThat(keyMap(list).nextPage().isEnabled()).isFalse();
+        assertThat(keyMap(list).prevPage().isEnabled()).isFalse();
+    }
+
     private static List createList(Item... items) {
         List list = new List(items, new TestDelegate(), 10, 10);
         applyCommand(list, list.init());
@@ -244,6 +257,16 @@ class ListTest {
             return (String) method.invoke(list);
         } catch (ReflectiveOperationException e) {
             throw new IllegalStateException("Failed to read populated view", e);
+        }
+    }
+
+    private static KeyMap keyMap(List list) {
+        try {
+            var field = List.class.getDeclaredField("keys");
+            field.setAccessible(true);
+            return (KeyMap) field.get(list);
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalStateException("Failed to read key map", e);
         }
     }
 

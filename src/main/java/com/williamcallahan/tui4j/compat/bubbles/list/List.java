@@ -37,6 +37,8 @@ import java.util.stream.Stream;
 /**
  * Port of Bubbles list.
  * Upstream: bubbles/list/list.go
+ * <p>
+ * Policy references for compat ports: AGENTS.md [JD1a], [JD1b], [FS1g].
  */
 public class List
     implements Model, com.williamcallahan.tui4j.compat.bubbles.help.KeyMap
@@ -438,7 +440,9 @@ public class List
     /**
      * Selects the item at the given index.
      *
-     * @param index absolute item index
+     * The index is zero-based across the full visible sequence, not page-local.
+     *
+     * @param index zero-based absolute item index
      * @return command to refresh items
      */
     public Command select(int index) {
@@ -502,7 +506,12 @@ public class List
     /**
      * Returns the absolute index of the cursor within the full list.
      *
-     * @return absolute cursor index
+     * This index is zero-based and mirrors Bubble's {@code Model.Index()} math
+     * ({@code page * perPage + cursor}) from {@code bubbles/list/list.go}.
+     * <p>
+     * Policy references for compat ports: AGENTS.md [JD1a], [JD1b], [FS1g].
+     *
+     * @return zero-based absolute cursor index
      */
     public int index() {
         return paginator.page() * paginator.perPage() + cursor;
@@ -511,7 +520,9 @@ public class List
     /**
      * Returns the cursor position within the current page.
      *
-     * @return cursor index within the page
+     * Cursor indexes are zero-based within the active page.
+     *
+     * @return zero-based cursor index within the page
      */
     public int cursor() {
         return cursor;
@@ -785,7 +796,7 @@ public class List
             keys.goToEnd().setEnabled(hasItems);
             keys.filter().setEnabled(filteringEnabled && hasItems);
 
-            boolean hasPages = paginator.totalPages() > 0;
+            boolean hasPages = paginator.totalPages() > 1;
             keys.nextPage().setEnabled(hasPages);
             keys.prevPage().setEnabled(hasPages);
             keys
@@ -863,13 +874,17 @@ public class List
 
     /**
      * Calculates page count for the current matched-item set and page size.
+     * <p>
+     * Returns at least {@code 1} to preserve paginator invariants used by
+     * {@code onFirstPage/onLastPage} checks. This matches Bubble's paginator
+     * default/count semantics from {@code bubbles/paginator/paginator.go}.
      *
      * @param perPage items per page
      * @return computed total pages
      */
     private int calculateTotalPages(int perPage) {
         if (matchedItems <= 0) {
-            return 0;
+            return 1;
         }
         long pages = (matchedItems + perPage - 1) / perPage;
         return (int) Math.min(pages, Integer.MAX_VALUE);
