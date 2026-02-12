@@ -6,7 +6,6 @@ import static com.williamcallahan.tui4j.compat.bubbletea.Command.batch;
 import com.williamcallahan.tui4j.ansi.Truncate;
 import com.williamcallahan.tui4j.compat.bubbles.help.Help;
 import com.williamcallahan.tui4j.compat.bubbles.key.Binding;
-import com.williamcallahan.tui4j.compat.bubbles.list.KeyMap;
 import com.williamcallahan.tui4j.compat.bubbles.paginator.Paginator;
 import com.williamcallahan.tui4j.compat.bubbles.paginator.Type;
 import com.williamcallahan.tui4j.compat.bubbles.spinner.Spinner;
@@ -82,7 +81,6 @@ public class List
     private ListDataSource dataSource;
     private boolean fetchingItems;
     private long totalItems = 0;
-    private int totalPages;
     private long matchedItems = 0;
     private java.util.List<FilteredItem> currentPageItems;
     private ItemDelegate itemDelegate;
@@ -445,7 +443,7 @@ public class List
      */
     public Command select(int index) {
         this.paginator.setPage(index / paginator.perPage());
-        this.cursor = index & paginator.perPage();
+        this.cursor = index % paginator.perPage();
         return fetchCurrentPageItems();
     }
 
@@ -780,7 +778,7 @@ public class List
             keys.showFullHelp().setEnabled(false);
             keys.closeFullHelp().setEnabled(false);
         } else {
-            boolean hasItems = !(totalItems == 0);
+            boolean hasItems = totalItems != 0;
             keys.cursorUp().setEnabled(hasItems);
             keys.cursorDown().setEnabled(hasItems);
             keys.goToStart().setEnabled(hasItems);
@@ -886,20 +884,18 @@ public class List
                 return UpdateResult.from(this, QuitMessage::new);
             }
         } else if (
-            msg instanceof FetchedCurrentPageItems fetchedCurrentPageItems
+            msg instanceof FetchedCurrentPageItems(FetchedItems fetchedItems, Runnable[] postFetchCallbacks)
         ) {
             stopSpinner();
             this.fetchingItems = false;
 
-            FetchedItems fetchedItems = fetchedCurrentPageItems.fetchedItems();
             this.currentPageItems = fetchedItems.items();
             this.matchedItems = fetchedItems.matchedItems();
             this.totalItems = fetchedItems.totalItems();
-            this.totalPages = fetchedItems.totalPages();
 
             updateKeybindings();
 
-            for (Runnable runnable : fetchedCurrentPageItems.postFetch()) {
+            for (Runnable runnable : postFetchCallbacks) {
                 runnable.run();
             }
 
@@ -1015,7 +1011,7 @@ public class List
             this.cursor = 0;
             return;
         }
-        this.cursor = Math.min(this.cursor, this.currentPageItems.size() - 1);
+        this.cursor = Math.clamp(this.cursor, 0, this.currentPageItems.size() - 1);
     }
 
     /**
@@ -1088,7 +1084,7 @@ public class List
                 hideStatusMessage();
 
                 if (totalItems > 0) {
-                    if (!this.currentPageItems.isEmpty()) {
+                    if (this.matchedItems > 0) {
                         filterInput.blur();
                         this.filterState = FilterState.FilterApplied;
                         updateKeybindings();
@@ -1148,10 +1144,10 @@ public class List
             availHeight -= Size.height(pagination);
         }
 
-        String help = null;
+        String helpSection = null;
         if (showHelp) {
-            help = helpView();
-            availHeight -= Size.height(help);
+            helpSection = helpView();
+            availHeight -= Size.height(helpSection);
         }
 
         String content = Style.newStyle()
@@ -1164,7 +1160,7 @@ public class List
         }
 
         if (showHelp) {
-            sections.add(help);
+            sections.add(helpSection);
         }
 
         return VerticalJoinDecorator.joinVertical(
@@ -1354,10 +1350,8 @@ public class List
         );
 
         boolean filtering = filterState == FilterState.Filtering;
-        if (!filtering) {
-            if (itemDelegate instanceof KeyMap delegateKeyMap) {
-                kb.addAll(Arrays.asList(delegateKeyMap.shortHelp()));
-            }
+        if (!filtering && itemDelegate instanceof KeyMap delegateKeyMap) {
+            kb.addAll(Arrays.asList(delegateKeyMap.shortHelp()));
         }
 
         kb.addAll(
@@ -1393,10 +1387,8 @@ public class List
         );
 
         boolean filtering = filterState == FilterState.Filtering;
-        if (!filtering) {
-            if (itemDelegate instanceof KeyMap delegateKeyMap) {
-                kb.addAll(Arrays.asList(delegateKeyMap.fullHelp()));
-            }
+        if (!filtering && itemDelegate instanceof KeyMap delegateKeyMap) {
+            kb.addAll(Arrays.asList(delegateKeyMap.fullHelp()));
         }
 
         java.util.List<Binding> listLevelBindings = new LinkedList<>(
