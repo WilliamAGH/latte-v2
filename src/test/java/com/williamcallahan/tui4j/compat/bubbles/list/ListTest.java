@@ -156,6 +156,35 @@ class ListTest {
         assertThat(keyMap(list).prevPage().isEnabled()).isFalse();
     }
 
+    @Test
+    void testCursorUpFromLaterPageKeepsCursorNonNegativeWhenFetchedPageIsEmpty() {
+        ListDataSource dataSource = (page, perPage, filterValue) -> {
+            if (page == 1) {
+                return new FetchedItems(
+                    java.util.List.of(new FilteredItem(new TestItem("item-1"))),
+                    2,
+                    2,
+                    2
+                );
+            }
+            return new FetchedItems(java.util.List.of(), 2, 2, 2);
+        };
+        List list = new List(dataSource, new TestDelegate(), 10, 5);
+        applyCommand(list, list.init());
+        applyCommand(list, list.setShowTitle(false));
+        list.setShowFilter(false);
+        list.setShowStatusBar(false);
+        list.setShowPagination(false);
+        applyCommand(list, list.setShowHelp(false));
+        applyCommand(list, list.setSize(10, 1));
+
+        applyCommand(list, list.select(1));
+        applyCommand(list, list.cursorUp());
+
+        assertThat(list.cursor()).isEqualTo(0);
+        assertThat(list.index()).isEqualTo(0);
+    }
+
     private static List createList(Item... items) {
         List list = new List(items, new TestDelegate(), 10, 10);
         applyCommand(list, list.init());
