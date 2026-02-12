@@ -1043,7 +1043,7 @@ public class List
         if (paginator.page() != 0) {
             paginator.prevPage();
             return fetchCurrentPageItems(() ->
-                this.cursor = currentPageItems.size() - 1
+                this.cursor = Math.max(0, currentPageItems.size() - 1)
             );
         }
 
@@ -1053,7 +1053,7 @@ public class List
 
         paginator.setPage(paginator.totalPages() - 1);
         return fetchCurrentPageItems(() ->
-            cursor = currentPageItems.size() - 1
+            cursor = Math.max(0, currentPageItems.size() - 1)
         );
     }
 
