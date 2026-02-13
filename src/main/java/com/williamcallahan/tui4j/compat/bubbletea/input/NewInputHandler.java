@@ -15,6 +15,7 @@ import org.jline.utils.NonBlockingReader;
 import com.williamcallahan.tui4j.compat.bubbletea.Message;
 import com.williamcallahan.tui4j.compat.bubbletea.BlurMessage;
 import com.williamcallahan.tui4j.compat.bubbletea.FocusMessage;
+import com.williamcallahan.tui4j.compat.bubbletea.ProgramException;
 import com.williamcallahan.tui4j.compat.bubbletea.KeyPressMessage;
 import com.williamcallahan.tui4j.compat.bubbletea.PasteMessage;
 import com.williamcallahan.tui4j.compat.bubbletea.UnknownSequenceMessage;
@@ -109,7 +110,7 @@ public class NewInputHandler implements InputHandler {
             }
         } catch (IOException e) {
             if (!Thread.currentThread().isInterrupted()) {
-                throw new RuntimeException("Unable to initialize keyboard input", e);
+                throw new ProgramException("Unable to initialize keyboard input", e);
             }
         }
     }
@@ -119,91 +120,119 @@ public class NewInputHandler implements InputHandler {
             return 0;
 
         if (inBracketedPaste) {
-            // Check if we have the end tag at the beginning
-            if (InputChars.startsWith(input, BP_END)) {
-                inBracketedPaste = false;
-                String content = pasteBuffer.toString();
-                pasteBuffer.setLength(0);
-                messageConsumer.accept(new PasteMessage(content));
-                return BP_END.length();
-            }
-
-            // Check if end tag is in the middle
-            int endIdx = InputChars.indexOf(input, BP_END);
-            if (endIdx != -1) {
-                pasteBuffer.append(input, 0, endIdx);
-                return endIdx; // Next iteration will hit the startsWith check
-            }
-
-            // If not found, buffer everything safely
-            int safeLen = input.length;
-            // Check for partial match at end to avoid splitting the tag
-            for (int len = 1; len < BP_END.length(); len++) {
-                if (InputChars.endsWith(input, BP_END.substring(0, len))) {
-                    safeLen = input.length - len;
-                    break;
-                }
-            }
-
-            if (safeLen == 0 && input.length > 0) {
-                // Only partial tag, wait for more data
-                return 0;
-            }
-
-            pasteBuffer.append(input, 0, safeLen);
-            return safeLen;
+            return processBracketedPaste(input);
         }
 
-        char firstChar = input[0];
-
-        if (firstChar == '\u001b') { // ESC character
-            if (input.length == 1) {
-
-                // ✅ Peek to check if more data is available
-                NonBlockingReader reader = terminal.reader();
-                if (reader.peek(PEEK_TIMEOUT_MS) < 0) {
-                    // No data available, treat as standalone ESC
-                    messageConsumer.accept(new KeyPressMessage(new Key(KeyAliases.getKeyType(KeyAliases.KeyAlias.KeyEscape))));
-                    return 1;
-                }
-
-                // Buffer might be incomplete, wait for more data
-                return 0;
-            }
-
-            // Detect bracketed paste start
-            if (InputChars.startsWith(input, BP_START)) {
-                inBracketedPaste = true;
-                pasteBuffer.setLength(0);
-                return BP_START.length();
-            }
-
-            // Check if it's a known control sequence
-            if (input[1] == '[' || input[1] == 'O') {
-                return processControlSequence(input);
-            }
-
-            // Try to match the full input as an extended sequence first
-            Key key = ExtendedSequences.getKey(new String(input));
-            if (key != null) {
-                messageConsumer.accept(new KeyPressMessage(key));
-                return input.length;
-            }
-
-            // ESC followed by a printable character is Alt+char, regardless of buffer length
-            // This handles cases where additional input is buffered after the Alt sequence
-            char altChar = input[1];
-            if (altChar >= 0x20 && altChar < 0x7F) {
-                messageConsumer.accept(new KeyPressMessage(new Key(KeyType.KeyRunes, new char[] { altChar }, true)));
-                return 2;
-            }
-
-            // Unknown sequence starting with ESC - treat ESC as standalone
-            messageConsumer.accept(new KeyPressMessage(new Key(KeyAliases.getKeyType(KeyAliases.KeyAlias.KeyEscape))));
-            return 1;
+        if (input[0] == '\u001b') {
+            return processEscapeSequence(input);
         }
 
-        // Regular character press
+        return processRegularCharacter(input[0]);
+    }
+
+    /**
+     * Processes input while in bracketed paste mode, buffering content until the end tag.
+     *
+     * @param input remaining input characters
+     * @return number of characters consumed
+     */
+    private int processBracketedPaste(char[] input) {
+        // Check if we have the end tag at the beginning
+        if (InputChars.startsWith(input, BP_END)) {
+            inBracketedPaste = false;
+            String content = pasteBuffer.toString();
+            pasteBuffer.setLength(0);
+            messageConsumer.accept(new PasteMessage(content));
+            return BP_END.length();
+        }
+
+        // Check if end tag is in the middle
+        int endIdx = InputChars.indexOf(input, BP_END);
+        if (endIdx != -1) {
+            pasteBuffer.append(input, 0, endIdx);
+            return endIdx; // Next iteration will hit the startsWith check
+        }
+
+        // If not found, buffer everything safely
+        int safeLen = input.length;
+        // Check for partial match at end to avoid splitting the tag
+        for (int len = 1; len < BP_END.length(); len++) {
+            if (InputChars.endsWith(input, BP_END.substring(0, len))) {
+                safeLen = input.length - len;
+                break;
+            }
+        }
+
+        if (safeLen == 0 && input.length > 0) {
+            // Only partial tag, wait for more data
+            return 0;
+        }
+
+        pasteBuffer.append(input, 0, safeLen);
+        return safeLen;
+    }
+
+    /**
+     * Processes input beginning with ESC, handling escape sequences, Alt+key combos,
+     * and standalone ESC.
+     *
+     * @param input remaining input characters starting with ESC
+     * @return number of characters consumed
+     * @throws IOException if peeking for additional input fails
+     */
+    private int processEscapeSequence(char[] input) throws IOException {
+        if (input.length == 1) {
+            // Peek to check if more data is available
+            NonBlockingReader reader = terminal.reader();
+            if (reader.peek(PEEK_TIMEOUT_MS) < 0) {
+                // No data available, treat as standalone ESC
+                messageConsumer.accept(new KeyPressMessage(new Key(KeyAliases.getKeyType(KeyAliases.KeyAlias.KeyEscape))));
+                return 1;
+            }
+
+            // Buffer might be incomplete, wait for more data
+            return 0;
+        }
+
+        // Detect bracketed paste start
+        if (InputChars.startsWith(input, BP_START)) {
+            inBracketedPaste = true;
+            pasteBuffer.setLength(0);
+            return BP_START.length();
+        }
+
+        // Check if it's a known control sequence
+        if (input[1] == '[' || input[1] == 'O') {
+            return processControlSequence(input);
+        }
+
+        // Try to match the full input as an extended sequence first
+        Key key = ExtendedSequences.getKey(new String(input));
+        if (key != null) {
+            messageConsumer.accept(new KeyPressMessage(key));
+            return input.length;
+        }
+
+        // ESC followed by a printable character is Alt+char, regardless of buffer length
+        // This handles cases where additional input is buffered after the Alt sequence
+        char altChar = input[1];
+        if (altChar >= 0x20 && altChar < 0x7F) {
+            messageConsumer.accept(new KeyPressMessage(new Key(KeyType.KeyRunes, new char[] { altChar }, true)));
+            return 2;
+        }
+
+        // Unknown sequence starting with ESC - treat ESC as standalone
+        messageConsumer.accept(new KeyPressMessage(new Key(KeyAliases.getKeyType(KeyAliases.KeyAlias.KeyEscape))));
+        return 1;
+    }
+
+    /**
+     * Processes a single regular (non-escape) character press.
+     *
+     * @param firstChar the character to process
+     * @return number of characters consumed (always 1)
+     */
+    private int processRegularCharacter(char firstChar) {
         Key key = ExtendedSequences.getKey(String.valueOf(firstChar));
         if (key != null) {
             messageConsumer.accept(new KeyPressMessage(key));
@@ -214,7 +243,7 @@ public class NewInputHandler implements InputHandler {
         return 1;
     }
 
-    private int processControlSequence(char[] input) throws IOException {
+    private int processControlSequence(char[] input) {
         if (input.length < 2)
             return 0;
         char firstChar = input[1];
