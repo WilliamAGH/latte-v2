@@ -680,62 +680,71 @@ public class Program {
                 break;
             }
 
-            if (msg != null) {
-                if (filter != null) {
-                    msg = filter.apply(currentModel, msg);
-                }
-                if (msg == null) {
-                    continue;
-                }
-                Message internalMsg = normalizeMessage(msg);
-                Message updateMsg = internalMsg;
-
-                if (internalMsg instanceof SequencedMessage seqMsg) {
-                    if (seqMsg.sequenceId() < lastHandledSequenceId) {
-                        continue;
-                    }
-                    lastHandledSequenceId = seqMsg.sequenceId();
-                    updateMsg = normalizeMessage(seqMsg.message());
-                    internalMsg = updateMsg;
-                }
-
-                if (handleSystemMessage(internalMsg)) {
-                    continue;
-                }
-
-                if (internalMsg instanceof QuitMessage) {
-                    return currentModel;
-                } else if (internalMsg instanceof ErrorMessage errorMessage) {
-                    this.lastError = errorMessage.error();
-                    return currentModel;
-                }
-
-                if (internalMsg instanceof MouseMessage mouseMessage) {
-                    if (mouseSelectionAutoScroller != null) {
-                        mouseSelectionAutoScroller.onMouse(mouseMessage);
-                    }
-                    handleMouseClickTracking(mouseMessage);
-                    handleMouseSelectionTracking(mouseMessage);
-                    handleMouseHoverCursor(mouseMessage);
-                    handleMouseTargetCursor(mouseMessage);
-                }
-
-                // process internal messages for the renderer
-                renderer.handleMessage(internalMsg);
-
-                UpdateResult<? extends Model> updateResult =
-                    currentModel.update(updateMsg);
-
-                currentModel = updateResult.model();
-                renderer.notifyModelChanged();
-                commandExecutor.executeIfPresent(
-                    updateResult.command(),
-                    this::send,
-                    this::sendError
-                );
-
-                renderer.write(currentModel.view());
+            if (msg == null) {
+                continue;
             }
+
+            if (filter != null) {
+                msg = filter.apply(currentModel, msg);
+            }
+
+            if (msg == null) {
+                continue;
+            }
+
+            Message internalMsg = normalizeMessage(msg);
+            Message updateMsg = internalMsg;
+
+            if (internalMsg instanceof SequencedMessage seqMsg) {
+                if (seqMsg.sequenceId() < lastHandledSequenceId) {
+                    continue;
+                }
+                lastHandledSequenceId = seqMsg.sequenceId();
+                if (seqMsg.message() == null) {
+                    continue;
+                }
+                updateMsg = normalizeMessage(seqMsg.message());
+                internalMsg = updateMsg;
+            }
+
+            if (handleSystemMessage(internalMsg)) {
+                continue;
+            }
+
+            if (internalMsg instanceof QuitMessage) {
+                return currentModel;
+            } 
+
+            if (internalMsg instanceof ErrorMessage errorMessage) {
+                this.lastError = errorMessage.error();
+                return currentModel;
+            }
+
+            if (internalMsg instanceof MouseMessage mouseMessage) {
+                if (mouseSelectionAutoScroller != null) {
+                    mouseSelectionAutoScroller.onMouse(mouseMessage);
+                }
+                handleMouseClickTracking(mouseMessage);
+                handleMouseSelectionTracking(mouseMessage);
+                handleMouseHoverCursor(mouseMessage);
+                handleMouseTargetCursor(mouseMessage);
+            }
+
+            // process internal messages for the renderer
+            renderer.handleMessage(internalMsg);
+
+            UpdateResult<? extends Model> updateResult =
+                currentModel.update(updateMsg);
+
+            currentModel = updateResult.model();
+            renderer.notifyModelChanged();
+            commandExecutor.executeIfPresent(
+                updateResult.command(),
+                this::send,
+                this::sendError
+            );
+
+            renderer.write(currentModel.view());
         }
         return currentModel;
     }
@@ -1354,7 +1363,9 @@ public class Program {
         }
         try {
             openedInput.close();
-        } catch (IOException ignored) {}
+        } catch (IOException e) {
+            logger.log(Level.FINE, "Failed to close opened input stream", e);
+        }
     }
 
     /**

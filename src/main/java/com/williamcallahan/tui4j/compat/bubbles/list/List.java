@@ -6,7 +6,6 @@ import static com.williamcallahan.tui4j.compat.bubbletea.Command.batch;
 import com.williamcallahan.tui4j.ansi.Truncate;
 import com.williamcallahan.tui4j.compat.bubbles.help.Help;
 import com.williamcallahan.tui4j.compat.bubbles.key.Binding;
-import com.williamcallahan.tui4j.compat.bubbles.list.KeyMap;
 import com.williamcallahan.tui4j.compat.bubbles.paginator.Paginator;
 import com.williamcallahan.tui4j.compat.bubbles.paginator.Type;
 import com.williamcallahan.tui4j.compat.bubbles.spinner.Spinner;
@@ -38,6 +37,8 @@ import java.util.stream.Stream;
 /**
  * Port of Bubbles list.
  * Upstream: bubbles/list/list.go
+ * <p>
+ * Policy references for compat ports: AGENTS.md [JD1a], [JD1b], [FS1g].
  */
 public class List
     implements Model, com.williamcallahan.tui4j.compat.bubbles.help.KeyMap
@@ -82,7 +83,6 @@ public class List
     private ListDataSource dataSource;
     private boolean fetchingItems;
     private long totalItems = 0;
-    private int totalPages;
     private long matchedItems = 0;
     private java.util.List<FilteredItem> currentPageItems;
     private ItemDelegate itemDelegate;
@@ -440,12 +440,14 @@ public class List
     /**
      * Selects the item at the given index.
      *
-     * @param index absolute item index
+     * The index is zero-based across the full visible sequence, not page-local.
+     *
+     * @param index zero-based absolute item index
      * @return command to refresh items
      */
     public Command select(int index) {
         this.paginator.setPage(index / paginator.perPage());
-        this.cursor = index & paginator.perPage();
+        this.cursor = index % paginator.perPage();
         return fetchCurrentPageItems();
     }
 
@@ -476,13 +478,10 @@ public class List
      * @return selected item or {@code null}
      */
     public Item selectedItem() {
-        int i = index();
-        java.util.List<FilteredItem> visibleItems = visibleItems();
-
-        if (i < 0 || visibleItems.isEmpty() || visibleItems.size() <= i) {
+        if (cursor < 0 || currentPageItems.isEmpty() || cursor >= currentPageItems.size()) {
             return null;
         }
-        return visibleItems.get(i).item();
+        return this.currentPageItems.get(this.cursor).item();
     }
 
     /**
@@ -507,7 +506,12 @@ public class List
     /**
      * Returns the absolute index of the cursor within the full list.
      *
-     * @return absolute cursor index
+     * This index is zero-based and mirrors Bubble's {@code Model.Index()} math
+     * ({@code page * perPage + cursor}) from {@code bubbles/list/list.go}.
+     * <p>
+     * Policy references for compat ports: AGENTS.md [JD1a], [JD1b], [FS1g].
+     *
+     * @return zero-based absolute cursor index
      */
     public int index() {
         return paginator.page() * paginator.perPage() + cursor;
@@ -516,7 +520,9 @@ public class List
     /**
      * Returns the cursor position within the current page.
      *
-     * @return cursor index within the page
+     * Cursor indexes are zero-based within the active page.
+     *
+     * @return zero-based cursor index within the page
      */
     public int cursor() {
         return cursor;
@@ -783,14 +789,14 @@ public class List
             keys.showFullHelp().setEnabled(false);
             keys.closeFullHelp().setEnabled(false);
         } else {
-            boolean hasItems = !(totalItems == 0);
+            boolean hasItems = totalItems != 0;
             keys.cursorUp().setEnabled(hasItems);
             keys.cursorDown().setEnabled(hasItems);
             keys.goToStart().setEnabled(hasItems);
             keys.goToEnd().setEnabled(hasItems);
             keys.filter().setEnabled(filteringEnabled && hasItems);
 
-            boolean hasPages = paginator.totalPages() > 0;
+            boolean hasPages = paginator.totalPages() > 1;
             keys.nextPage().setEnabled(hasPages);
             keys.prevPage().setEnabled(hasPages);
             keys
@@ -824,8 +830,6 @@ public class List
         int index = index();
         int availHeight = this.height;
 
-        paginator.setTotalPages(totalPages);
-
         if (showTitle || (showFilter && filteringEnabled)) {
             availHeight -= Size.height(titleView());
         }
@@ -843,20 +847,42 @@ public class List
             1,
             availHeight / (itemDelegate.height() + itemDelegate.spacing())
         );
-        paginator.setPerPage(perPage);
-        this.cursor = index % perPage;
 
-        if (paginator.page() >= paginator.totalPages() && paginator.totalPages() > 0) {
-            int newPage = paginator.totalPages() - 1;
-            if (paginator.page() != newPage) {
-                paginator.setPage(newPage);
-                updateKeybindings();
-                return true;
-            }
+        paginator.setPerPage(perPage);
+        int recalculatedTotalPages = calculateTotalPages(perPage);
+        paginator.setTotalPages(recalculatedTotalPages);
+
+        int newPage = Math.min(index / perPage, recalculatedTotalPages - 1);
+        int newCursor = index % perPage;
+
+        this.cursor = newCursor;
+
+        if (paginator.page() != newPage) {
+            paginator.setPage(newPage);
+            updateKeybindings();
+            return true;
         }
 
         updateKeybindings();
         return false;
+    }
+
+    /**
+     * Calculates page count for the current matched-item set and page size.
+     * <p>
+     * Returns at least {@code 1} to preserve paginator invariants used by
+     * {@code onFirstPage/onLastPage} checks. This matches Bubble's paginator
+     * default/count semantics from {@code bubbles/paginator/paginator.go}.
+     *
+     * @param perPage items per page
+     * @return computed total pages
+     */
+    private int calculateTotalPages(int perPage) {
+        if (matchedItems <= 0) {
+            return 1;
+        }
+        long pages = (matchedItems + perPage - 1) / perPage;
+        return (int) Math.min(pages, Integer.MAX_VALUE);
     }
 
     @Override
@@ -868,20 +894,18 @@ public class List
                 return UpdateResult.from(this, QuitMessage::new);
             }
         } else if (
-            msg instanceof FetchedCurrentPageItems fetchedCurrentPageItems
+            msg instanceof FetchedCurrentPageItems(FetchedItems fetchedItems, Runnable[] postFetchCallbacks)
         ) {
             stopSpinner();
             this.fetchingItems = false;
 
-            FetchedItems fetchedItems = fetchedCurrentPageItems.fetchedItems();
             this.currentPageItems = fetchedItems.items();
             this.matchedItems = fetchedItems.matchedItems();
             this.totalItems = fetchedItems.totalItems();
-            this.totalPages = fetchedItems.totalPages();
 
             updateKeybindings();
 
-            for (Runnable runnable : fetchedCurrentPageItems.postFetch()) {
+            for (Runnable runnable : postFetchCallbacks) {
                 runnable.run();
             }
 
@@ -993,10 +1017,11 @@ public class List
     }
 
     private void keepCursorInBounds() {
-        int itemsOnPage = visibleItems().size();
-        if (cursor > itemsOnPage - 1) {
-            this.cursor = Math.max(0, itemsOnPage - 1);
+        if (currentPageItems.isEmpty()) {
+            this.cursor = 0;
+            return;
         }
+        this.cursor = Math.clamp(this.cursor, 0, this.currentPageItems.size() - 1);
     }
 
     /**
@@ -1005,34 +1030,26 @@ public class List
      * @return command to refresh items, or {@code null} if no change
      */
     public Command cursorUp() {
-        this.cursor--;
-        if (cursor < 0) {
-            if (paginator.page() == 0) {
-                if (infiniteScrolling) {
-                    paginator.setPage(paginator.totalPages() - 1);
-                    return fetchCurrentPageItems(() ->
-                        cursor =
-                            paginator.itemsOnPage(visibleItems().size()) - 1
-                    );
-                }
+        if ((cursor - 1) > -1) {
+            this.cursor--;
+            return null;
+        }
 
-                this.cursor = 0;
-                return null;
-            }
-
-            if (infiniteScrolling) {
-                paginator.setPage(paginator.totalPages() - 1);
-                return fetchCurrentPageItems(() ->
-                    cursor = paginator.itemsOnPage(visibleItems().size()) - 1
-                );
-            }
-
+        if (paginator.page() != 0) {
             paginator.prevPage();
             return fetchCurrentPageItems(() ->
-                cursor = visibleItems().size() - 1
+                this.cursor = Math.max(0, currentPageItems.size() - 1)
             );
         }
-        return null;
+
+        if (!infiniteScrolling) {
+           return null;
+        }
+
+        paginator.setPage(paginator.totalPages() - 1);
+        return fetchCurrentPageItems(() ->
+            cursor = Math.max(0, currentPageItems.size() - 1)
+        );
     }
 
     /**
@@ -1041,10 +1058,8 @@ public class List
      * @return command to refresh items, or {@code null} if no change
      */
     public Command cursorDown() {
-        int itemsOnPage = visibleItems().size();
-        this.cursor++;
-
-        if (cursor < itemsOnPage) {
+        if ((cursor + 1) < currentPageItems.size()) {
+            this.cursor++;
             return null;
         }
 
@@ -1053,17 +1068,10 @@ public class List
             return fetchCurrentPageItems(() -> cursor = 0);
         }
 
-        if (cursor > itemsOnPage) {
-            this.cursor = 0;
-            return null;
-        }
-
-        this.cursor = itemsOnPage - 1;
-
         if (infiniteScrolling) {
+            paginator.setPage(0);
             return fetchCurrentPageItems(() -> cursor = 0);
         }
-
         return null;
     }
 
@@ -1086,8 +1094,7 @@ public class List
                 hideStatusMessage();
 
                 if (totalItems > 0) {
-                    java.util.List<FilteredItem> h = visibleItems();
-                    if (!h.isEmpty()) {
+                    if (this.matchedItems > 0) {
                         filterInput.blur();
                         this.filterState = FilterState.FilterApplied;
                         updateKeybindings();
@@ -1147,10 +1154,10 @@ public class List
             availHeight -= Size.height(pagination);
         }
 
-        String help = null;
+        String helpSection = null;
         if (showHelp) {
-            help = helpView();
-            availHeight -= Size.height(help);
+            helpSection = helpView();
+            availHeight -= Size.height(helpSection);
         }
 
         String content = Style.newStyle()
@@ -1163,7 +1170,7 @@ public class List
         }
 
         if (showHelp) {
-            sections.add(help);
+            sections.add(helpSection);
         }
 
         return VerticalJoinDecorator.joinVertical(
@@ -1225,17 +1232,14 @@ public class List
 
     private String statusView() {
         StringBuilder status = new StringBuilder();
-        int visibleItems = visibleItems().size();
+        long matchedCount = this.matchedItems;
 
-        String itemName = itemNameSingular;
-        if (visibleItems != 1) {
-            itemName = itemNamePlural;
-        }
+        String itemName = matchedCount == 1 ? itemNameSingular : itemNamePlural;
 
-        String itemsDisplay = "%d %s".formatted(matchedItems, itemName);
+        String itemsDisplay = "%d %s".formatted(matchedCount, itemName);
 
         if (filterState == FilterState.Filtering) {
-            if (visibleItems == 0) {
+            if (matchedCount == 0) {
                 status = new StringBuilder(
                     styles.statusEmpty().render("Nothing matched")
                 );
@@ -1262,7 +1266,7 @@ public class List
             filterState == FilterState.Filtering ||
             filterState == FilterState.FilterApplied
         ) {
-            long numFiltered = totalItems - visibleItems;
+            long numFiltered = totalItems - matchedCount;
             if (numFiltered > 0) {
                 status
                     .append(styles.dividerDot().render())
@@ -1298,37 +1302,32 @@ public class List
     }
 
     private String populatedView() {
-        java.util.List<FilteredItem> items = visibleItems();
-
         StringBuilder b = new StringBuilder();
 
-        if (items.isEmpty()) {
+        if (this.matchedItems == 0) {
             if (filterState == FilterState.Filtering) {
                 return "";
             }
             return styles.noItems().render("No " + itemNamePlural + ".");
         }
 
-        for (int i = 0; i < items.size(); i++) {
+        for (int i = 0; i < this.currentPageItems.size(); i++) {
             itemDelegate.render(
                 b,
                 this,
                 paginator.page() * paginator.perPage() + i,
-                items.get(i)
+                this.currentPageItems.get(i)
             );
-            if (i != items.size() - 1) {
+            if (i != this.currentPageItems.size() - 1) {
                 b.append("\n".repeat(itemDelegate.spacing() + 1));
             }
         }
 
-        int itemsOnPage = items.size();
+        int itemsOnPage = this.currentPageItems.size();
         if (itemsOnPage < paginator.perPage()) {
             int emptyLines =
                 (paginator.perPage() - itemsOnPage) *
                 (itemDelegate.height() + itemDelegate.spacing());
-            if (items.isEmpty()) {
-                emptyLines -= itemDelegate.height() - 1; // Edge case adjustment
-            }
             b.append("\n".repeat(emptyLines));
         }
         return b.toString();
@@ -1361,10 +1360,8 @@ public class List
         );
 
         boolean filtering = filterState == FilterState.Filtering;
-        if (!filtering) {
-            if (itemDelegate instanceof KeyMap delegateKeyMap) {
-                kb.addAll(Arrays.asList(delegateKeyMap.shortHelp()));
-            }
+        if (!filtering && itemDelegate instanceof KeyMap delegateKeyMap) {
+            kb.addAll(Arrays.asList(delegateKeyMap.shortHelp()));
         }
 
         kb.addAll(
@@ -1400,10 +1397,8 @@ public class List
         );
 
         boolean filtering = filterState == FilterState.Filtering;
-        if (!filtering) {
-            if (itemDelegate instanceof KeyMap delegateKeyMap) {
-                kb.addAll(Arrays.asList(delegateKeyMap.fullHelp()));
-            }
+        if (!filtering && itemDelegate instanceof KeyMap delegateKeyMap) {
+            kb.addAll(Arrays.asList(delegateKeyMap.fullHelp()));
         }
 
         java.util.List<Binding> listLevelBindings = new LinkedList<>(

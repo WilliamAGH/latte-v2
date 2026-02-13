@@ -4,6 +4,9 @@ import com.williamcallahan.tui4j.compat.bubbletea.Command;
 import com.williamcallahan.tui4j.compat.bubbletea.BatchMessage;
 import com.williamcallahan.tui4j.compat.bubbletea.Message;
 import com.williamcallahan.tui4j.compat.bubbletea.SequenceMessage;
+import com.williamcallahan.tui4j.compat.bubbletea.KeyPressMessage;
+import com.williamcallahan.tui4j.compat.bubbletea.input.key.Key;
+import com.williamcallahan.tui4j.compat.bubbletea.input.key.KeyType;
 import com.williamcallahan.tui4j.compat.lipgloss.Renderer;
 import com.williamcallahan.tui4j.compat.lipgloss.color.ColorProfile;
 import com.williamcallahan.tui4j.compat.lipgloss.color.NoColor;
@@ -93,6 +96,95 @@ class ListTest {
         assertThat(footer).contains("clear");
     }
 
+    @Test
+    void testResizeKeepsAbsoluteSelectionIndex() {
+        Item[] items = new Item[100];
+        for (int i = 0; i < items.length; i++) {
+            items[i] = new TestItem("item-" + i);
+        }
+        List list = createList(items);
+
+        applyCommand(list, list.setShowTitle(false));
+        list.setShowFilter(false);
+        list.setShowStatusBar(false);
+        list.setShowPagination(false);
+        applyCommand(list, list.setShowHelp(false));
+        applyCommand(list, list.refresh());
+
+        applyCommand(list, list.select(80));
+        assertThat(list.index()).isEqualTo(80);
+
+        applyCommand(list, list.setSize(10, 5));
+        assertThat(list.index()).isEqualTo(80);
+        assertThat(list.selectedItem().filterValue()).isEqualTo("item-80");
+    }
+
+    @Test
+    void testPopulatedViewDoesNotShowEmptyStateWhenMatchesExist() {
+        ListDataSource dataSource = (page, perPage, filterValue) ->
+            new FetchedItems(java.util.List.of(), 5, 5, 5);
+        List list = new List(dataSource, new TestDelegate(), 10, 5);
+        applyCommand(list, list.init());
+
+        assertThat(populatedView(list)).doesNotContain("No items.");
+    }
+
+    @Test
+    void testAcceptFilteringUsesMatchedItemsNotCurrentPageSlice() {
+        ListDataSource dataSource = (page, perPage, filterValue) ->
+            new FetchedItems(java.util.List.of(), 3, 5, 1);
+        List list = new List(dataSource, new TestDelegate(), 10, 5);
+        applyCommand(list, list.init());
+        applyCommand(list, list.setFilterText("x"));
+        applyCommand(list, list.setFilterState(FilterState.Filtering));
+
+        applyMessage(list, new KeyPressMessage(new Key(KeyType.keyCR)));
+
+        assertThat(list.filterState()).isEqualTo(FilterState.FilterApplied);
+    }
+
+    @Test
+    void testEmptyResultsStayOnSinglePageWithPaginationDisabled() {
+        ListDataSource dataSource = (page, perPage, filterValue) ->
+            new FetchedItems(java.util.List.of(), 0, 0, 0);
+        List list = new List(dataSource, new TestDelegate(), 10, 5);
+        applyCommand(list, list.init());
+
+        assertThat(list.nextPage()).isNull();
+        assertThat(list.prevPage()).isNull();
+        assertThat(keyMap(list).nextPage().isEnabled()).isFalse();
+        assertThat(keyMap(list).prevPage().isEnabled()).isFalse();
+    }
+
+    @Test
+    void testCursorUpFromLaterPageKeepsCursorNonNegativeWhenFetchedPageIsEmpty() {
+        ListDataSource dataSource = (page, perPage, filterValue) -> {
+            if (page == 1) {
+                return new FetchedItems(
+                    java.util.List.of(new FilteredItem(new TestItem("item-1"))),
+                    2,
+                    2,
+                    2
+                );
+            }
+            return new FetchedItems(java.util.List.of(), 2, 2, 2);
+        };
+        List list = new List(dataSource, new TestDelegate(), 10, 5);
+        applyCommand(list, list.init());
+        applyCommand(list, list.setShowTitle(false));
+        list.setShowFilter(false);
+        list.setShowStatusBar(false);
+        list.setShowPagination(false);
+        applyCommand(list, list.setShowHelp(false));
+        applyCommand(list, list.setSize(10, 1));
+
+        applyCommand(list, list.select(1));
+        applyCommand(list, list.cursorUp());
+
+        assertThat(list.cursor()).isZero();
+        assertThat(list.index()).isZero();
+    }
+
     private static List createList(Item... items) {
         List list = new List(items, new TestDelegate(), 10, 10);
         applyCommand(list, list.init());
@@ -157,20 +249,6 @@ class ListTest {
             return;
         }
 
-        // Also handle the legacy message forms that may be emitted internally.
-        if (msg instanceof com.williamcallahan.tui4j.compat.bubbletea.BatchMessage batchMsg) {
-            for (Command c : batchMsg.commands()) {
-                applyCommand(list, c);
-            }
-            return;
-        }
-        if (msg instanceof com.williamcallahan.tui4j.compat.bubbletea.SequenceMessage sequenceMsg) {
-            for (Command c : sequenceMsg.commands()) {
-                applyCommand(list, c);
-            }
-            return;
-        }
-
         com.williamcallahan.tui4j.compat.bubbletea.UpdateResult<List> result = list.update(msg);
         if (result != null && result.command() != null) {
             applyCommand(list, result.command());
@@ -184,6 +262,26 @@ class ListTest {
             return (String) method.invoke(list);
         } catch (ReflectiveOperationException e) {
             throw new IllegalStateException("Failed to read status view", e);
+        }
+    }
+
+    private static String populatedView(List list) {
+        try {
+            Method method = List.class.getDeclaredMethod("populatedView");
+            method.setAccessible(true);
+            return (String) method.invoke(list);
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalStateException("Failed to read populated view", e);
+        }
+    }
+
+    private static KeyMap keyMap(List list) {
+        try {
+            var field = List.class.getDeclaredField("keys");
+            field.setAccessible(true);
+            return (KeyMap) field.get(list);
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalStateException("Failed to read key map", e);
         }
     }
 

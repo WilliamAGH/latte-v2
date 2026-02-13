@@ -7,6 +7,11 @@ import com.williamcallahan.tui4j.compat.bubbles.key.Binding;
 /**
  * Port of the Bubble Tea paginator component.
  * Upstream: bubbles/paginator/paginator.go
+ * <p>
+ * Indexing contract: {@code page} is zero-based for internal math while rendered
+ * Arabic output is one-based ({@code page + 1}) for humans.
+ * <p>
+ * Policy references for compat ports: AGENTS.md [JD1a], [JD1b], [FS1g].
  */
 public class Paginator {
 
@@ -130,6 +135,8 @@ public class Paginator {
     /**
      * Returns whether the paginator is on the last page.
      *
+     * This compares a zero-based page index to {@code totalPages - 1}.
+     *
      * @return {@code true} when on the last page
      */
     public boolean onLastPage() {
@@ -138,6 +145,8 @@ public class Paginator {
 
     /**
      * Returns whether the paginator is on the first page.
+     *
+     * The first page index is always {@code 0}.
      *
      * @return {@code true} when on the first page
      */
@@ -193,7 +202,9 @@ public class Paginator {
     /**
      * Returns the total number of pages.
      *
-     * @return total pages
+     * This value is a count, not a zero-based index.
+     *
+     * @return total page count
      */
     public int totalPages() {
         return totalPages;
@@ -220,7 +231,9 @@ public class Paginator {
     /**
      * Sets the current page.
      *
-     * @param page page index
+     * Page indexes are zero-based.
+     *
+     * @param page zero-based page index
      */
     public void setPage(int page) {
         this.page = page;
@@ -229,7 +242,9 @@ public class Paginator {
     /**
      * Returns the current page.
      *
-     * @return page index
+     * Page indexes are zero-based.
+     *
+     * @return zero-based page index
      */
     public int page() {
         return page;
@@ -238,7 +253,9 @@ public class Paginator {
     /**
      * Sets the total number of pages.
      *
-     * @param totalPages total pages
+     * This value is a count, not a zero-based index.
+     *
+     * @param totalPages total page count
      */
     public void setTotalPages(int totalPages) {
         this.totalPages = totalPages;

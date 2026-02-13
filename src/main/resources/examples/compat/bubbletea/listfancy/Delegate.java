@@ -88,28 +88,37 @@ public class Delegate {
     public static DefaultDelegate newItemDelegate(DelegateKeyMap keyMap) {
         DefaultDelegate defaultDelegate = new DefaultDelegate();
         defaultDelegate.onUpdate((msg, list) -> {
-            if (msg instanceof KeyPressMessage keyPressMessage) {
-                String title = null;
-                int index = -1;
-                if (list.selectedItem() instanceof FancyItem fancyItem && list.dataSource() instanceof DefaultDataSource defaultDataSource) {
-                    index = defaultDataSource.indexOf(fancyItem);
-                    title = fancyItem.title();
-                } else {
-                    return null;
-                }
+            if (!(msg instanceof KeyPressMessage)) {
+               return null;
+            }
 
-                if (Binding.matches(keyPressMessage, keyMap.choose())) {
-                    return list.newStatusMessage(Styles.statusMessageStyle.apply(new String[]{"You choose", title}));
-                } else if (Binding.matches(keyPressMessage, keyMap.remove()) && index != -1) {
-                    return Command.batch(
-                            defaultDataSource.removeItem(index, () -> {
-                                if (defaultDataSource.isEmpty()) {
-                                    keyMap.remove().setEnabled(false);
-                                }
-                            }),
-                            list.newStatusMessage(Styles.statusMessageStyle.apply(new String[]{"Deleted", title}))
-                    );
-                }
+            var keyPressMessage = (KeyPressMessage) msg;
+
+            if (!Binding.matches(keyPressMessage, keyMap.choose(), keyMap.remove())) {
+               return null;
+            }
+
+            String title = null;
+            int index = -1;
+            if (list.selectedItem() instanceof FancyItem fancyItem && list.dataSource() instanceof DefaultDataSource defaultDataSource) {
+                index = defaultDataSource.indexOf(fancyItem);
+                title = fancyItem.title();
+            } else {
+                return null;
+            }
+
+            if (Binding.matches(keyPressMessage, keyMap.choose())) {
+                return list.newStatusMessage(Styles.statusMessageStyle.apply(new String[]{"You choose", title}));
+            } 
+            if (Binding.matches(keyPressMessage, keyMap.remove()) && index != -1) {
+                return Command.batch(
+                        defaultDataSource.removeItem(index, () -> {
+                            if (defaultDataSource.isEmpty()) {
+                                keyMap.remove().setEnabled(false);
+                            }
+                        }),
+                        list.newStatusMessage(Styles.statusMessageStyle.apply(new String[]{"Deleted", title}))
+                );
             }
             return null;
         });
