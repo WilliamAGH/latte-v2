@@ -18,9 +18,11 @@ import java.util.function.Consumer;
 import java.util.function.IntSupplier;
 
 /**
- * Mouse selection, hover, and click tracking for {@link Program}.
+ * Handles all mouse-related behavior for a {@link Program}: selection tracking,
+ * hover-text cursor, target cursor, click tracking, and auto-scroll.
  * <p>
- * This is a tui4j extension; Bubble Tea does not include mouse selection UX.
+ * tui4j extension; no Bubble Tea equivalent — Go Bubble Tea has no built-in
+ * mouse cursor management beyond raw event delivery.
  *
  * @see Program
  * @see ProgramConfiguration
@@ -28,84 +30,94 @@ import java.util.function.IntSupplier;
 final class ProgramMouseHandler {
 
     private final ProgramConfiguration config;
-    private final Consumer<Message> send;
+    private final Consumer<Message> sendFn;
+    private final MouseSelectionAutoScroller autoScroller;
 
     private final MouseSelectionTracker mouseSelectionTracker =
         new MouseSelectionTracker();
     private final MouseHoverTextDetector mouseHoverTextDetector =
         new MouseHoverTextDetector();
     private final MouseClickTracker mouseClickTracker = new MouseClickTracker();
-    private final MouseSelectionAutoScroller mouseSelectionAutoScroller;
-
     private boolean mouseSelectionCursorActive;
     private boolean hoverTextCursorActive;
     private MouseCursor currentTargetCursor;
 
+    /**
+     * Creates a mouse handler bound to the given configuration and program callbacks.
+     *
+     * @param config program configuration for reading enabled-flags
+     * @param terminalHeight supplies the current terminal height for auto-scroll
+     * @param sendFn callback to enqueue messages into the program's message queue
+     */
     ProgramMouseHandler(
         ProgramConfiguration config,
         IntSupplier terminalHeight,
-        Consumer<Message> send
+        Consumer<Message> sendFn
     ) {
         this.config = Objects.requireNonNull(config, "config");
-        this.send = Objects.requireNonNull(send, "send");
-
-        this.mouseSelectionAutoScroller = new MouseSelectionAutoScroller(
-            terminalHeight,
+        this.sendFn = Objects.requireNonNull(sendFn, "sendFn");
+        this.autoScroller = new MouseSelectionAutoScroller(
+            Objects.requireNonNull(terminalHeight, "terminalHeight"),
             mouseSelectionTracker,
-            send
+            sendFn
         );
-
-        if (config.isSelectionAutoScrollEnabled()) {
-            mouseSelectionAutoScroller.configure(
-                config.selectionAutoScrollEdgeRows(),
-                config.selectionAutoScrollIntervalMs()
-            );
-        }
-    }
-
-    void enableSelectionAutoScroll() {
-        mouseSelectionAutoScroller.enable();
-    }
-
-    void configureSelectionAutoScroll(int edgeRows, int intervalMs) {
-        mouseSelectionAutoScroller.configure(edgeRows, intervalMs);
-    }
-
-    void startAutoScroll() {
-        mouseSelectionAutoScroller.start();
-    }
-
-    void stopAutoScroll() {
-        mouseSelectionAutoScroller.stop();
+        applyAutoScrollConfig();
     }
 
     /**
-     * Handles mouse message side-effects (cursor updates and click/selection messages).
-     *
-     * @param mouseMessage mouse message
-     * @param model current model
-     * @param renderer renderer used for cursor changes
+     * Enables selection auto-scroll on the scroller instance.
+     * Called from {@link Program#withMouseSelectionAutoScroll()}.
      */
-    void handleMouse(MouseMessage mouseMessage, Model model, Renderer renderer) {
-        Objects.requireNonNull(mouseMessage, "mouseMessage");
-        Objects.requireNonNull(model, "model");
-        Objects.requireNonNull(renderer, "renderer");
-
-        mouseSelectionAutoScroller.onMouse(mouseMessage);
-        handleMouseClickTracking(mouseMessage, model);
-        handleMouseSelectionTracking(mouseMessage, renderer);
-        handleMouseHoverCursor(mouseMessage, model, renderer);
-        handleMouseTargetCursor(mouseMessage, model, renderer);
+    void enableSelectionAutoScroll() {
+        autoScroller.enable();
     }
 
     /**
-     * Resets cursor state tracked by this handler.
+     * Configures auto-scroll edge rows and interval.
+     * Called from {@link Program#withMouseSelectionAutoScroll(int, int)}.
      *
-     * @param renderer renderer used for cursor changes
+     * @param edgeRows number of rows from the edge that trigger auto-scroll
+     * @param intervalMs interval in milliseconds between auto-scroll steps
+     */
+    void configureSelectionAutoScroll(int edgeRows, int intervalMs) {
+        autoScroller.configure(edgeRows, intervalMs);
+    }
+
+    /**
+     * Starts the auto-scroller polling thread.
+     */
+    void startAutoScroll() {
+        autoScroller.start();
+    }
+
+    /**
+     * Stops the auto-scroller polling thread.
+     */
+    void stopAutoScroll() {
+        autoScroller.stop();
+    }
+
+    /**
+     * Dispatches a mouse event to all sub-handlers.
+     *
+     * @param mouseMessage the mouse event
+     * @param currentModel current model (for view text and target resolution)
+     * @param renderer renderer for cursor operations
+     */
+    void handleMouse(MouseMessage mouseMessage, Model currentModel, Renderer renderer) {
+        autoScroller.onMouse(mouseMessage);
+        handleMouseClickTracking(mouseMessage, currentModel);
+        handleMouseSelectionTracking(mouseMessage, renderer);
+        handleMouseHoverCursor(mouseMessage, currentModel, renderer);
+        handleMouseTargetCursor(mouseMessage, currentModel, renderer);
+    }
+
+    /**
+     * Resets any active mouse cursors during program cleanup.
+     *
+     * @param renderer renderer for cursor reset
      */
     void cleanupCursors(Renderer renderer) {
-        Objects.requireNonNull(renderer, "renderer");
-
         if (config.isManageMouseSelectionCursor() && mouseSelectionCursorActive) {
             renderer.resetMouseCursor();
         }
@@ -119,10 +131,16 @@ final class ProgramMouseHandler {
         ) {
             renderer.resetMouseCursor();
         }
+    }
 
-        mouseSelectionCursorActive = false;
-        hoverTextCursorActive = false;
-        currentTargetCursor = null;
+    private void applyAutoScrollConfig() {
+        if (!config.isSelectionAutoScrollEnabled()) {
+            return;
+        }
+        autoScroller.configure(
+            config.selectionAutoScrollEdgeRows(),
+            config.selectionAutoScrollIntervalMs()
+        );
     }
 
     private void handleMouseSelectionTracking(
@@ -137,7 +155,7 @@ final class ProgramMouseHandler {
             config.isExtendSelectionOnScroll() &&
             selectionUpdate.selectionScrollUpdate() != null
         ) {
-            send.accept(selectionUpdate.selectionScrollUpdate());
+            sendFn.accept(selectionUpdate.selectionScrollUpdate());
         }
 
         if (!config.isManageMouseSelectionCursor()) {
@@ -171,7 +189,7 @@ final class ProgramMouseHandler {
 
     private void handleMouseHoverCursor(
         MouseMessage mouseMessage,
-        Model model,
+        Model currentModel,
         Renderer renderer
     ) {
         if (!config.isHoverTextCursorEnabled()) {
@@ -192,7 +210,7 @@ final class ProgramMouseHandler {
         }
 
         boolean overText = mouseHoverTextDetector.isHoveringText(
-            model.view(),
+            currentModel.view(),
             mouseMessage.column(),
             mouseMessage.row()
         );
@@ -208,7 +226,7 @@ final class ProgramMouseHandler {
 
     private void handleMouseTargetCursor(
         MouseMessage mouseMessage,
-        Model model,
+        Model currentModel,
         Renderer renderer
     ) {
         if (!config.isMouseTargetCursorEnabled()) {
@@ -234,7 +252,7 @@ final class ProgramMouseHandler {
             return;
         }
 
-        MouseTarget target = resolveMouseTarget(mouseMessage, model);
+        MouseTarget target = resolveMouseTarget(mouseMessage, currentModel);
         MouseCursor desiredCursor = (target != null)
             ? target.cursor()
             : MouseCursor.DEFAULT;
@@ -267,25 +285,25 @@ final class ProgramMouseHandler {
         mouseSelectionCursorActive = false;
     }
 
-    private void handleMouseClickTracking(MouseMessage mouseMessage, Model model) {
+    private void handleMouseClickTracking(MouseMessage mouseMessage, Model currentModel) {
         if (!config.isMouseClicksEnabled()) {
             return;
         }
-        MouseTarget target = resolveMouseTarget(mouseMessage, model);
+        MouseTarget target = resolveMouseTarget(mouseMessage, currentModel);
         MouseClickMessage clickMessage = mouseClickTracker.handle(
             mouseMessage,
             target
         );
         if (clickMessage != null) {
-            send.accept(clickMessage);
+            sendFn.accept(clickMessage);
         }
     }
 
-    private static MouseTarget resolveMouseTarget(
+    private MouseTarget resolveMouseTarget(
         MouseMessage mouseMessage,
-        Model model
+        Model currentModel
     ) {
-        if (!(model instanceof MouseTargetProvider provider)) {
+        if (!(currentModel instanceof MouseTargetProvider provider)) {
             return null;
         }
         return MouseTargets.hitTest(

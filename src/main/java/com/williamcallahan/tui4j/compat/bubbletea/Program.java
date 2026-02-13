@@ -1,28 +1,12 @@
 package com.williamcallahan.tui4j.compat.bubbletea;
 
-import com.williamcallahan.tui4j.compat.bubbletea.input.InputHandler;
-import com.williamcallahan.tui4j.compat.bubbletea.render.NilRenderer;
-import com.williamcallahan.tui4j.compat.bubbletea.render.Renderer;
-import com.williamcallahan.tui4j.compat.bubbletea.render.StandardRenderer;
-import com.williamcallahan.tui4j.input.MouseClickMessage;
-import com.williamcallahan.tui4j.input.MouseCursor;
-import com.williamcallahan.tui4j.runtime.CommandExecutor;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.UncheckedIOException;
 import java.util.List;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.jline.terminal.Terminal;
-import org.jline.utils.InfoCmp;
 
 /**
  * Runs the TUI event loop and manages terminal IO.
@@ -35,40 +19,22 @@ import org.jline.utils.InfoCmp;
  */
 public class Program {
 
-    private static final Logger logger = Logger.getLogger(
-        Program.class.getName()
-    );
+    private static final Logger logger = Logger.getLogger(Program.class.getName());
 
+    // Kept as a field on Program for ProgramOption compatibility and tests that
+    // assert option behavior via reflection.
     private final ProgramConfiguration config = new ProgramConfiguration();
+
+    private final ProgramCore core;
 
     static {
         try {
             com.williamcallahan.tui4j.compat.lipgloss.Renderer.defaultRenderer().hasDarkBackground();
         } catch (Exception e) {
             // Best-effort parity with bubbletea/tea_init.go.
-            logger.log(
-                Level.FINE,
-                "Dark-background probe failed during static init",
-                e
-            );
+            logger.log(Level.FINE, "Dark-background probe failed during static init", e);
         }
     }
-
-    private final AtomicBoolean isRunning = new AtomicBoolean(false);
-    private final CountDownLatch initLatch = new CountDownLatch(1);
-    private final BlockingQueue<Message> messageQueue =
-        new LinkedBlockingQueue<>();
-    private final CommandExecutor commandExecutor;
-    private final AtomicReference<Model> currentModel;
-
-    private Throwable lastError;
-    private Terminal terminal;
-    private Renderer renderer;
-    private InputHandler inputHandler;
-
-    private ProgramTerminal programTerminal;
-    private ProgramMouseHandler mouseHandler;
-    private ProgramProcessExecutor processExecutor;
 
     /**
      * Creates Program to keep this component ready for use.
@@ -86,8 +52,7 @@ public class Program {
      * @param options options
      */
     public Program(Model initialModel, ProgramOption... options) {
-        this.currentModel = new AtomicReference<>(initialModel);
-        this.commandExecutor = new CommandExecutor();
+        this.core = new ProgramCore(initialModel, config);
         if (options != null) {
             for (ProgramOption option : options) {
                 if (option != null) {
@@ -95,67 +60,24 @@ public class Program {
                 }
             }
         }
-        initializeTerminal();
+        core.initializeTerminal();
     }
 
     /**
-     * Handles initialize terminal for this component.
-     */
-    private void initializeTerminal() {
-        try {
-            programTerminal = ProgramTerminal.initialize(config, this::send);
-            terminal = programTerminal.terminal();
-            inputHandler = programTerminal.inputHandler();
-
-            if (config.isWithoutRenderer()) {
-                renderer = new NilRenderer();
-            } else {
-                renderer = new StandardRenderer(
-                    terminal,
-                    config.normalizeFps(config.fps())
-                );
-            }
-
-            mouseHandler = new ProgramMouseHandler(
-                config,
-                terminal::getHeight,
-                this::send
-            );
-            processExecutor = new ProgramProcessExecutor(
-                terminal,
-                programTerminal.terminalIsTty(),
-                renderer,
-                currentModel::get,
-                this::send
-            );
-        } catch (IOException e) {
-            throw new UncheckedIOException("Failed to initialize terminal", e);
-        }
-    }
-
-    /**
-     * Handles with alt screen for this component.
-     *
-     * @return result
+     * Enables the alternate screen buffer.
+     * @return this program for chaining
      */
     public Program withAltScreen() {
-        config.setEnableAltScreen(true);
-        if (renderer != null) {
-            renderer.enterAltScreen();
-        }
+        core.withAltScreen();
         return this;
     }
 
     /**
-     * Handles with report focus for this component.
-     *
-     * @return result
+     * Enables focus/blur reporting.
+     * @return this program for chaining
      */
     public Program withReportFocus() {
-        config.setEnableReportFocus(true);
-        if (renderer != null) {
-            renderer.enableReportFocus();
-        }
+        core.withReportFocus();
         return this;
     }
 
@@ -173,135 +95,91 @@ public class Program {
      *      Keyboard Protocol</a>
      */
     public Program withKittyKeyboard() {
-        config.setEnableKittyKeyboard(true);
-        if (renderer != null) {
-            renderer.enableKittyKeyboard();
-        }
+        core.withKittyKeyboard();
         return this;
     }
 
     /**
-     * Handles with mouse all motion for this component.
-     *
-     * @return result
+     * Enables mouse tracking for all motion events.
+     * @return this program for chaining
      */
     public Program withMouseAllMotion() {
-        config.setEnableMouseAllMotion(true);
-        config.setEnableMouseCellMotion(false);
-        if (renderer != null) {
-            renderer.enableMouseAllMotion();
-            renderer.enableMouseSGRMode();
-        }
+        core.withMouseAllMotion();
         return this;
     }
 
     /**
-     * Handles with mouse cell motion for this component.
-     *
-     * @return result
+     * Enables mouse tracking for cell motion events.
+     * @return this program for chaining
      */
     public Program withMouseCellMotion() {
-        config.setEnableMouseCellMotion(true);
-        config.setEnableMouseAllMotion(false);
-        if (renderer != null) {
-            renderer.enableMouseCellMotion();
-            renderer.enableMouseSGRMode();
-        }
+        core.withMouseCellMotion();
         return this;
     }
 
     /**
-     * While selecting, translate wheel events into selection motion updates.
-     *
+     * Extends selection while scrolling.
      * @return this program for chaining
      */
     public Program withMouseSelectionExtendOnScroll() {
-        config.setExtendSelectionOnScroll(true);
+        core.withMouseSelectionExtendOnScroll();
         return this;
     }
 
     /**
-     * While selecting, automatically scroll when the mouse is at the top/bottom
-     * edge.
-     * <p>
-     * tui4j extension; no Bubble Tea equivalent.
-     *
+     * Enables selection auto-scroll.
      * @return this program for chaining
      */
     public Program withMouseSelectionAutoScroll() {
-        // Auto-scroll is implemented by emitting wheel events while selecting, so we
-        // must also preserve selection during scroll to avoid breaking the user's
-        // selection state.
-        config.setExtendSelectionOnScroll(true);
-        config.setSelectionAutoScrollEnabled(true);
-        if (mouseHandler != null) {
-            mouseHandler.enableSelectionAutoScroll();
-        }
+        core.withMouseSelectionAutoScroll();
         return this;
     }
 
     /**
-     * Configure selection auto-scroll behavior.
-     * <p>
-     * tui4j extension; no Bubble Tea equivalent.
+     * Configures selection auto-scroll.
      *
      * @param edgeRows number of rows from the edge that trigger auto-scroll
      * @param intervalMs interval in milliseconds between auto-scroll steps
      * @return this program for chaining
      */
     public Program withMouseSelectionAutoScroll(int edgeRows, int intervalMs) {
-        config.setExtendSelectionOnScroll(true);
-        config.setSelectionAutoScrollEnabled(true);
-        config.setSelectionAutoScrollEdgeRows(edgeRows);
-        config.setSelectionAutoScrollIntervalMs(intervalMs);
-        if (mouseHandler != null) {
-            mouseHandler.configureSelectionAutoScroll(edgeRows, intervalMs);
-        }
+        core.withMouseSelectionAutoScroll(edgeRows, intervalMs);
         return this;
     }
 
     /**
-     * Manage the mouse cursor during selection (OSC 22).
-     *
+     * Enables selection cursor management.
      * @return this program for chaining
      */
     public Program withMouseSelectionCursor() {
-        config.setManageMouseSelectionCursor(true);
+        core.withMouseSelectionCursor();
         return this;
     }
 
     /**
-     * Manage the mouse cursor when hovering non-whitespace text (OSC 22).
-     * Requires mouse motion events (e.g. {@link #withMouseAllMotion()}).
-     *
+     * Enables hover-text cursor management.
      * @return this program for chaining
      */
     public Program withMouseHoverTextCursor() {
-        config.setHoverTextCursorEnabled(true);
+        core.withMouseHoverTextCursor();
         return this;
     }
 
     /**
-     * Manage the mouse cursor based on MouseTarget cursor hints (OSC 22).
-     * When hovering a target with {@link MouseCursor#POINTER}, shows pointer
-     * cursor. Requires mouse motion events (e.g. {@link #withMouseAllMotion()}).
-     * tui4j extension; no Bubble Tea equivalent.
-     *
+     * Enables mouse target cursor hints.
      * @return this program for chaining
      */
     public Program withMouseTargetCursor() {
-        config.setMouseTargetCursorEnabled(true);
+        core.withMouseTargetCursor();
         return this;
     }
 
     /**
-     * When enabled, emits {@link MouseClickMessage} on press/release clicks.
-     * tui4j extension; no Bubble Tea equivalent.
-     *
+     * Enables mouse click messages.
      * @return this program for chaining
      */
     public Program withMouseClicks() {
-        config.setMouseClicksEnabled(true);
+        core.withMouseClicks();
         return this;
     }
 
@@ -310,7 +188,7 @@ public class Program {
      * Takes control of the terminal until the model returns a {@link QuitMessage}.
      */
     public void run() {
-        runInternal();
+        core.run();
     }
 
     /**
@@ -322,317 +200,97 @@ public class Program {
      * @return final model state
      */
     public Model runWithFinalModel() {
-        return runInternal();
+        return core.runWithFinalModel();
     }
 
     /**
-     * Runs the program and returns the final model state.
-     *
-     * @return final model state
-     */
-    private Model runInternal() {
-        if (!isRunning.compareAndSet(false, true)) {
-            throw new IllegalStateException("Program is already running!");
-        }
-
-        ProgramSignals.registerAll(
-            config,
-            commandExecutor,
-            this::send,
-            this::sendError
-        );
-        if (mouseHandler != null) {
-            mouseHandler.startAutoScroll();
-        }
-
-        // start reading keyboard input
-        inputHandler.start();
-
-        applyStartupOptions();
-
-        // starting renderer
-        renderer.hideCursor();
-        renderer.start();
-        installCancelSignal();
-
-        Model finalModel = currentModel.get();
-        boolean renderFinalView = false;
-
-        try {
-            // execute init command
-            Command initCommand = currentModel.get().init();
-            commandExecutor
-                .executeIfPresent(initCommand, this::send, this::sendError)
-                .thenRun(initLatch::countDown);
-
-            // render the initial view
-            renderer.write(currentModel.get().view());
-
-            // run event loop
-            ProgramEventLoop.Result loopResult = new ProgramEventLoop(
-                isRunning,
-                messageQueue,
-                config,
-                renderer,
-                terminal,
-                currentModel,
-                commandExecutor,
-                mouseHandler,
-                processExecutor,
-                this::send,
-                this::sendError
-            ).run();
-
-            finalModel = loopResult.finalModel();
-            if (loopResult.error() != null) {
-                lastError = loopResult.error();
-            }
-            renderFinalView = true;
-        } catch (Exception e) {
-            if (config.isWithoutCatchPanics()) {
-                throw e;
-            }
-            lastError = e;
-        } finally {
-            cleanup(renderFinalView, finalModel);
-        }
-
-        if (lastError != null) {
-            throw new ProgramException(lastError);
-        }
-        return finalModel;
-    }
-
-    /**
-     * Handles cleanup for this component.
-     *
-     * @param renderFinalView render final view
-     * @param finalModel final model
-     */
-    private void cleanup(boolean renderFinalView, Model finalModel) {
-        // stop reading keyboard input
-        inputHandler.stop();
-
-        if (renderFinalView) {
-            // render final model view before closing
-            renderer.write(finalModel.view());
-        }
-        renderer.showCursor();
-        renderer.stop();
-
-        if (mouseHandler != null) {
-            mouseHandler.stopAutoScroll();
-        }
-
-        if (renderer.bracketedPaste()) {
-            renderer.disableBracketedPaste();
-        }
-
-        if (mouseHandler != null) {
-            mouseHandler.cleanupCursors(renderer);
-        }
-
-        // disabling mouse support
-        disableMouse();
-
-        if (renderer.reportFocus()) {
-            renderer.disableReportFocus();
-        }
-
-        if (renderer.kittyKeyboard()) {
-            renderer.disableKittyKeyboard();
-        }
-
-        if (renderer.altScreen()) {
-            renderer.exitAltScreen();
-        }
-
-        terminal.puts(InfoCmp.Capability.carriage_return);
-        terminal.puts(InfoCmp.Capability.cursor_down);
-        terminal.flush();
-
-        // Finally clean up
-        isRunning.set(false);
-        commandExecutor.shutdown();
-        try {
-            terminal.close();
-        } catch (IOException e) {
-            // Chain with any existing error to preserve context
-            if (lastError != null) {
-                e.addSuppressed(lastError);
-            }
-            throw new UncheckedIOException(e);
-        } finally {
-            if (programTerminal != null) {
-                programTerminal.closeOpenedInput();
-            }
-        }
-    }
-
-    /**
-     * Handles send error for this component.
-     *
-     * @param error error
-     */
-    private void sendError(Throwable error) {
-        send(new ErrorMessage(error));
-    }
-
-    /**
-     * Handles send for this component.
-     *
-     * @param msg msg
+     * Enqueues a message while the program is running.
+     * @param msg message to enqueue
      */
     public void send(Message msg) {
-        if (isRunning.get() && msg != null && !messageQueue.offer(msg)) {
-            logger.log(Level.WARNING, "Failed to enqueue message: {0}", msg);
-        }
+        core.send(msg);
     }
 
     /**
-     * Reports whether running.
-     *
+     * Returns whether the program is running.
      * @return whether running
      */
     public boolean isRunning() {
-        return isRunning.get();
+        return core.isRunning();
     }
 
-    /**
-     * Handles wait for init for this component.
-     */
+    /** Blocks until the model init command has completed. */
     public void waitForInit() {
-        try {
-            initLatch.await();
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new ProgramException(e);
-        }
+        core.waitForInit();
     }
 
     /**
-     * Handles disable mouse for this component.
-     */
-    private void disableMouse() {
-        renderer.disableMouseSGRMode();
-        renderer.disableMouseNormalTracking();
-        renderer.disableMouseCellMotion();
-        renderer.disableMouseAllMotion();
-    }
-
-    /**
-     * Handles apply startup options for this component.
-     */
-    private void applyStartupOptions() {
-        if (config.isEnableAltScreen() && !renderer.altScreen()) {
-            renderer.enterAltScreen();
-        }
-        if (!config.isWithoutBracketedPaste()) {
-            renderer.enableBracketedPaste();
-        }
-        if (config.isEnableMouseCellMotion()) {
-            renderer.enableMouseCellMotion();
-            renderer.enableMouseSGRMode();
-        } else if (config.isEnableMouseAllMotion()) {
-            renderer.enableMouseAllMotion();
-            renderer.enableMouseSGRMode();
-        }
-        if (config.isEnableReportFocus() && !renderer.reportFocus()) {
-            renderer.enableReportFocus();
-        }
-        if (config.isEnableKittyKeyboard() && !renderer.kittyKeyboard()) {
-            renderer.enableKittyKeyboard();
-        }
-    }
-
-    /**
-     * Handles install cancel signal for this component.
-     */
-    private void installCancelSignal() {
-        if (config.cancelSignal() == null) {
-            return;
-        }
-        config.cancelSignal().whenComplete((result, error) ->
-            send(new QuitMessage())
-        );
-    }
-
-    /**
-     * Updates the output.
-     *
-     * @param output output
+     * Sets the output stream.
+     * @param output output stream
      */
     void setOutput(OutputStream output) {
         config.setOutput(output);
     }
 
     /**
-     * Updates the input.
-     *
-     * @param input input
+     * Sets the input stream.
+     * @param input input stream
      */
     void setInput(InputStream input) {
         config.setInput(input);
     }
 
     /**
-     * Updates the input tty.
-     *
-     * @param useInputTTY use input tty
+     * Sets whether to use an input TTY.
+     * @param useInputTTY whether to use input TTY
      */
     void setInputTTY(boolean useInputTTY) {
         config.setInputTTY(useInputTTY);
     }
 
     /**
-     * Updates the environment.
-     *
-     * @param environment environment
+     * Sets environment variables.
+     * @param environment environment variables
      */
     void setEnvironment(List<String> environment) {
         config.setEnvironment(environment);
     }
 
     /**
-     * Updates the without signal handler.
-     *
-     * @param withoutSignalHandler without signal handler
+     * Disables the signal handler.
+     * @param withoutSignalHandler whether to disable the signal handler
      */
     void setWithoutSignalHandler(boolean withoutSignalHandler) {
         config.setWithoutSignalHandler(withoutSignalHandler);
     }
 
     /**
-     * Updates the without catch panics.
-     *
-     * @param withoutCatchPanics without catch panics
+     * Disables panic catching.
+     * @param withoutCatchPanics whether to disable panic catching
      */
     void setWithoutCatchPanics(boolean withoutCatchPanics) {
         config.setWithoutCatchPanics(withoutCatchPanics);
     }
 
     /**
-     * Updates the ignore signals.
-     *
-     * @param ignoreSignals ignore signals
+     * Enables ignoring signals.
+     * @param ignoreSignals whether to ignore signals
      */
     void setIgnoreSignals(boolean ignoreSignals) {
         config.setIgnoreSignals(ignoreSignals);
     }
 
     /**
-     * Updates the without bracketed paste.
-     *
-     * @param withoutBracketedPaste without bracketed paste
+     * Disables bracketed paste.
+     * @param withoutBracketedPaste whether to disable bracketed paste
      */
     void setWithoutBracketedPaste(boolean withoutBracketedPaste) {
         config.setWithoutBracketedPaste(withoutBracketedPaste);
     }
 
     /**
-     * Updates the without renderer.
-     *
-     * @param withoutRenderer without renderer
+     * Disables the renderer.
+     * @param withoutRenderer whether to disable the renderer
      */
     void setWithoutRenderer(boolean withoutRenderer) {
         config.setWithoutRenderer(withoutRenderer);
@@ -652,39 +310,34 @@ public class Program {
     }
 
     /**
-     * Updates the ansi compressor internal.
-     *
-     * @param ansiCompressor ansi compressor
+     * Sets ANSI compression (ignored).
+     * @param ansiCompressor whether to enable ANSI compression (ignored)
      */
     void setAnsiCompressorInternal(boolean ansiCompressor) {
         config.setAnsiCompressorInternal(ansiCompressor);
     }
 
     /**
-     * Updates the filter.
-     *
-     * @param filter filter
+     * Sets a message filter.
+     * @param filter message filter function
      */
     void setFilter(BiFunction<Model, Message, Message> filter) {
         config.setFilter(filter);
     }
 
     /**
-     * Updates the fps.
-     *
-     * @param fps fps
+     * Sets frames per second.
+     * @param fps frames per second
      */
     void setFps(int fps) {
         config.setFps(fps);
     }
 
     /**
-     * Updates the cancel signal.
-     *
+     * Sets the cancel signal.
      * @param cancelSignal cancel signal
      */
     void setCancelSignal(CompletableFuture<?> cancelSignal) {
         config.setCancelSignal(cancelSignal);
     }
 }
-

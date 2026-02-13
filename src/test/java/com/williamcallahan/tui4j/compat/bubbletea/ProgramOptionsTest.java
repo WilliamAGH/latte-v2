@@ -43,7 +43,7 @@ class ProgramOptionsTest {
                 ProgramOption.withInput(new ByteArrayInputStream(new byte[0])),
                 ProgramOption.withOutput(new ByteArrayOutputStream()));
 
-        Object renderer = getField(program, "renderer", Object.class);
+        Object renderer = getCoreField(program, "renderer", Object.class);
         assertThat(renderer).isInstanceOf(NilRenderer.class);
     }
 
@@ -137,13 +137,17 @@ class ProgramOptionsTest {
     }
 
     /**
-     * Reads a field directly from Program (for runtime state that stays on Program).
+     * Reads a field directly from ProgramCore (runtime state lives there).
      */
-    private static <T> T getField(Program program, String name, Class<T> type) {
+    private static <T> T getCoreField(Program program, String name, Class<T> type) {
         try {
-            Field field = Program.class.getDeclaredField(name);
+            Field coreField = Program.class.getDeclaredField("core");
+            coreField.setAccessible(true);
+            Object core = coreField.get(program);
+
+            Field field = ProgramCore.class.getDeclaredField(name);
             field.setAccessible(true);
-            return type.cast(field.get(program));
+            return type.cast(field.get(core));
         } catch (ReflectiveOperationException e) {
             throw new IllegalStateException("Failed to read field: " + name, e);
         }

@@ -23,8 +23,8 @@ class ScreenTest {
                 ProgramOption.withOutput(new ByteArrayOutputStream()));
 
         SpyRenderer renderer = new SpyRenderer();
-        setField(program, "renderer", renderer);
-        setField(program, "inputHandler", new NoopInputHandler());
+        setCoreField(program, "renderer", renderer);
+        setCoreField(program, "inputHandler", new NoopInputHandler());
 
         program.run();
 
@@ -36,22 +36,26 @@ class ScreenTest {
         assertThat(renderer.disableMouseCalled).isTrue();
     }
 
-    private static void setField(Program program, String name, Object value) throws Exception {
-        Field field = Program.class.getDeclaredField(name);
+    private static void setCoreField(Program program, String name, Object value) throws Exception {
+        Field coreField = Program.class.getDeclaredField("core");
+        coreField.setAccessible(true);
+        Object core = coreField.get(program);
+
+        Field field = ProgramCore.class.getDeclaredField(name);
         field.setAccessible(true);
-        field.set(program, value);
+        field.set(core, value);
     }
 
     private static final class ScreenModel implements Model {
         @Override
         public Command init() {
             return Command.sequence(
-                    () -> new ClearScreenMessage(),
-                    () -> new EnterAltScreenMessage(),
-                    () -> new ExitAltScreenMessage(),
-                    () -> new EnableMouseCellMotionMessage(),
-                    () -> new EnableMouseAllMotionMessage(),
-                    () -> new DisableMouseMessage(),
+                    ClearScreenMessage::new,
+                    EnterAltScreenMessage::new,
+                    ExitAltScreenMessage::new,
+                    EnableMouseCellMotionMessage::new,
+                    EnableMouseAllMotionMessage::new,
+                    DisableMouseMessage::new,
                     Command.quit()
             );
         }
