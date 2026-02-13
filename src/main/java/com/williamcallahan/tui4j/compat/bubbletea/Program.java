@@ -71,8 +71,9 @@ public class Program {
     static {
         try {
             com.williamcallahan.tui4j.compat.lipgloss.Renderer.defaultRenderer().hasDarkBackground();
-        } catch (Throwable ignored) {
+        } catch (Throwable e) {
             // Best-effort parity with bubbletea/tea_init.go.
+            logger.log(Level.FINE, "Dark-background probe failed during static init", e);
         }
     }
 
