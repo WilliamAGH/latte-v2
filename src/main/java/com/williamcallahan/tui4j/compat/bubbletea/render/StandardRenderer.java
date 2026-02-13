@@ -13,6 +13,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.jline.terminal.Terminal;
 import org.jline.utils.InfoCmp;
 
@@ -23,6 +25,7 @@ import org.jline.utils.InfoCmp;
  */
 public class StandardRenderer implements Renderer {
 
+    private static final Logger logger = Logger.getLogger(StandardRenderer.class.getName());
     private static final int DEFAULT_FPS = 60;
 
     private volatile boolean needsRender = true;
@@ -70,13 +73,11 @@ public class StandardRenderer implements Renderer {
         try {
             this.width = terminal.getWidth();
             this.height = terminal.getHeight();
-        } catch (Throwable t) {
-            // Log the error but fallback to safe defaults to prevent crash
-            // The renderer can recover when a window size message is received later
-            // Use system err/out sparingly or logger if available
-            System.err.println(
-                "Failed to get initial terminal size, defaulting to 80x24: " +
-                    t.getMessage()
+        } catch (Exception e) {
+            logger.log(
+                Level.WARNING,
+                "Failed to get initial terminal size, defaulting to 80x24",
+                e
             );
             this.width = 80;
             this.height = 24;
