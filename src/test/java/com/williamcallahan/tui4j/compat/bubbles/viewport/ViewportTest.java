@@ -10,15 +10,15 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ViewportTest {
+class ViewportTest {
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         TerminalInfo.provide(() -> new TerminalInfo(false, new NoColor()));
     }
 
     @Test
-    public void testNewViewport() {
+    void testNewViewport() {
         Viewport viewport = Viewport.create(80, 24);
         assertEquals(80, viewport.getWidth());
         assertEquals(24, viewport.getHeight());
@@ -28,7 +28,7 @@ public class ViewportTest {
     }
 
     @Test
-    public void testSetContent() {
+    void testSetContent() {
         Viewport viewport = Viewport.create(80, 10);
         String content = "line1\nline2\nline3\nline4\nline5";
         viewport.setContent(content);
@@ -37,7 +37,7 @@ public class ViewportTest {
     }
 
     @Test
-    public void testScrollDown() {
+    void testScrollDown() {
         Viewport viewport = Viewport.create(80, 2);
         String content = "line1\nline2\nline3\nline4\nline5\nline6\nline7\nline8\nline9\nline10";
         viewport.setContent(content);
@@ -53,7 +53,7 @@ public class ViewportTest {
     }
 
     @Test
-    public void testScrollUp() {
+    void testScrollUp() {
         Viewport viewport = Viewport.create(80, 2);
         String content = "line1\nline2\nline3\nline4\nline5\nline6\nline7\nline8\nline9\nline10";
         viewport.setContent(content);
@@ -70,7 +70,7 @@ public class ViewportTest {
     }
 
     @Test
-    public void testPageDown() {
+    void testPageDown() {
         Viewport viewport = Viewport.create(80, 3);
         String content = "line1\nline2\nline3\nline4\nline5\nline6\nline7\nline8\nline9\nline10";
         viewport.setContent(content);
@@ -88,7 +88,7 @@ public class ViewportTest {
     }
 
     @Test
-    public void testPageUp() {
+    void testPageUp() {
         Viewport viewport = Viewport.create(80, 3);
         String content = "line1\nline2\nline3\nline4\nline5\nline6\nline7\nline8\nline9\nline10";
         viewport.setContent(content);
@@ -104,7 +104,7 @@ public class ViewportTest {
     }
 
     @Test
-    public void testHalfPageDown() {
+    void testHalfPageDown() {
         Viewport viewport = Viewport.create(80, 4);
         String content = "line1\nline2\nline3\nline4\nline5\nline6\nline7\nline8\nline9\nline10";
         viewport.setContent(content);
@@ -117,7 +117,7 @@ public class ViewportTest {
     }
 
     @Test
-    public void testHalfPageUp() {
+    void testHalfPageUp() {
         Viewport viewport = Viewport.create(80, 4);
         String content = "line1\nline2\nline3\nline4\nline5\nline6\nline7\nline8\nline9\nline10";
         viewport.setContent(content);
@@ -130,7 +130,7 @@ public class ViewportTest {
     }
 
     @Test
-    public void testGotoTop() {
+    void testGotoTop() {
         Viewport viewport = Viewport.create(80, 3);
         String content = "line1\nline2\nline3\nline4\nline5\nline6\nline7\nline8\nline9\nline10";
         viewport.setContent(content);
@@ -144,7 +144,7 @@ public class ViewportTest {
     }
 
     @Test
-    public void testGotoBottom() {
+    void testGotoBottom() {
         Viewport viewport = Viewport.create(80, 3);
         String content = "line1\nline2\nline3\nline4\nline5\nline6\nline7\nline8\nline9\nline10";
         viewport.setContent(content);
@@ -155,7 +155,7 @@ public class ViewportTest {
     }
 
     @Test
-    public void testScrollPercent() {
+    void testScrollPercent() {
         Viewport viewport = Viewport.create(80, 2);
         String content = "line1\nline2\nline3\nline4\nline5\nline6\nline7\nline8\nline9\nline10";
         viewport.setContent(content);
@@ -173,7 +173,7 @@ public class ViewportTest {
     }
 
     @Test
-    public void testVisibleLineCount() {
+    void testVisibleLineCount() {
         Viewport viewport = Viewport.create(80, 5);
         String content = "line1\nline2\nline3\nline4\nline5\nline6\nline7\nline8\nline9\nline10";
         viewport.setContent(content);
@@ -188,7 +188,7 @@ public class ViewportTest {
     }
 
     @Test
-    public void testAtTop() {
+    void testAtTop() {
         Viewport viewport = Viewport.create(80, 3);
         String content = "line1\nline2\nline3\nline4\nline5\nline6\nline7\nline8\nline9\nline10";
         viewport.setContent(content);
@@ -203,7 +203,7 @@ public class ViewportTest {
     }
 
     @Test
-    public void testAtBottom() {
+    void testAtBottom() {
         Viewport viewport = Viewport.create(80, 3);
         String content = "line1\nline2\nline3\nline4\nline5\nline6\nline7\nline8\nline9\nline10";
         viewport.setContent(content);
@@ -215,7 +215,7 @@ public class ViewportTest {
     }
 
     @Test
-    public void testContentShorterThanViewport() {
+    void testContentShorterThanViewport() {
         Viewport viewport = Viewport.create(80, 10);
         String content = "line1\nline2\nline3";
         viewport.setContent(content);
@@ -226,7 +226,7 @@ public class ViewportTest {
     }
 
     @Test
-    public void testUpdateWithKeyBindings() {
+    void testUpdateWithKeyBindings() {
         Viewport viewport = Viewport.create(80, 5);
         String content = "line1\nline2\nline3\nline4\nline5\nline6\nline7\nline8\nline9\nline10";
         viewport.setContent(content);
@@ -243,7 +243,7 @@ public class ViewportTest {
     }
 
     @Test
-    public void testHorizontalScrolling() {
+    void testHorizontalScrolling() {
         Viewport viewport = Viewport.create(10, 3);
         viewport.setHorizontalStep(3);
         String content = "This is a very long line that should be truncated";
@@ -259,7 +259,7 @@ public class ViewportTest {
     }
 
     @Test
-    public void testView() {
+    void testView() {
         Viewport viewport = Viewport.create(80, 5);
         viewport.setContent("line1\nline2\nline3\nline4\nline5\nline6\nline7\nline8\nline9\nline10");
 
@@ -268,7 +268,7 @@ public class ViewportTest {
     }
 
     @Test
-    public void testMouseWheelSettings() {
+    void testMouseWheelSettings() {
         Viewport viewport = Viewport.create(80, 10);
 
         assertTrue(viewport.isMouseWheelEnabled());
@@ -282,7 +282,7 @@ public class ViewportTest {
     }
 
     @Test
-    public void testScrollDownClamping() {
+    void testScrollDownClamping() {
         Viewport viewport = Viewport.create(80, 5);
         String content = "line1\nline2\nline3\nline4\nline5";
         viewport.setContent(content);
@@ -292,7 +292,7 @@ public class ViewportTest {
     }
 
     @Test
-    public void testScrollUpClamping() {
+    void testScrollUpClamping() {
         Viewport viewport = Viewport.create(80, 5);
         String content = "line1\nline2\nline3\nline4\nline5\nline6\nline7\nline8\nline9\nline10";
         viewport.setContent(content);
@@ -303,7 +303,7 @@ public class ViewportTest {
     }
 
     @Test
-    public void testMaxYOffsetCalculation() {
+    void testMaxYOffsetCalculation() {
         Viewport viewport = Viewport.create(80, 3);
         String content = "line1\nline2\nline3\nline4\nline5\nline6\nline7\nline8\nline9\nline10";
         viewport.setContent(content);
@@ -313,17 +313,17 @@ public class ViewportTest {
     }
 
     @Test
-    public void testViewRendersContent() {
+    void testViewRendersContent() {
         Viewport viewport = Viewport.create(80, 5);
         viewport.setContent("line1\nline2\nline3\nline4\nline5\nline6\nline7\nline8\nline9\nline10");
 
         String view = viewport.view();
         assertNotNull(view);
-        assertTrue(view.length() > 0);
+        assertFalse(view.isEmpty());
     }
 
     @Test
-    public void testHorizontalScrollPercent() {
+    void testHorizontalScrollPercent() {
         Viewport viewport = Viewport.create(10, 3);
         String content = "This is a very long line that exceeds viewport width";
         viewport.setContent(content);
@@ -339,7 +339,7 @@ public class ViewportTest {
     }
 
     @Test
-    public void testPastBottom() {
+    void testPastBottom() {
         Viewport viewport = Viewport.create(80, 10);
         String content = "line1\nline2\nline3";
         viewport.setContent(content);
@@ -348,7 +348,7 @@ public class ViewportTest {
     }
 
     @Test
-    public void testSetStyle() {
+    void testSetStyle() {
         Viewport viewport = Viewport.create(80, 5);
         assertNotNull(viewport.getStyle());
 
@@ -358,7 +358,7 @@ public class ViewportTest {
     }
 
     @Test
-    public void testHighPerformanceRendering() {
+    void testHighPerformanceRendering() {
         Viewport viewport = Viewport.create(80, 5);
 
         assertFalse(viewport.isHighPerformanceRendering());
@@ -371,7 +371,7 @@ public class ViewportTest {
     }
 
     @Test
-    public void testYPosition() {
+    void testYPosition() {
         Viewport viewport = Viewport.create(80, 5);
 
         assertEquals(0, viewport.getYPosition());
@@ -381,7 +381,7 @@ public class ViewportTest {
     }
 
     @Test
-    public void testKeyMap() {
+    void testKeyMap() {
         Viewport viewport = Viewport.create(80, 5);
         KeyMap keyMap = viewport.getKeyMap();
 
@@ -393,14 +393,14 @@ public class ViewportTest {
     }
 
     @Test
-    public void testViewWithNoContent() {
+    void testViewWithNoContent() {
         Viewport viewport = Viewport.create(80, 5);
         String view = viewport.view();
         assertNotNull(view);
     }
 
     @Test
-    public void testSetContentWithEmptyString() {
+    void testSetContentWithEmptyString() {
         Viewport viewport = Viewport.create(80, 5);
         viewport.setContent("");
 
@@ -408,7 +408,7 @@ public class ViewportTest {
     }
 
     @Test
-    public void testSetContentWithNull() {
+    void testSetContentWithNull() {
         Viewport viewport = Viewport.create(80, 5);
         viewport.setContent(null);
 

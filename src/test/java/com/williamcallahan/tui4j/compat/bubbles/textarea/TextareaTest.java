@@ -9,7 +9,9 @@ import com.williamcallahan.tui4j.term.TerminalInfo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class TextareaTest {
@@ -109,7 +111,7 @@ class TextareaTest {
         textarea.setHeight(10);
         textarea.setPlaceholder("作業ディレクトリを指定してください");
 
-        textarea.view();
+        assertDoesNotThrow(textarea::view);
     }
 
     /**
@@ -236,6 +238,8 @@ class TextareaTest {
         textarea.setHeight(10);
 
         textarea.setEndOfBufferCharacter('~');
+        String view = textarea.view();
+        assertNotNull(view, "View should render after setting end-of-buffer character");
     }
 
     @Test
@@ -263,28 +267,28 @@ class TextareaTest {
     void testStyleClasses() {
         Textarea textarea = new Textarea();
         Textarea.Style style = textarea.style();
-        assertTrue(style != null, "Style should not be null");
+        assertNotNull(style, "Style should not be null");
     }
 
     @Test
     void testFocusedAndBlurredStyles() {
         Textarea textarea = new Textarea();
 
-        assertTrue(textarea.focusedStyle() != null, "Focused style should not be null");
-        assertTrue(textarea.blurredStyle() != null, "Blurred style should not be null");
+        assertNotNull(textarea.focusedStyle(), "Focused style should not be null");
+        assertNotNull(textarea.blurredStyle(), "Blurred style should not be null");
     }
 
     @Test
     void testCursorAccessor() {
         Textarea textarea = new Textarea();
 
-        assertTrue(textarea.cursor() != null, "Cursor should not be null");
+        assertNotNull(textarea.cursor(), "Cursor should not be null");
     }
 
     @Test
     void testLineInfoClass() {
-        new Textarea.LineInfo();
-        // Removed redundant null check
+        Textarea.LineInfo lineInfo = new Textarea.LineInfo();
+        assertNotNull(lineInfo, "LineInfo should be constructable");
     }
 
     @Test
@@ -304,7 +308,7 @@ class TextareaTest {
     void testKeyMapClass() {
         Textarea.KeyMap keyMap = new Textarea.KeyMap();
 
-        assertTrue(keyMap.characterForward() != null, "characterForward binding should not be null");
-        assertTrue(keyMap.characterBackward() != null, "characterBackward binding should not be null");
+        assertNotNull(keyMap.characterForward(), "characterForward binding should not be null");
+        assertNotNull(keyMap.characterBackward(), "characterBackward binding should not be null");
     }
 }
