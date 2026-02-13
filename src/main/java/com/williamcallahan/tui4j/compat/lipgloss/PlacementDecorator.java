@@ -1,6 +1,5 @@
 package com.williamcallahan.tui4j.compat.lipgloss;
 
-import com.williamcallahan.tui4j.compat.lipgloss.Position;
 import com.williamcallahan.tui4j.compat.lipgloss.Whitespace.WhitespaceOption;
 
 import static com.williamcallahan.tui4j.compat.lipgloss.Renderer.defaultRenderer;

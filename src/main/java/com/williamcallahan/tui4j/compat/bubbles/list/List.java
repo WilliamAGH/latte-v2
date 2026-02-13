@@ -1043,7 +1043,7 @@ public class List
         }
 
         if (!infiniteScrolling) {
-           return null;
+            return null;
         }
 
         paginator.setPage(paginator.totalPages() - 1);

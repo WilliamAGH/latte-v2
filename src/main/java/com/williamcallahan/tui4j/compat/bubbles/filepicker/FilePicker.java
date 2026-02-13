@@ -17,8 +17,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -51,7 +49,6 @@ public class FilePicker implements Model {
     private boolean fileAllowed;
     private boolean autoHeight;
     private int height;
-    private int cursor;
     private int selected;
     private int min;
     private int max;
