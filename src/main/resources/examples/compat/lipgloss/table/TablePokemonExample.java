@@ -1,8 +1,9 @@
-package com.williamcallahan.tui4j.examples.compat.lipgloss.table;
+package examples.compat.lipgloss.table;
 
 import com.williamcallahan.tui4j.compat.lipgloss.Style;
-import com.williamcallahan.tui4j.compat.lipgloss.Table;
+import com.williamcallahan.tui4j.compat.lipgloss.border.StandardBorder;
 import com.williamcallahan.tui4j.compat.lipgloss.color.Color;
+import com.williamcallahan.tui4j.compat.lipgloss.table.Table;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -84,22 +85,22 @@ public class TablePokemonExample {
         Style headerStyle = baseStyle.foreground(Color.color("252")).bold(true);
         Style selectedStyle = baseStyle.foreground(Color.color("#01BE85")).background(Color.color("#00432F"));
 
-        String[][] capitalizeHeaders = new String[HEADERS.length][1];
+        String[] capitalizeHeaders = new String[HEADERS.length];
         for (int i = 0; i < HEADERS.length; i++) {
-            capitalizeHeaders[i][0] = HEADERS[i].toUpperCase();
+            capitalizeHeaders[i] = HEADERS[i].toUpperCase();
         }
 
         Style finalBaseStyle = baseStyle.copy();
         Style finalHeaderStyle = headerStyle.copy();
         Style finalSelectedStyle = selectedStyle.copy();
 
-        Table t = new Table().
-                border(Table.Border.NORMAL).
+        Table t = Table.create().
+                border(StandardBorder.NormalBorder).
                 borderStyle(finalBaseStyle.foreground(Color.color("238"))).
                 headers(capitalizeHeaders)
                 .width(80)
                 .styleFunc((row, col) -> {
-                    if (row == Table.HeaderRow) {
+                    if (row == Table.HEADER_ROW) {
                         return finalHeaderStyle;
                     }
 

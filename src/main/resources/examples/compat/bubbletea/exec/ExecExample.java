@@ -1,4 +1,4 @@
-package com.williamcallahan.tui4j.examples.exec;
+package examples.compat.bubbletea.exec;
 
 import com.williamcallahan.tui4j.compat.bubbletea.Command;
 import com.williamcallahan.tui4j.compat.bubbletea.Model;
@@ -8,10 +8,7 @@ import com.williamcallahan.tui4j.compat.bubbletea.ExecCompletedMessage;
 import com.williamcallahan.tui4j.compat.bubbletea.KeyPressMessage;
 import com.williamcallahan.tui4j.compat.bubbletea.QuitMessage;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
 /**
  * Demonstrates launching an external editor from a TUI.
@@ -20,19 +17,13 @@ import java.nio.file.Path;
  */
 public class ExecExample implements Model {
 
-    private static final String TEMP_FILE = System.getProperty("java.io.tmpdir") + "/tui4j-editor-demo.txt";
-
     private String status;
-    private String editorContent;
-    private boolean isEditing;
 
     /**
      * Initializes the status prompt for the editor demo.
      */
     public ExecExample() {
         this.status = "Press 'e' to open your EDITOR";
-        this.editorContent = "";
-        this.isEditing = false;
     }
 
     /**
@@ -81,7 +72,6 @@ public class ExecExample implements Model {
             return UpdateResult.from(this);
         }
 
-        this.isEditing = true;
         this.status = "Opening " + editor + "...";
 
         ProcessBuilder processBuilder = new ProcessBuilder(editor.split("\\s+"));
@@ -96,7 +86,6 @@ public class ExecExample implements Model {
             }));
         } catch (IOException e) {
             this.status = "Failed to open editor: " + e.getMessage();
-            this.isEditing = false;
             return UpdateResult.from(this);
         }
     }
@@ -108,8 +97,6 @@ public class ExecExample implements Model {
      * @return updated model
      */
     private UpdateResult<? extends Model> handleExecCompleted(ExecCompletedMessage execCompleted) {
-        this.isEditing = false;
-
         if (execCompleted.error() != null) {
             this.status = "Editor error: " + execCompleted.error().getMessage();
         } else if (execCompleted.exitCode() != 0) {

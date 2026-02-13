@@ -1,4 +1,4 @@
-package com.williamcallahan.tui4j.examples.tetris;
+package examples.compat.bubbletea.tetris;
 
 import com.williamcallahan.tui4j.compat.bubbletea.Command;
 import com.williamcallahan.tui4j.compat.bubbletea.Message;
@@ -12,7 +12,7 @@ import com.williamcallahan.tui4j.compat.lipgloss.color.Color;
 import com.williamcallahan.tui4j.compat.lipgloss.join.HorizontalJoinDecorator;
 import com.williamcallahan.tui4j.compat.lipgloss.join.VerticalJoinDecorator;
 import com.williamcallahan.tui4j.compat.lipgloss.PlacementDecorator;
-import com.williamcallahan.tui4j.compat.bubbletea.CheckWindowSizeMessage;
+import com.williamcallahan.tui4j.message.CheckWindowSizeMessage;
 import com.williamcallahan.tui4j.compat.bubbletea.QuitMessage;
 import com.williamcallahan.tui4j.compat.bubbletea.WindowSizeMessage;
 

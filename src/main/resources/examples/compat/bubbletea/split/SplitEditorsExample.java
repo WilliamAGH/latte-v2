@@ -1,4 +1,4 @@
-package com.williamcallahan.tui4j.examples.split;
+package examples.compat.bubbletea.split;
 
 import com.williamcallahan.tui4j.compat.bubbletea.Command;
 import com.williamcallahan.tui4j.compat.bubbletea.Message;
@@ -10,7 +10,6 @@ import com.williamcallahan.tui4j.compat.bubbletea.input.key.KeyAliases;
 import com.williamcallahan.tui4j.compat.bubbletea.input.key.KeyAliases.KeyAlias;
 import com.williamcallahan.tui4j.compat.bubbletea.input.key.KeyType;
 import com.williamcallahan.tui4j.compat.lipgloss.Style;
-import com.williamcallahan.tui4j.compat.lipgloss.border.Border;
 import com.williamcallahan.tui4j.compat.lipgloss.border.StandardBorder;
 import com.williamcallahan.tui4j.compat.lipgloss.color.AdaptiveColor;
 import com.williamcallahan.tui4j.compat.bubbletea.KeyPressMessage;
@@ -153,28 +152,28 @@ public class SplitEditorsExample implements Model {
                 return UpdateResult.from(this);
             }
 
-            if (KeyAliases.getKeyType(KeyAlias.KeyCtrlN) == keyType) {
-                if (inputs.size() < MAX_INPUTS) {
-                    inputs.add(createTextarea());
-                    inputs.get(focus).blur();
-                    focus = inputs.size() - 1;
-                    inputs.get(focus).focus();
-                    updateKeybindings();
-                    sizeInputs();
-                    return UpdateResult.from(this);
-                }
+            if (KeyAliases.getKeyType(KeyAlias.KeyCtrlN) == keyType
+                    && inputs.size() < MAX_INPUTS) {
+                inputs.add(createTextarea());
+                inputs.get(focus).blur();
+                focus = inputs.size() - 1;
+                inputs.get(focus).focus();
+                updateKeybindings();
+                sizeInputs();
+                return UpdateResult.from(this);
             }
 
-            if (KeyAliases.getKeyType(KeyAlias.KeyCtrlW) == keyType) {
-                if (inputs.size() > MIN_INPUTS) {
-                    inputs.remove(inputs.size() - 1);
-                    if (focus > inputs.size() - 1) {
-                        focus = inputs.size() - 1;
-                    }
-                    updateKeybindings();
-                    sizeInputs();
-                    return UpdateResult.from(this);
+            if (KeyAliases.getKeyType(KeyAlias.KeyCtrlW) == keyType
+                    && inputs.size() > MIN_INPUTS) {
+                inputs.get(focus).blur();
+                inputs.remove(inputs.size() - 1);
+                if (focus > inputs.size() - 1) {
+                    focus = inputs.size() - 1;
                 }
+                inputs.get(focus).focus();
+                updateKeybindings();
+                sizeInputs();
+                return UpdateResult.from(this);
             }
         }
 

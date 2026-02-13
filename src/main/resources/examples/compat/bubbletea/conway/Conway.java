@@ -1,4 +1,4 @@
-package com.williamcallahan.tui4j.examples.conway;
+package examples.compat.bubbletea.conway;
 
 
 import com.williamcallahan.tui4j.compat.bubbletea.Command;

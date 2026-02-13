@@ -1,9 +1,10 @@
-package com.williamcallahan.tui4j.examples.compat.lipgloss.table;
+package examples.compat.lipgloss.table;
 
-import com.williamcallahan.tui4j.compat.lipgloss.Table;
+import com.williamcallahan.tui4j.compat.lipgloss.Position;
 import com.williamcallahan.tui4j.compat.lipgloss.Style;
-import com.williamcallahan.tui4j.compat.lipgloss.Table.Border;
+import com.williamcallahan.tui4j.compat.lipgloss.border.StandardBorder;
 import com.williamcallahan.tui4j.compat.lipgloss.color.Color;
+import com.williamcallahan.tui4j.compat.lipgloss.table.Table;
 
 /**
  * Example program demonstrating lipgloss table with multi-language content.
@@ -36,19 +37,19 @@ public class TableLanguagesExample {
         Style headerStyle = Style.newStyle()
                 .foreground(Color.color(PURPLE))
                 .bold(true)
-                .alignHorizontal(Style.Align.CENTER);
+                .alignHorizontal(Position.Center);
 
         Style cellStyle = Style.newStyle().padding(0, 1).width(14);
         Style oddRowStyle = cellStyle.foreground(Color.color(GRAY));
         Style evenRowStyle = cellStyle.foreground(Color.color(LIGHT_GRAY));
         Style borderStyle = Style.newStyle().foreground(Color.color(PURPLE));
 
-        Table t = new Table()
-                .border(Border.THICK)
+        Table t = Table.create()
+                .border(StandardBorder.ThickBorder)
                 .borderStyle(borderStyle)
                 .styleFunc((row, col) -> {
                     Style style;
-                    if (row == Table.HeaderRow) {
+                    if (row == Table.HEADER_ROW) {
                         return headerStyle;
                     }
 
@@ -59,7 +60,7 @@ public class TableLanguagesExample {
                     }
 
                     if (row < ROWS.length && "Arabic".equals(ROWS[row][0]) && col != 0) {
-                        return style.alignHorizontal(Style.Align.RIGHT);
+                        return style.alignHorizontal(Position.Right);
                     }
 
                     return style;
@@ -70,7 +71,7 @@ public class TableLanguagesExample {
             t.rows(row);
         }
 
-        t.rows("English", "You look absolutely fabulous.", "How's it going?");
+        t.row("English", "You look absolutely fabulous.", "How's it going?");
 
         System.out.println(t);
     }

@@ -1,4 +1,4 @@
-package com.williamcallahan.tui4j.examples.sendmsg;
+package examples.compat.bubbletea.sendmsg;
 
 import com.williamcallahan.tui4j.compat.bubbles.spinner.Spinner;
 import com.williamcallahan.tui4j.compat.bubbles.spinner.SpinnerType;

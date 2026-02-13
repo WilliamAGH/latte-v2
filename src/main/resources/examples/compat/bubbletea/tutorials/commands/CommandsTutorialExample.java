@@ -1,4 +1,4 @@
-package com.williamcallahan.tui4j.examples.tutorials.commands;
+package examples.compat.bubbletea.tutorials.commands;
 
 import com.williamcallahan.tui4j.compat.bubbletea.Command;
 import com.williamcallahan.tui4j.compat.bubbletea.KeyPressMessage;
@@ -9,7 +9,7 @@ import com.williamcallahan.tui4j.compat.bubbletea.QuitMessage;
 import com.williamcallahan.tui4j.compat.bubbletea.UpdateResult;
 import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.net.URL;
+import java.net.URI;
 
 /**
  * Tutorial example demonstrating commands and async work.
@@ -107,7 +107,7 @@ public class CommandsTutorialExample implements Model {
      */
     private static Message checkServer() {
         try {
-            HttpURLConnection connection = (HttpURLConnection) new URL(URL_TO_CHECK).openConnection();
+            HttpURLConnection connection = (HttpURLConnection) URI.create(URL_TO_CHECK).toURL().openConnection();
             connection.setConnectTimeout(10_000);
             connection.setReadTimeout(10_000);
             connection.setRequestMethod("GET");

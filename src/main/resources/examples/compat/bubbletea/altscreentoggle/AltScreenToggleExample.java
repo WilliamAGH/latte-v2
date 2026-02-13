@@ -1,4 +1,4 @@
-package com.williamcallahan.tui4j.examples.altscreentoggle;
+package examples.compat.bubbletea.altscreentoggle;
 
 import com.williamcallahan.tui4j.compat.bubbletea.Command;
 import com.williamcallahan.tui4j.compat.bubbletea.EnterAltScreenMessage;

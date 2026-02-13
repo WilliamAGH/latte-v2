@@ -1,9 +1,9 @@
-package com.williamcallahan.tui4j.examples.compat.lipgloss.list;
+package examples.compat.lipgloss.list;
 
-import com.williamcallahan.tui4j.compat.lipgloss.list.List;
+import com.williamcallahan.tui4j.compat.lipgloss.List;
 import com.williamcallahan.tui4j.compat.lipgloss.Style;
-import com.williamcallahan.tui4j.compat.lipgloss.list.ItemStyleFunc;
-import com.williamcallahan.tui4j.compat.lipgloss.list.EnumeratorStyleFunc;
+import com.williamcallahan.tui4j.compat.lipgloss.color.Color;
+import com.williamcallahan.tui4j.compat.lipgloss.tree.StyleFunction;
 
 /**
  * Example program demonstrating lipgloss list with document entries and timestamps.
@@ -47,27 +47,22 @@ public class ListGlowExample {
         String dimColor = "250";
         String highlightColor = "#EE6FF8";
 
-        ItemStyleFunc itemStyleFunc = (items, i) -> {
-            Style st = baseStyle;
+        StyleFunction itemStyleFunc = (items, i) -> {
             if (SELECTED == i) {
-                st = st.foreground(highlightColor);
-            } else {
-                st = st.foreground(dimColor);
+                return baseStyle.foreground(Color.color(highlightColor));
             }
-            return st;
+            return baseStyle.foreground(Color.color(dimColor));
         };
 
-        EnumeratorStyleFunc enumStyleFunc = (items, i) -> {
-            Style st = baseStyle;
+        StyleFunction enumStyleFunc = (items, i) -> {
             if (SELECTED == i) {
-                return Style.newStyle().foreground(highlightColor);
-            } else {
-                return Style.newStyle().foreground(dimColor);
+                return Style.newStyle().foreground(Color.color(highlightColor));
             }
+            return Style.newStyle().foreground(Color.color(dimColor));
         };
 
         List l = new List()
-                .enumerator(items -> SELECTED == items ? "│\n│" : " ")
+                .enumerator((children, index) -> SELECTED == index ? "│\n│" : " ")
                 .enumeratorStyleFunc(enumStyleFunc)
                 .itemStyleFunc(itemStyleFunc);
 

@@ -1,4 +1,4 @@
-package com.williamcallahan.tui4j.examples.listfancy;
+package examples.compat.bubbletea.listfancy;
 
 import java.util.ArrayList;
 import java.util.Arrays;

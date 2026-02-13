@@ -1,4 +1,4 @@
-package com.williamcallahan.tui4j.examples.tabs;
+package examples.compat.bubbletea.tabs;
 
 import com.williamcallahan.tui4j.ansi.TextWidth;
 import com.williamcallahan.tui4j.compat.bubbletea.Command;

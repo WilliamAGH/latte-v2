@@ -1,4 +1,4 @@
-package com.williamcallahan.tui4j.examples.preventquit;
+package examples.compat.bubbletea.preventquit;
 
 import com.williamcallahan.tui4j.compat.bubbletea.Command;
 import com.williamcallahan.tui4j.compat.bubbletea.Message;
@@ -11,7 +11,6 @@ import com.williamcallahan.tui4j.compat.bubbles.help.KeyMap;
 import com.williamcallahan.tui4j.compat.bubbles.key.Binding;
 import com.williamcallahan.tui4j.compat.bubbles.cursor.Cursor;
 import com.williamcallahan.tui4j.compat.lipgloss.Style;
-import com.williamcallahan.tui4j.compat.lipgloss.border.StandardBorder;
 import com.williamcallahan.tui4j.compat.lipgloss.color.Color;
 import com.williamcallahan.tui4j.compat.bubbletea.KeyPressMessage;
 import com.williamcallahan.tui4j.compat.bubbletea.QuitMessage;
@@ -24,10 +23,6 @@ public class PreventQuitExample implements Model {
 
     private static final Style CHOICE_STYLE = Style.newStyle().paddingLeft(1).foreground(Color.color("241"));
     private static final Style SAVE_TEXT_STYLE = Style.newStyle().foreground(Color.color("170"));
-    private static final Style QUIT_VIEW_STYLE = Style.newStyle()
-            .padding(1)
-            .border(StandardBorder.RoundedBorder)
-            .borderForeground(Color.color("170"));
 
     private Textarea textarea;
     private Help help;

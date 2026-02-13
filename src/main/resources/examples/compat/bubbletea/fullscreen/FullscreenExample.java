@@ -1,4 +1,4 @@
-package com.williamcallahan.tui4j.examples.fullscreen;
+package examples.compat.bubbletea.fullscreen;
 
 import com.williamcallahan.tui4j.compat.bubbletea.Command;
 import com.williamcallahan.tui4j.compat.bubbletea.Message;

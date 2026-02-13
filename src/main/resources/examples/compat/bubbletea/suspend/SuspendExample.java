@@ -1,4 +1,4 @@
-package com.williamcallahan.tui4j.examples.suspend;
+package examples.compat.bubbletea.suspend;
 
 import com.williamcallahan.tui4j.compat.bubbletea.Command;
 import com.williamcallahan.tui4j.compat.bubbletea.Message;

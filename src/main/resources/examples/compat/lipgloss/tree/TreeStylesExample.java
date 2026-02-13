@@ -1,9 +1,9 @@
-package com.williamcallahan.tui4j.examples.compat.lipgloss.tree;
+package examples.compat.lipgloss.tree;
 
-import com.williamcallahan.tui4j.compat.lipgloss.Tree;
+import com.williamcallahan.tui4j.compat.lipgloss.ListEnumerator;
 import com.williamcallahan.tui4j.compat.lipgloss.Style;
 import com.williamcallahan.tui4j.compat.lipgloss.color.Color;
-import com.williamcallahan.tui4j.compat.lipgloss.tree.Enumerator;
+import com.williamcallahan.tui4j.compat.lipgloss.tree.Tree;
 
 /**
  * Example program demonstrating lipgloss tree with multiple vendors.
@@ -15,7 +15,6 @@ import com.williamcallahan.tui4j.compat.lipgloss.tree.Enumerator;
 public class TreeStylesExample {
 
     private static final Style PURPLE = Style.newStyle().foreground(Color.color("99")).marginRight(1);
-    private static final Style PINK = Style.newStyle().foreground(Color.color("212")).marginRight(1);
 
     /**
      * Runs the example to render a tree with mixed enumerator styles.
@@ -23,12 +22,12 @@ public class TreeStylesExample {
      * @param args ignored
      */
     public static void main(String[] args) {
-        Tree t = Tree.root()
+        Tree t = new Tree()
                 .child("Glossier", "Claire's Boutique")
                 .child(
-                        Tree.root("Nyx")
-                                        .enumerator(Enumerator.ROMAN)
-                                        .item("Lip Gloss", "Foundation"),
+                        Tree.withRoot("Nyx")
+                                        .enumerator(ListEnumerator.roman())
+                                        .child("Lip Gloss", "Foundation"),
                         "Mac", "Milk"
                 )
                 .enumeratorStyle(PURPLE);

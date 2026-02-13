@@ -1,4 +1,4 @@
-package com.williamcallahan.tui4j.examples.compat.x.ansi;
+package examples.compat.x.ansi;
 
 import com.williamcallahan.tui4j.compat.x.ansi.StringWidth;
 import com.williamcallahan.tui4j.compat.x.ansi.Method;

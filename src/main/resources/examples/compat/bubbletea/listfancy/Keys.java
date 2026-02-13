@@ -1,4 +1,4 @@
-package com.williamcallahan.tui4j.examples.listfancy;
+package examples.compat.bubbletea.listfancy;
 
 import com.williamcallahan.tui4j.compat.bubbles.key.Binding;
 

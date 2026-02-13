@@ -1,6 +1,6 @@
-package com.williamcallahan.tui4j.examples.compat.lipgloss.tree;
+package examples.compat.lipgloss.tree;
 
-import com.williamcallahan.tui4j.compat.lipgloss.Tree;
+import com.williamcallahan.tui4j.compat.lipgloss.tree.Tree;
 import com.williamcallahan.tui4j.compat.lipgloss.Style;
 import com.williamcallahan.tui4j.compat.lipgloss.color.Color;
 
@@ -31,14 +31,14 @@ public class TreeBackgroundExample {
      * @param args ignored
      */
     public static void main(String[] args) {
-        Tree t = Tree.root("# Table of Contents")
+        Tree t = Tree.withRoot("# Table of Contents")
                 .rootStyle(HEADER_ITEM_STYLE)
                 .itemStyle(ITEM_STYLE)
                 .enumeratorStyle(ENUMERATOR_STYLE)
                 .child(
-                        Tree.root("## Chapter 1")
+                        Tree.withRoot("## Chapter 1")
                                 .child("Chapter 1.1", "Chapter 1.2"),
-                        Tree.root("## Chapter 2")
+                        Tree.withRoot("## Chapter 2")
                                 .child("Chapter 2.1", "Chapter 2.2")
                 );
 

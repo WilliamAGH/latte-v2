@@ -1,11 +1,10 @@
-package com.williamcallahan.tui4j.examples.compat.lipgloss.list;
+package examples.compat.lipgloss.list;
 
-import com.williamcallahan.tui4j.compat.lipgloss.list.List;
-import com.williamcallahan.tui4j.compat.lipgloss.list.Enumerator;
-import com.williamcallahan.tui4j.compat.lipgloss.list.EnumeratorStyleFunc;
-import com.williamcallahan.tui4j.compat.lipgloss.list.ItemStyleFunc;
+import com.williamcallahan.tui4j.compat.lipgloss.List;
 import com.williamcallahan.tui4j.compat.lipgloss.Style;
 import com.williamcallahan.tui4j.compat.lipgloss.color.Color;
+import com.williamcallahan.tui4j.compat.lipgloss.tree.StyleFunction;
+import com.williamcallahan.tui4j.compat.lipgloss.tree.TreeEnumerator;
 
 /**
  * Example program demonstrating lipgloss list with custom enumerator and item styles.
@@ -31,28 +30,31 @@ public class ListGroceryExample {
         Style highlightedEnumStyle = Style.newStyle().foreground(Color.color("10")).marginRight(1);
         Style itemStyle = Style.newStyle().foreground(Color.color("255"));
 
-        Enumerator groceryEnumerator = (items, i) -> {
+        TreeEnumerator groceryEnumerator = (children, i) -> {
+            String item = children.at(i).value();
             for (String purchased : PURCHASED) {
-                if (items.get(i).equals(purchased)) {
+                if (purchased.equals(item)) {
                     return "✓";
                 }
             }
             return "•";
         };
 
-        EnumeratorStyleFunc enumStyleFunc = (items, i) -> {
+        StyleFunction enumStyleFunc = (children, i) -> {
+            String item = children.at(i).value();
             for (String purchased : PURCHASED) {
-                if (items.get(i).equals(purchased)) {
+                if (purchased.equals(item)) {
                     return highlightedEnumStyle;
                 }
             }
             return dimEnumStyle;
         };
 
-        ItemStyleFunc itemStyleFunc = (items, i) -> {
+        StyleFunction itemStyleFunc = (children, i) -> {
+            String item = children.at(i).value();
             for (String purchased : PURCHASED) {
-                if (items.get(i).equals(purchased)) {
-                    return itemStyle.strikethrough(true);
+                if (purchased.equals(item)) {
+                    return itemStyle.faint(true);
                 }
             }
             return itemStyle;
