@@ -31,6 +31,7 @@ public class TickMessage implements Message {
      *
      * @return tick time
      */
+    @Deprecated(since = "0.3.0")
     public LocalDateTime time() {
         return delegate.time();
     }
@@ -40,6 +41,7 @@ public class TickMessage implements Message {
      *
      * @return spinner tag
      */
+    @Deprecated(since = "0.3.0")
     public int tag() {
         return delegate.tag();
     }
@@ -49,6 +51,7 @@ public class TickMessage implements Message {
      *
      * @return spinner id
      */
+    @Deprecated(since = "0.3.0")
     public int id() {
         return delegate.id();
     }
@@ -58,6 +61,7 @@ public class TickMessage implements Message {
      *
      * @return canonical TickMessage
      */
+    @Deprecated(since = "0.3.0")
     public com.williamcallahan.tui4j.compat.bubbles.spinner.TickMessage toCanonical() {
         return delegate;
     }

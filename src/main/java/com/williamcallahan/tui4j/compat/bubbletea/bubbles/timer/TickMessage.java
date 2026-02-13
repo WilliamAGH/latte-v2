@@ -29,6 +29,7 @@ public class TickMessage implements Message {
      *
      * @return timer id
      */
+    @Deprecated(since = "0.3.0")
     public int id() {
         return delegate.id();
     }
@@ -38,6 +39,7 @@ public class TickMessage implements Message {
      *
      * @return whether timeout
      */
+    @Deprecated(since = "0.3.0")
     public boolean timeout() {
         return delegate.timeout();
     }
@@ -47,6 +49,7 @@ public class TickMessage implements Message {
      *
      * @return timer tag
      */
+    @Deprecated(since = "0.3.0")
     public int tag() {
         return delegate.tag();
     }
@@ -56,6 +59,7 @@ public class TickMessage implements Message {
      *
      * @return canonical TickMessage
      */
+    @Deprecated(since = "0.3.0")
     public com.williamcallahan.tui4j.compat.bubbles.timer.TickMessage toCanonical() {
         return delegate;
     }

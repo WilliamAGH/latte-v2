@@ -28,6 +28,7 @@ public class StartStopMessage implements Message {
      *
      * @return timer id
      */
+    @Deprecated(since = "0.3.0")
     public int id() {
         return delegate.id();
     }
@@ -37,6 +38,7 @@ public class StartStopMessage implements Message {
      *
      * @return whether running
      */
+    @Deprecated(since = "0.3.0")
     public boolean running() {
         return delegate.running();
     }
@@ -46,6 +48,7 @@ public class StartStopMessage implements Message {
      *
      * @return canonical StartStopMessage
      */
+    @Deprecated(since = "0.3.0")
     public com.williamcallahan.tui4j.compat.bubbles.timer.StartStopMessage toCanonical() {
         return delegate;
     }

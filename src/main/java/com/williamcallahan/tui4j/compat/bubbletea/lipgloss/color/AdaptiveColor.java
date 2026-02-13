@@ -26,12 +26,14 @@ public final class AdaptiveColor implements TerminalColor {
         this.delegate = new com.williamcallahan.tui4j.compat.lipgloss.color.AdaptiveColor(light, dark);
     }
 
+    @Deprecated(since = "0.3.0")
     @Override
     public AttributedStyle applyAsBackground(AttributedStyle style,
             com.williamcallahan.tui4j.compat.lipgloss.Renderer renderer) {
         return delegate.applyAsBackground(style, renderer);
     }
 
+    @Deprecated(since = "0.3.0")
     @Override
     public AttributedStyle applyAsForeground(AttributedStyle style,
             com.williamcallahan.tui4j.compat.lipgloss.Renderer renderer) {
@@ -43,6 +45,7 @@ public final class AdaptiveColor implements TerminalColor {
      *
      * @return canonical AdaptiveColor
      */
+    @Deprecated(since = "0.3.0")
     public com.williamcallahan.tui4j.compat.lipgloss.color.AdaptiveColor toCanonical() {
         return delegate;
     }

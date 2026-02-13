@@ -32,7 +32,9 @@ public final class MarginDecorator {
      * @param attributedStyle style to preserve for margins
      * @param renderer        renderer to use
      * @return margined string
+     * @deprecated Use {@link com.williamcallahan.tui4j.compat.lipgloss.MarginDecorator#applyMargins} instead.
      */
+    @Deprecated(since = "0.3.0")
     public static String applyMargins(
         String input,
         int topMargin,

@@ -24,6 +24,7 @@ public class Spring {
      * @param n frames per second
      * @return time delta in seconds
      */
+    @Deprecated(since = "0.3.0", forRemoval = true)
     public static double fps(int n) {
         return com.williamcallahan.tui4j.compat.harmonica.Spring.fps(n);
     }
@@ -36,6 +37,7 @@ public class Spring {
      * @param dampingRatio damping ratio (1.0 = critically damped)
      * @return a new Spring instance
      */
+    @Deprecated(since = "0.3.0", forRemoval = true)
     public static Spring newSpring(double deltaTime, double angularFrequency, double dampingRatio) {
         return new Spring(
             com.williamcallahan.tui4j.compat.harmonica.Spring.newSpring(
@@ -53,6 +55,7 @@ public class Spring {
      * @param equilibriumPos equilibrium position
      * @return array containing new position and velocity
      */
+    @Deprecated(since = "0.3.0", forRemoval = true)
     public double[] update(double pos, double vel, double equilibriumPos) {
         return delegate.update(pos, vel, equilibriumPos);
     }

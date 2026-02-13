@@ -15,6 +15,7 @@ public class Size {
     /**
      * Creates Size to keep this component ready for use.
      */
+    @Deprecated(since = "0.3.0")
     public Size() {
         this.profile = null;
     }
@@ -34,6 +35,7 @@ public class Size {
      * @param str str
      * @return result
      */
+    @Deprecated(since = "0.3.0")
     public static int width(String str) {
         return com.williamcallahan.tui4j.compat.lipgloss.Size.width(str);
     }
@@ -44,6 +46,7 @@ public class Size {
      * @param str str
      * @return result
      */
+    @Deprecated(since = "0.3.0")
     public static int height(String str) {
         return com.williamcallahan.tui4j.compat.lipgloss.Size.height(str);
     }
@@ -54,6 +57,7 @@ public class Size {
      * @param profile profile
      * @return result
      */
+    @Deprecated(since = "0.3.0")
     public static Size withProfile(com.williamcallahan.tui4j.compat.bubbletea.lipgloss.color.ColorProfile profile) {
         return new Size(toCanonical(profile));
     }
@@ -63,6 +67,7 @@ public class Size {
      *
      * @return result
      */
+    @Deprecated(since = "0.3.0")
     public com.williamcallahan.tui4j.compat.lipgloss.color.ColorProfile profile() {
         return profile;
     }

@@ -11,6 +11,7 @@ public final class Runes extends com.williamcallahan.tui4j.compat.lipgloss.Runes
     /**
      * Creates a legacy runes helper.
      */
+    @Deprecated(since = "0.3.0")
     public Runes() {
         super();
     }

@@ -30,6 +30,7 @@ public class Keys {
     /**
      * Creates the default list key bindings.
      */
+    @Deprecated(since = "0.3.0")
     public Keys() {
         // Browsing
         this.cursorUp = new Binding(Binding.withKeys("up", "k"), Binding.withHelp("↑/k", "up"));
@@ -60,6 +61,7 @@ public class Keys {
      *
      * @return cursor up binding
      */
+    @Deprecated(since = "0.3.0")
     public Binding cursorUp() {
         return cursorUp;
     }
@@ -69,6 +71,7 @@ public class Keys {
      *
      * @return cursor down binding
      */
+    @Deprecated(since = "0.3.0")
     public Binding cursorDown() {
         return cursorDown;
     }
@@ -78,6 +81,7 @@ public class Keys {
      *
      * @return next page binding
      */
+    @Deprecated(since = "0.3.0")
     public Binding nextPage() {
         return nextPage;
     }
@@ -87,6 +91,7 @@ public class Keys {
      *
      * @return previous page binding
      */
+    @Deprecated(since = "0.3.0")
     public Binding prevPage() {
         return prevPage;
     }
@@ -96,6 +101,7 @@ public class Keys {
      *
      * @return go to start binding
      */
+    @Deprecated(since = "0.3.0")
     public Binding goToStart() {
         return goToStart;
     }
@@ -105,6 +111,7 @@ public class Keys {
      *
      * @return go to end binding
      */
+    @Deprecated(since = "0.3.0")
     public Binding goToEnd() {
         return goToEnd;
     }
@@ -114,6 +121,7 @@ public class Keys {
      *
      * @return filter binding
      */
+    @Deprecated(since = "0.3.0")
     public Binding filter() {
         return filter;
     }
@@ -123,6 +131,7 @@ public class Keys {
      *
      * @return clear filter binding
      */
+    @Deprecated(since = "0.3.0")
     public Binding clearFilter() {
         return clearFilter;
     }
@@ -132,6 +141,7 @@ public class Keys {
      *
      * @return cancel while filtering binding
      */
+    @Deprecated(since = "0.3.0")
     public Binding cancelWhileFiltering() {
         return cancelWhileFiltering;
     }
@@ -141,6 +151,7 @@ public class Keys {
      *
      * @return accept while filtering binding
      */
+    @Deprecated(since = "0.3.0")
     public Binding acceptWhileFiltering() {
         return acceptWhileFiltering;
     }
@@ -150,6 +161,7 @@ public class Keys {
      *
      * @return show full help binding
      */
+    @Deprecated(since = "0.3.0")
     public Binding showFullHelp() {
         return showFullHelp;
     }
@@ -159,6 +171,7 @@ public class Keys {
      *
      * @return close full help binding
      */
+    @Deprecated(since = "0.3.0")
     public Binding closeFullHelp() {
         return closeFullHelp;
     }
@@ -168,6 +181,7 @@ public class Keys {
      *
      * @return quit binding
      */
+    @Deprecated(since = "0.3.0")
     public Binding quit() {
         return quit;
     }
@@ -177,6 +191,7 @@ public class Keys {
      *
      * @return force quit binding
      */
+    @Deprecated(since = "0.3.0")
     public Binding forceQuit() {
         return forceQuit;
     }

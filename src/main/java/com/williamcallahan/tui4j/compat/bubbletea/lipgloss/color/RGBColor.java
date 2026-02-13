@@ -21,7 +21,9 @@ public final class RGBColor implements TerminalColor, RGBSupplier {
      * Creates an RGB color from a hex string.
      *
      * @param hexValue hex color (e.g., "#ff0000")
+     * @deprecated Use {@link com.williamcallahan.tui4j.compat.lipgloss.color.RGBColor#RGBColor(String)} instead.
      */
+    @Deprecated(since = "0.3.0")
     public RGBColor(String hexValue) {
         this.delegate =
             new com.williamcallahan.tui4j.compat.lipgloss.color.RGBColor(
@@ -35,7 +37,9 @@ public final class RGBColor implements TerminalColor, RGBSupplier {
      * @param r red channel (0-255)
      * @param g green channel (0-255)
      * @param b blue channel (0-255)
+     * @deprecated Use {@link com.williamcallahan.tui4j.compat.lipgloss.color.RGBColor#RGBColor(int, int, int)} instead.
      */
+    @Deprecated(since = "0.3.0")
     public RGBColor(int r, int g, int b) {
         this.delegate =
             new com.williamcallahan.tui4j.compat.lipgloss.color.RGBColor(
@@ -51,7 +55,9 @@ public final class RGBColor implements TerminalColor, RGBSupplier {
      * @param style style to update
      * @param renderer renderer context
      * @return updated style
+     * @deprecated Use canonical {@link com.williamcallahan.tui4j.compat.lipgloss.color.RGBColor} instead.
      */
+    @Deprecated(since = "0.3.0")
     @Override
     public AttributedStyle applyAsBackground(
         AttributedStyle style,
@@ -66,7 +72,9 @@ public final class RGBColor implements TerminalColor, RGBSupplier {
      * @param style style to update
      * @param renderer canonical renderer context
      * @return updated style
+     * @deprecated Use canonical {@link com.williamcallahan.tui4j.compat.lipgloss.color.RGBColor} instead.
      */
+    @Deprecated(since = "0.3.0")
     public AttributedStyle applyAsBackground(
         AttributedStyle style,
         com.williamcallahan.tui4j.compat.lipgloss.Renderer renderer
@@ -80,7 +88,9 @@ public final class RGBColor implements TerminalColor, RGBSupplier {
      * @param style style to update
      * @param renderer renderer context
      * @return updated style
+     * @deprecated Use canonical {@link com.williamcallahan.tui4j.compat.lipgloss.color.RGBColor} instead.
      */
+    @Deprecated(since = "0.3.0")
     @Override
     public AttributedStyle applyAsForeground(
         AttributedStyle style,
@@ -95,7 +105,9 @@ public final class RGBColor implements TerminalColor, RGBSupplier {
      * @param style style to update
      * @param renderer canonical renderer context
      * @return updated style
+     * @deprecated Use canonical {@link com.williamcallahan.tui4j.compat.lipgloss.color.RGBColor} instead.
      */
+    @Deprecated(since = "0.3.0")
     public AttributedStyle applyAsForeground(
         AttributedStyle style,
         com.williamcallahan.tui4j.compat.lipgloss.Renderer renderer
@@ -107,7 +119,9 @@ public final class RGBColor implements TerminalColor, RGBSupplier {
      * Returns the RGB value for this color.
      *
      * @return RGB value
+     * @deprecated Use canonical {@link com.williamcallahan.tui4j.compat.lipgloss.color.RGBColor#rgb()} instead.
      */
+    @Deprecated(since = "0.3.0")
     @Override
     public com.williamcallahan.tui4j.compat.lipgloss.color.RGB rgb() {
         return delegate.rgb();
@@ -117,7 +131,9 @@ public final class RGBColor implements TerminalColor, RGBSupplier {
      * Converts this color to the closest ANSI 256-color entry.
      *
      * @return ANSI 256 color
+     * @deprecated Use canonical {@link com.williamcallahan.tui4j.compat.lipgloss.color.RGBColor#toANSI256Color()} instead.
      */
+    @Deprecated(since = "0.3.0")
     public com.williamcallahan.tui4j.compat.lipgloss.color.ANSI256Color toANSI256Color() {
         return delegate.toANSI256Color();
     }
@@ -126,7 +142,10 @@ public final class RGBColor implements TerminalColor, RGBSupplier {
      * Returns the canonical RGB color delegate.
      *
      * @return canonical RGB color
+     * @deprecated Use canonical {@link com.williamcallahan.tui4j.compat.lipgloss.color.RGBColor} directly.
      */
+    @Deprecated(since = "0.3.0")
+    @Override
     public com.williamcallahan.tui4j.compat.lipgloss.color.RGBColor toCanonical() {
         return delegate;
     }

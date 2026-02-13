@@ -1,6 +1,5 @@
 package com.williamcallahan.tui4j.compat.bubbletea.bubbles.runeutil;
 
-import com.ibm.icu.lang.UCharacter;
 import java.util.function.Consumer;
 
 /**

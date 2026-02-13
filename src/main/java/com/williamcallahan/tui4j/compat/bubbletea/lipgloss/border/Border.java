@@ -42,7 +42,9 @@ public record Border(
      * Handles to new for this component.
      *
      * @return result
+     * @deprecated Use {@link com.williamcallahan.tui4j.compat.lipgloss.border.Border} directly.
      */
+    @Deprecated(since = "0.3.0")
     public com.williamcallahan.tui4j.compat.lipgloss.border.Border toNew() {
         return new com.williamcallahan.tui4j.compat.lipgloss.border.Border(
                 top, bottom, left, right, topLeft, topRight, bottomLeft, bottomRight,
@@ -55,7 +57,9 @@ public record Border(
      *
      * @param b b
      * @return result
+     * @deprecated Use {@link com.williamcallahan.tui4j.compat.lipgloss.border.Border} directly.
      */
+    @Deprecated(since = "0.3.0")
     public static Border fromNew(com.williamcallahan.tui4j.compat.lipgloss.border.Border b) {
         if (b == null) return null;
         return new Border(
@@ -68,25 +72,33 @@ public record Border(
      * Returns the top size.
      *
      * @return result
+     * @deprecated Use {@link com.williamcallahan.tui4j.compat.lipgloss.border.Border#getTopSize()} instead.
      */
+    @Deprecated(since = "0.3.0")
     public int getTopSize() { return toNew().getTopSize(); }
     /**
      * Returns the right size.
      *
      * @return result
+     * @deprecated Use {@link com.williamcallahan.tui4j.compat.lipgloss.border.Border#getRightSize()} instead.
      */
+    @Deprecated(since = "0.3.0")
     public int getRightSize() { return toNew().getRightSize(); }
     /**
      * Returns the bottom size.
      *
      * @return result
+     * @deprecated Use {@link com.williamcallahan.tui4j.compat.lipgloss.border.Border#getBottomSize()} instead.
      */
+    @Deprecated(since = "0.3.0")
     public int getBottomSize() { return toNew().getBottomSize(); }
     /**
      * Returns the left size.
      *
      * @return result
+     * @deprecated Use {@link com.williamcallahan.tui4j.compat.lipgloss.border.Border#getLeftSize()} instead.
      */
+    @Deprecated(since = "0.3.0")
     public int getLeftSize() { return toNew().getLeftSize(); }
 
     /**
@@ -107,7 +119,9 @@ public record Border(
      * @param borderLeftBackground border left background
      * @param renderer renderer
      * @return result
+     * @deprecated Use {@link com.williamcallahan.tui4j.compat.lipgloss.border.Border#applyBorders} instead.
      */
+    @Deprecated(since = "0.3.0")
     public String applyBorders(
         String string,
         boolean hasTop,

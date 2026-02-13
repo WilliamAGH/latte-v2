@@ -15,6 +15,7 @@ public class TreeStyle extends com.williamcallahan.tui4j.compat.lipgloss.tree.Tr
     /**
      * Creates TreeStyle to keep this component ready for use.
      */
+    @Deprecated(since = "0.3.0")
     public TreeStyle() {
         super();
         this.delegate = this;
@@ -32,7 +33,9 @@ public class TreeStyle extends com.williamcallahan.tui4j.compat.lipgloss.tree.Tr
      * Creates TreeStyle to keep this component ready for use.
      *
      * @param delegate delegate
+     * @deprecated Use {@link com.williamcallahan.tui4j.compat.lipgloss.tree.TreeStyle} instead.
      */
+    @Deprecated(since = "0.3.0")
     TreeStyle(com.williamcallahan.tui4j.compat.lipgloss.tree.TreeStyle delegate) {
         super();
         this.delegate = delegate;
@@ -51,6 +54,7 @@ public class TreeStyle extends com.williamcallahan.tui4j.compat.lipgloss.tree.Tr
      *
      * @return result
      */
+    @Deprecated(since = "0.3.0")
     @Override
     public com.williamcallahan.tui4j.compat.lipgloss.Style rootStyle() {
         if (delegate == this) {
@@ -64,6 +68,7 @@ public class TreeStyle extends com.williamcallahan.tui4j.compat.lipgloss.tree.Tr
      *
      * @return result
      */
+    @Deprecated(since = "0.3.0")
     @Override
     public StyleFunction enumeratorFunction() {
         if (delegate == this) {
@@ -77,6 +82,7 @@ public class TreeStyle extends com.williamcallahan.tui4j.compat.lipgloss.tree.Tr
      *
      * @return result
      */
+    @Deprecated(since = "0.3.0")
     @Override
     public StyleFunction itemFunction() {
         if (delegate == this) {
@@ -87,15 +93,14 @@ public class TreeStyle extends com.williamcallahan.tui4j.compat.lipgloss.tree.Tr
 
     /**
      * Updates the enumerator function.
+     * <p>
+     * Intentional overload for backward compatibility with the deprecated {@link StyleFunction} subtype.
      *
      * @param enumeratorFunction enumerator function
      */
+    @Deprecated(since = "0.3.0")
     public void setEnumeratorFunction(StyleFunction enumeratorFunction) {
-        if (delegate == this) {
-            super.setEnumeratorFunction(enumeratorFunction);
-            return;
-        }
-        delegate.setEnumeratorFunction(enumeratorFunction);
+        setEnumeratorFunction((com.williamcallahan.tui4j.compat.lipgloss.tree.StyleFunction) enumeratorFunction);
     }
 
     /**
@@ -103,6 +108,7 @@ public class TreeStyle extends com.williamcallahan.tui4j.compat.lipgloss.tree.Tr
      *
      * @param enumeratorFunction enumerator function
      */
+    @Deprecated(since = "0.3.0")
     @Override
     public void setEnumeratorFunction(com.williamcallahan.tui4j.compat.lipgloss.tree.StyleFunction enumeratorFunction) {
         if (delegate == this) {
@@ -114,17 +120,15 @@ public class TreeStyle extends com.williamcallahan.tui4j.compat.lipgloss.tree.Tr
 
     /**
      * Updates the root style.
+     * <p>
+     * Intentional overload for backward compatibility with the deprecated Style subtype.
      *
      * @param rootStyle root style
      * @deprecated Deprecated in tui4j as of 0.3.0 because you should use {@link #setRootStyle(com.williamcallahan.tui4j.compat.lipgloss.Style)} instead.
      */
     @Deprecated(since = "0.3.0")
     public void setRootStyle(com.williamcallahan.tui4j.compat.bubbletea.lipgloss.Style rootStyle) {
-        if (delegate == this) {
-            super.setRootStyle(rootStyle);
-            return;
-        }
-        delegate.setRootStyle(rootStyle);
+        setRootStyle((com.williamcallahan.tui4j.compat.lipgloss.Style) rootStyle);
     }
 
     /**
@@ -132,6 +136,7 @@ public class TreeStyle extends com.williamcallahan.tui4j.compat.lipgloss.tree.Tr
      *
      * @param rootStyle root style
      */
+    @Deprecated(since = "0.3.0")
     @Override
     public void setRootStyle(com.williamcallahan.tui4j.compat.lipgloss.Style rootStyle) {
         if (delegate == this) {
@@ -143,15 +148,14 @@ public class TreeStyle extends com.williamcallahan.tui4j.compat.lipgloss.tree.Tr
 
     /**
      * Updates the item function.
+     * <p>
+     * Intentional overload for backward compatibility with the deprecated {@link StyleFunction} subtype.
      *
      * @param itemFunction item function
      */
+    @Deprecated(since = "0.3.0")
     public void setItemFunction(StyleFunction itemFunction) {
-        if (delegate == this) {
-            super.setItemFunction(itemFunction);
-            return;
-        }
-        delegate.setItemFunction(itemFunction);
+        setItemFunction((com.williamcallahan.tui4j.compat.lipgloss.tree.StyleFunction) itemFunction);
     }
 
     /**
@@ -159,6 +163,7 @@ public class TreeStyle extends com.williamcallahan.tui4j.compat.lipgloss.tree.Tr
      *
      * @param itemFunction item function
      */
+    @Deprecated(since = "0.3.0")
     @Override
     public void setItemFunction(com.williamcallahan.tui4j.compat.lipgloss.tree.StyleFunction itemFunction) {
         if (delegate == this) {

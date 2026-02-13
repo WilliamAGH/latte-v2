@@ -16,6 +16,7 @@ public class NodeChildren extends com.williamcallahan.tui4j.compat.lipgloss.tree
      *
      * @param children children
      */
+    @Deprecated(since = "0.3.0")
     public NodeChildren(List<Node> children) {
         super(toNewList(children));
     }
@@ -23,6 +24,7 @@ public class NodeChildren extends com.williamcallahan.tui4j.compat.lipgloss.tree
     /**
      * Creates NodeChildren to keep this component ready for use.
      */
+    @Deprecated(since = "0.3.0")
     public NodeChildren() {
         super();
     }
@@ -33,6 +35,7 @@ public class NodeChildren extends com.williamcallahan.tui4j.compat.lipgloss.tree
      * @param index index
      * @return result
      */
+    @Deprecated(since = "0.3.0")
     @Override
     public Node at(int index) {
         return (Node) super.at(index);
@@ -44,6 +47,7 @@ public class NodeChildren extends com.williamcallahan.tui4j.compat.lipgloss.tree
      * @param index index
      * @return result
      */
+    @Deprecated(since = "0.3.0")
     @Override
     public Children remove(int index) {
         return (Children) super.remove(index);
@@ -55,6 +59,7 @@ public class NodeChildren extends com.williamcallahan.tui4j.compat.lipgloss.tree
      * @param child child
      * @return result
      */
+    @Deprecated(since = "0.3.0")
     public Children append(Node child) {
         return (Children) super.append(child);
     }

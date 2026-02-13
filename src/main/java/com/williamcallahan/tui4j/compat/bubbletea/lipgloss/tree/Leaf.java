@@ -20,6 +20,7 @@ public class Leaf extends com.williamcallahan.tui4j.compat.lipgloss.tree.Leaf {
      *
      * @param value the leaf value
      */
+    @Deprecated(since = "0.3.0")
     public Leaf(String value) {
         super(value);
     }
