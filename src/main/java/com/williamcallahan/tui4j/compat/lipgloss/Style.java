@@ -95,7 +95,13 @@ public class Style {
         this.renderer = renderer;
     }
 
-    private Style(Style source) {
+    /**
+     * Copy constructor that duplicates all styling properties from the source.
+     * Protected to allow deprecated shim subclasses to support {@link #copy()}.
+     *
+     * @param source style to copy from
+     */
+    protected Style(Style source) {
         this.renderer = source.renderer;
         this.value = source.value;
         this.transformFunction = source.transformFunction;
