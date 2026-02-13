@@ -1,9 +1,5 @@
 package com.williamcallahan.tui4j.compat.bubbletea;
 
-import com.williamcallahan.tui4j.compat.bubbletea.BatchMessage;
-import com.williamcallahan.tui4j.compat.bubbletea.ExecProcessMessage;
-import com.williamcallahan.tui4j.compat.bubbletea.QuitMessage;
-import com.williamcallahan.tui4j.compat.bubbletea.SequenceMessage;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;

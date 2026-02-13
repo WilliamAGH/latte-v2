@@ -283,7 +283,7 @@ class TextareaTest {
 
     @Test
     void testLineInfoClass() {
-        Textarea.LineInfo lineInfo = new Textarea.LineInfo();
+        new Textarea.LineInfo();
         // Removed redundant null check
     }
 
