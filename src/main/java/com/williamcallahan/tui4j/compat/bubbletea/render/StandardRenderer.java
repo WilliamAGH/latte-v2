@@ -74,6 +74,9 @@ public class StandardRenderer implements Renderer {
             this.width = terminal.getWidth();
             this.height = terminal.getHeight();
         } catch (Exception e) {
+            // Fallback to 80x24: acceptable because handleMessage(WindowSizeMessage)
+            // updates width/height on every terminal resize event, so the renderer
+            // self-corrects as soon as the first resize signal arrives.
             logger.log(
                 Level.WARNING,
                 "Failed to get initial terminal size, defaulting to 80x24",
