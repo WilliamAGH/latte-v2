@@ -45,12 +45,12 @@ record BorderCharacters(
                                     boolean hasRight,
                                     boolean hasBottom,
                                     boolean hasLeft) {
-        String left = hasLeft ? defaultIfBlank(border.left()) : border.left();
-        String right = hasRight ? defaultIfBlank(border.right()) : border.right();
+        String left = defaultIfBlank(border.left());
+        String right = defaultIfBlank(border.right());
 
         return new BorderCharacters(
-                border.top(),
-                border.bottom(),
+                defaultIfBlank(border.top()),
+                defaultIfBlank(border.bottom()),
                 left,
                 right,
                 resolveCorner(border.topLeft(), hasTop, hasLeft),
