@@ -39,6 +39,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.logging.Level;
@@ -62,16 +63,18 @@ import org.jline.utils.Signals;
  */
 public class Program {
 
-    private static final int DEFAULT_FPS = 60;
-    private static final int MAX_FPS = 120;
+    static final int DEFAULT_FPS = ProgramConfiguration.DEFAULT_FPS;
+    static final int MAX_FPS = ProgramConfiguration.MAX_FPS;
     private static final Logger logger = Logger.getLogger(
         Program.class.getName()
     );
 
+    private final ProgramConfiguration config = new ProgramConfiguration();
+
     static {
         try {
             com.williamcallahan.tui4j.compat.lipgloss.Renderer.defaultRenderer().hasDarkBackground();
-        } catch (Throwable e) {
+        } catch (Exception e) {
             // Best-effort parity with bubbletea/tea_init.go.
             logger.log(Level.FINE, "Dark-background probe failed during static init", e);
         }
@@ -85,60 +88,23 @@ public class Program {
     private InputHandler inputHandler;
 
     private Throwable lastError;
-    private volatile Model currentModel;
+    private final AtomicReference<Model> currentModel;
     private Renderer renderer;
     private Terminal terminal;
-    private boolean systemTerminal;
     private boolean terminalIsTty;
     private final MouseSelectionTracker mouseSelectionTracker =
         new MouseSelectionTracker();
     private final MouseHoverTextDetector mouseHoverTextDetector =
         new MouseHoverTextDetector();
     private final MouseClickTracker mouseClickTracker = new MouseClickTracker();
-    private boolean extendSelectionOnScroll;
-    private boolean manageMouseSelectionCursor;
     private boolean mouseSelectionCursorActive;
-    private boolean hoverTextCursorEnabled;
     private boolean hoverTextCursorActive;
-    private boolean mouseTargetCursorEnabled;
     private MouseCursor currentTargetCursor;
-    private boolean mouseClicksEnabled;
     private volatile boolean isSuspended = false;
 
     private MouseSelectionAutoScroller mouseSelectionAutoScroller;
 
-    private int fps = DEFAULT_FPS;
-    private boolean withoutSignalHandler;
-    private boolean withoutCatchPanics;
-    private final AtomicBoolean ignoreSignals = new AtomicBoolean(false);
-    private boolean withoutBracketedPaste;
-    private boolean withoutRenderer;
-
-    /**
-     * Whether ANSI sequence compression is enabled (currently ignored).
-     * <p>
-     * Mirrors Go Bubble Tea's {@code WithANSICompressor()} option and is accepted
-     * for API compatibility only.
-     */
-    private boolean ansiCompressor;
-
-    private boolean enableAltScreen;
-    private boolean enableMouseAllMotion;
-    private boolean enableMouseCellMotion;
-    private boolean enableReportFocus;
-    private boolean enableKittyKeyboard;
-    private BiFunction<Model, Message, Message> filter;
-    private CompletableFuture<?> cancelSignal;
-    private InputStream input = System.in;
-    private OutputStream output = System.out;
-    private boolean inputDisabled;
-    private boolean useInputTTY;
     private InputStream openedInput;
-    // SSH/remote session support - passes environment to lipgloss for terminal capability detection
-    private List<String> environment;
-    private boolean selectionAutoScrollEnabled;
-    private int selectionAutoScrollEdgeRows = 1;
-    private int selectionAutoScrollIntervalMs = 50;
 
     private long currentSequenceId = 0;
     private long lastHandledSequenceId = 0;
@@ -159,7 +125,7 @@ public class Program {
      * @param options options
      */
     public Program(Model initialModel, ProgramOption... options) {
-        this.currentModel = initialModel;
+        this.currentModel = new AtomicReference<>(initialModel);
         this.commandExecutor = new CommandExecutor();
         if (options != null) {
             for (ProgramOption option : options) {
@@ -177,8 +143,8 @@ public class Program {
     private void initializeTerminal() {
         try {
             InputStream resolvedInput = resolveInputStream();
-            OutputStream resolvedOutput = output == null ? System.out : output;
-            this.systemTerminal = isSystemTerminal(
+            OutputStream resolvedOutput = config.output() == null ? System.out : config.output();
+            boolean systemTerminal = isSystemTerminal(
                 resolvedInput,
                 resolvedOutput
             );
@@ -198,7 +164,7 @@ public class Program {
             } else {
                 TerminalBuilder builder = TerminalBuilder.builder()
                     .jni(true)
-                    .system(this.systemTerminal);
+                    .system(systemTerminal);
 
                 if (!systemTerminal) {
                     builder.streams(resolvedInput, resolvedOutput);
@@ -215,21 +181,21 @@ public class Program {
             TerminalInfo.provide(new JLineTerminalInfoProvider(terminal));
 
             // Wire environment to lipgloss for SSH/remote session support
-            if (environment != null && !environment.isEmpty()) {
+            if (config.environment() != null && !config.environment().isEmpty()) {
                 com.williamcallahan.tui4j.compat.lipgloss.Renderer.defaultRenderer().setEnvironment(
-                    environment
+                    config.environment()
                 );
             }
 
-            if (withoutRenderer) {
+            if (config.isWithoutRenderer()) {
                 this.renderer = new NilRenderer();
             } else {
                 this.renderer = new StandardRenderer(
                     terminal,
-                    normalizeFps(fps)
+                    config.normalizeFps(config.fps())
                 );
             }
-            this.inputHandler = inputDisabled
+            this.inputHandler = config.isInputDisabled()
                 ? new NoopInputHandler()
                 : createInputHandler(terminal);
             this.mouseSelectionAutoScroller = new MouseSelectionAutoScroller(
@@ -239,7 +205,7 @@ public class Program {
             );
             applySelectionAutoScrollConfig();
         } catch (IOException e) {
-            throw new RuntimeException("Failed to initialize terminal", e);
+            throw new UncheckedIOException("Failed to initialize terminal", e);
         }
     }
 
@@ -274,7 +240,7 @@ public class Program {
      * @return result
      */
     public Program withAltScreen() {
-        enableAltScreen = true;
+        config.setEnableAltScreen(true);
         if (renderer != null) {
             renderer.enterAltScreen();
         }
@@ -287,7 +253,7 @@ public class Program {
      * @return result
      */
     public Program withReportFocus() {
-        enableReportFocus = true;
+        config.setEnableReportFocus(true);
         if (renderer != null) {
             renderer.enableReportFocus();
         }
@@ -306,7 +272,7 @@ public class Program {
      * @see <a href="https://sw.kovidgoyal.net/kitty/keyboard-protocol/">Kitty Keyboard Protocol</a>
      */
     public Program withKittyKeyboard() {
-        enableKittyKeyboard = true;
+        config.setEnableKittyKeyboard(true);
         if (renderer != null) {
             renderer.enableKittyKeyboard();
         }
@@ -319,8 +285,8 @@ public class Program {
      * @return result
      */
     public Program withMouseAllMotion() {
-        enableMouseAllMotion = true;
-        enableMouseCellMotion = false;
+        config.setEnableMouseAllMotion(true);
+        config.setEnableMouseCellMotion(false);
         if (renderer != null) {
             renderer.enableMouseAllMotion();
             renderer.enableMouseSGRMode();
@@ -334,8 +300,8 @@ public class Program {
      * @return result
      */
     public Program withMouseCellMotion() {
-        enableMouseCellMotion = true;
-        enableMouseAllMotion = false;
+        config.setEnableMouseCellMotion(true);
+        config.setEnableMouseAllMotion(false);
         if (renderer != null) {
             renderer.enableMouseCellMotion();
             renderer.enableMouseSGRMode();
@@ -349,7 +315,7 @@ public class Program {
      * @return this program for chaining
      */
     public Program withMouseSelectionExtendOnScroll() {
-        this.extendSelectionOnScroll = true;
+        config.setExtendSelectionOnScroll(true);
         return this;
     }
 
@@ -366,8 +332,8 @@ public class Program {
         // must also
         // preserve selection during scroll to avoid breaking the user's selection
         // state.
-        this.extendSelectionOnScroll = true;
-        selectionAutoScrollEnabled = true;
+        config.setExtendSelectionOnScroll(true);
+        config.setSelectionAutoScrollEnabled(true);
         if (mouseSelectionAutoScroller != null) {
             mouseSelectionAutoScroller.enable();
         }
@@ -384,10 +350,10 @@ public class Program {
      * @return this program for chaining
      */
     public Program withMouseSelectionAutoScroll(int edgeRows, int intervalMs) {
-        this.extendSelectionOnScroll = true;
-        selectionAutoScrollEnabled = true;
-        selectionAutoScrollEdgeRows = edgeRows;
-        selectionAutoScrollIntervalMs = intervalMs;
+        config.setExtendSelectionOnScroll(true);
+        config.setSelectionAutoScrollEnabled(true);
+        config.setSelectionAutoScrollEdgeRows(edgeRows);
+        config.setSelectionAutoScrollIntervalMs(intervalMs);
         if (mouseSelectionAutoScroller != null) {
             mouseSelectionAutoScroller.configure(edgeRows, intervalMs);
         }
@@ -400,7 +366,7 @@ public class Program {
      * @return this program for chaining
      */
     public Program withMouseSelectionCursor() {
-        this.manageMouseSelectionCursor = true;
+        config.setManageMouseSelectionCursor(true);
         return this;
     }
 
@@ -411,7 +377,7 @@ public class Program {
      * @return this program for chaining
      */
     public Program withMouseHoverTextCursor() {
-        this.hoverTextCursorEnabled = true;
+        config.setHoverTextCursorEnabled(true);
         return this;
     }
 
@@ -424,7 +390,7 @@ public class Program {
      * @return this program for chaining
      */
     public Program withMouseTargetCursor() {
-        this.mouseTargetCursorEnabled = true;
+        config.setMouseTargetCursorEnabled(true);
         return this;
     }
 
@@ -435,7 +401,7 @@ public class Program {
      * @return this program for chaining
      */
     public Program withMouseClicks() {
-        this.mouseClicksEnabled = true;
+        config.setMouseClicksEnabled(true);
         return this;
     }
 
@@ -485,33 +451,33 @@ public class Program {
         renderer.start();
         installCancelSignal();
 
-        Model finalModel = currentModel;
+        Model finalModel = currentModel.get();
         boolean renderFinalView = false;
 
         try {
             // execute init command
-            Command initCommand = currentModel.init();
+            Command initCommand = currentModel.get().init();
             commandExecutor
                 .executeIfPresent(initCommand, this::send, this::sendError)
                 .thenRun(initLatch::countDown);
 
             // render the initial view
-            renderer.write(currentModel.view());
+            renderer.write(currentModel.get().view());
 
             // run event loop
             finalModel = eventLoop();
             renderFinalView = true;
-        } catch (Throwable t) {
-            if (withoutCatchPanics) {
-                throw t;
+        } catch (Exception e) {
+            if (config.isWithoutCatchPanics()) {
+                throw e;
             }
-            lastError = t;
+            lastError = e;
         } finally {
             cleanup(renderFinalView, finalModel);
         }
 
         if (lastError != null) {
-            throw new RuntimeException(lastError);
+            throw new ProgramException(lastError);
         }
         return finalModel;
     }
@@ -541,14 +507,14 @@ public class Program {
             renderer.disableBracketedPaste();
         }
 
-        if (manageMouseSelectionCursor && mouseSelectionCursorActive) {
+        if (config.isManageMouseSelectionCursor() && mouseSelectionCursorActive) {
             renderer.resetMouseCursor();
         }
-        if (hoverTextCursorEnabled && hoverTextCursorActive) {
+        if (config.isHoverTextCursorEnabled() && hoverTextCursorActive) {
             renderer.resetMouseCursor();
         }
         if (
-            mouseTargetCursorEnabled &&
+            config.isMouseTargetCursorEnabled() &&
             currentTargetCursor != null &&
             currentTargetCursor != MouseCursor.DEFAULT
         ) {
@@ -584,7 +550,7 @@ public class Program {
             if (lastError != null) {
                 e.addSuppressed(lastError);
             }
-            throw new RuntimeException(e);
+            throw new UncheckedIOException(e);
         } finally {
             closeOpenedInput();
         }
@@ -594,11 +560,11 @@ public class Program {
      * Handles handle termination signals for this component.
      */
     private void handleTerminationSignals() {
-        if (withoutSignalHandler) {
+        if (config.isWithoutSignalHandler()) {
             return;
         }
         Signals.register("INT", () -> {
-            if (ignoreSignals.get()) {
+            if (config.ignoreSignals().get()) {
                 return;
             }
             commandExecutor.executeIfPresent(
@@ -608,7 +574,7 @@ public class Program {
             );
         });
         Signals.register("TERM", () -> {
-            if (ignoreSignals.get()) {
+            if (config.ignoreSignals().get()) {
                 return;
             }
             commandExecutor.executeIfPresent(
@@ -623,11 +589,11 @@ public class Program {
      * Handles handle suspend signals for this component.
      */
     private void handleSuspendSignals() {
-        if (withoutSignalHandler) {
+        if (config.isWithoutSignalHandler()) {
             return;
         }
         Signals.register("TSTP", () -> {
-            if (ignoreSignals.get()) {
+            if (config.ignoreSignals().get()) {
                 return;
             }
             commandExecutor.executeIfPresent(
@@ -637,7 +603,7 @@ public class Program {
             );
         });
         Signals.register("CONT", () -> {
-            if (ignoreSignals.get()) {
+            if (config.ignoreSignals().get()) {
                 return;
             }
             commandExecutor.executeIfPresent(
@@ -685,8 +651,8 @@ public class Program {
                 continue;
             }
 
-            if (filter != null) {
-                msg = filter.apply(currentModel, msg);
+            if (config.filter() != null) {
+                msg = config.filter().apply(currentModel.get(), msg);
             }
 
             if (msg == null) {
@@ -696,15 +662,15 @@ public class Program {
             Message internalMsg = normalizeMessage(msg);
             Message updateMsg = internalMsg;
 
-            if (internalMsg instanceof SequencedMessage seqMsg) {
-                if (seqMsg.sequenceId() < lastHandledSequenceId) {
+            if (internalMsg instanceof SequencedMessage(var seqMessage, var sequenceId)) {
+                if (sequenceId < lastHandledSequenceId) {
                     continue;
                 }
-                lastHandledSequenceId = seqMsg.sequenceId();
-                if (seqMsg.message() == null) {
+                lastHandledSequenceId = sequenceId;
+                if (seqMessage == null) {
                     continue;
                 }
-                updateMsg = normalizeMessage(seqMsg.message());
+                updateMsg = normalizeMessage(seqMessage);
                 internalMsg = updateMsg;
             }
 
@@ -713,12 +679,12 @@ public class Program {
             }
 
             if (internalMsg instanceof QuitMessage) {
-                return currentModel;
+                return currentModel.get();
             } 
 
             if (internalMsg instanceof ErrorMessage errorMessage) {
                 this.lastError = errorMessage.error();
-                return currentModel;
+                return currentModel.get();
             }
 
             if (internalMsg instanceof MouseMessage mouseMessage) {
@@ -735,9 +701,9 @@ public class Program {
             renderer.handleMessage(internalMsg);
 
             UpdateResult<? extends Model> updateResult =
-                currentModel.update(updateMsg);
+                currentModel.get().update(updateMsg);
 
-            currentModel = updateResult.model();
+            currentModel.set(updateResult.model());
             renderer.notifyModelChanged();
             commandExecutor.executeIfPresent(
                 updateResult.command(),
@@ -745,9 +711,9 @@ public class Program {
                 this::sendError
             );
 
-            renderer.write(currentModel.view());
+            renderer.write(currentModel.get().view());
         }
-        return currentModel;
+        return currentModel.get();
     }
 
     /**
@@ -786,8 +752,8 @@ public class Program {
                 );
                 yield true;
             }
-            case OpenUrlMessage openUrlMessage -> {
-                handleOpenUrl(openUrlMessage.url());
+            case OpenUrlMessage(var url) -> {
+                handleOpenUrl(url);
                 yield true;
             }
             case ExecProcessMessage execProcessMessage -> {
@@ -841,10 +807,10 @@ public class Program {
      */
     private void handleSequence(Command... commands) {
         long sequenceId = ++currentSequenceId;
-        Arrays.stream(commands).reduce(
+        CompletableFuture<Void> chain = Arrays.stream(commands).reduce(
             CompletableFuture.completedFuture(null),
             (CompletableFuture<Void> future, Command command) ->
-                future.thenCompose(__ ->
+                future.thenCompose(ignored ->
                     commandExecutor.executeIfPresent(
                         command,
                         msg -> send(new SequencedMessage(msg, sequenceId)),
@@ -853,6 +819,10 @@ public class Program {
                 ),
             (f1, f2) -> f2
         );
+        chain.exceptionally(e -> {
+            sendError(e);
+            return null;
+        });
     }
 
     /**
@@ -863,7 +833,7 @@ public class Program {
     private void handleOpenUrl(String url) {
         boolean success = UrlOpener.open(url);
         if (!success) {
-            logger.log(Level.WARNING, "Failed to open URL: " + url);
+            logger.log(Level.WARNING, "Failed to open URL: {0}", url);
         }
     }
 
@@ -878,13 +848,13 @@ public class Program {
         );
 
         if (
-            extendSelectionOnScroll &&
+            config.isExtendSelectionOnScroll() &&
             selectionUpdate.selectionScrollUpdate() != null
         ) {
             send(selectionUpdate.selectionScrollUpdate());
         }
 
-        if (!manageMouseSelectionCursor) {
+        if (!config.isManageMouseSelectionCursor()) {
             return;
         }
 
@@ -919,7 +889,7 @@ public class Program {
      * @param mouseMessage mouse message
      */
     private void handleMouseHoverCursor(MouseMessage mouseMessage) {
-        if (!hoverTextCursorEnabled) {
+        if (!config.isHoverTextCursorEnabled()) {
             return;
         }
         if (mouseSelectionTracker.isSelecting() || mouseSelectionCursorActive) {
@@ -937,7 +907,7 @@ public class Program {
         }
 
         boolean overText = mouseHoverTextDetector.isHoveringText(
-            currentModel.view(),
+            currentModel.get().view(),
             mouseMessage.column(),
             mouseMessage.row()
         );
@@ -957,7 +927,7 @@ public class Program {
      * @param mouseMessage mouse message
      */
     private void handleMouseTargetCursor(MouseMessage mouseMessage) {
-        if (!mouseTargetCursorEnabled) {
+        if (!config.isMouseTargetCursorEnabled()) {
             return;
         }
         if (mouseSelectionTracker.isSelecting() || mouseSelectionCursorActive) {
@@ -1025,7 +995,7 @@ public class Program {
      * @param mouseMessage mouse message
      */
     private void handleMouseClickTracking(MouseMessage mouseMessage) {
-        if (!mouseClicksEnabled) {
+        if (!config.isMouseClicksEnabled()) {
             return;
         }
         MouseTarget target = resolveMouseTarget(mouseMessage);
@@ -1045,7 +1015,7 @@ public class Program {
      * @return result
      */
     private MouseTarget resolveMouseTarget(MouseMessage mouseMessage) {
-        if (!(currentModel instanceof MouseTargetProvider provider)) {
+        if (!(currentModel.get() instanceof MouseTargetProvider provider)) {
             return null;
         }
         return MouseTargets.hitTest(
@@ -1080,8 +1050,8 @@ public class Program {
      * @param msg msg
      */
     public void send(Message msg) {
-        if (isRunning.get() && msg != null) {
-            messageQueue.offer(msg);
+        if (isRunning.get() && msg != null && !messageQueue.offer(msg)) {
+            logger.log(Level.WARNING, "Failed to enqueue message: {0}", msg);
         }
     }
 
@@ -1101,7 +1071,8 @@ public class Program {
         try {
             initLatch.await();
         } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            Thread.currentThread().interrupt();
+            throw new ProgramException(e);
         }
     }
 
@@ -1158,8 +1129,8 @@ public class Program {
             int exitCode = process.waitFor();
 
             if (outputHandler != null) {
-                byte[] output = stdoutFuture.get();
-                outputHandler.accept(exitCode, output);
+                byte[] stdoutBytes = stdoutFuture.get();
+                outputHandler.accept(exitCode, stdoutBytes);
             }
             if (errorHandler != null) {
                 byte[] error = stderrFuture.get();
@@ -1206,7 +1177,7 @@ public class Program {
         }
         renderer.resume();
         renderer.hideCursor();
-        renderer.write(currentModel.view());
+        renderer.write(currentModel.get().view());
         isSuspended = false;
     }
 
@@ -1214,23 +1185,23 @@ public class Program {
      * Handles apply startup options for this component.
      */
     private void applyStartupOptions() {
-        if (enableAltScreen && !renderer.altScreen()) {
+        if (config.isEnableAltScreen() && !renderer.altScreen()) {
             renderer.enterAltScreen();
         }
-        if (!withoutBracketedPaste) {
+        if (!config.isWithoutBracketedPaste()) {
             renderer.enableBracketedPaste();
         }
-        if (enableMouseCellMotion) {
+        if (config.isEnableMouseCellMotion()) {
             renderer.enableMouseCellMotion();
             renderer.enableMouseSGRMode();
-        } else if (enableMouseAllMotion) {
+        } else if (config.isEnableMouseAllMotion()) {
             renderer.enableMouseAllMotion();
             renderer.enableMouseSGRMode();
         }
-        if (enableReportFocus && !renderer.reportFocus()) {
+        if (config.isEnableReportFocus() && !renderer.reportFocus()) {
             renderer.enableReportFocus();
         }
-        if (enableKittyKeyboard && !renderer.kittyKeyboard()) {
+        if (config.isEnableKittyKeyboard() && !renderer.kittyKeyboard()) {
             renderer.enableKittyKeyboard();
         }
     }
@@ -1239,36 +1210,23 @@ public class Program {
      * Handles install cancel signal for this component.
      */
     private void installCancelSignal() {
-        if (cancelSignal == null) {
+        if (config.cancelSignal() == null) {
             return;
         }
-        cancelSignal.whenComplete((result, error) -> send(new QuitMessage()));
+        config.cancelSignal().whenComplete((result, error) -> send(new QuitMessage()));
     }
 
     /**
      * Handles apply selection auto scroll config for this component.
      */
     private void applySelectionAutoScrollConfig() {
-        if (!selectionAutoScrollEnabled || mouseSelectionAutoScroller == null) {
+        if (!config.isSelectionAutoScrollEnabled() || mouseSelectionAutoScroller == null) {
             return;
         }
         mouseSelectionAutoScroller.configure(
-            selectionAutoScrollEdgeRows,
-            selectionAutoScrollIntervalMs
+            config.selectionAutoScrollEdgeRows(),
+            config.selectionAutoScrollIntervalMs()
         );
-    }
-
-    /**
-     * Handles normalize fps for this component.
-     *
-     * @param value value
-     * @return result
-     */
-    private int normalizeFps(int value) {
-        if (value < 1) {
-            return DEFAULT_FPS;
-        }
-        return Math.min(value, MAX_FPS);
     }
 
     /**
@@ -1277,12 +1235,12 @@ public class Program {
      * @return result
      */
     private InputStream resolveInputStream() throws IOException {
-        InputStream resolved = input;
-        if (useInputTTY) {
+        InputStream resolved = config.input();
+        if (config.isUseInputTTY()) {
             resolved = openInputTTY();
         }
         if (resolved == null) {
-            inputDisabled = true;
+            config.setInputDisabled(true);
             return System.in;
         }
         return resolved;
@@ -1299,7 +1257,7 @@ public class Program {
         InputStream resolvedInput,
         OutputStream resolvedOutput
     ) {
-        if (useInputTTY) {
+        if (config.isUseInputTTY()) {
             return false;
         }
         boolean inputIsSystem = resolvedInput == System.in;
@@ -1319,7 +1277,7 @@ public class Program {
         InputStream resolvedInput,
         OutputStream resolvedOutput
     ) {
-        if (useInputTTY) {
+        if (config.isUseInputTTY()) {
             return false;
         }
         return !isSystemTerminal(resolvedInput, resolvedOutput);
@@ -1375,7 +1333,7 @@ public class Program {
      * @param output output
      */
     void setOutput(OutputStream output) {
-        this.output = output;
+        config.setOutput(output);
     }
 
     /**
@@ -1384,8 +1342,7 @@ public class Program {
      * @param input input
      */
     void setInput(InputStream input) {
-        this.input = input;
-        this.inputDisabled = input == null;
+        config.setInput(input);
     }
 
     /**
@@ -1394,7 +1351,7 @@ public class Program {
      * @param useInputTTY use input tty
      */
     void setInputTTY(boolean useInputTTY) {
-        this.useInputTTY = useInputTTY;
+        config.setInputTTY(useInputTTY);
     }
 
     /**
@@ -1403,7 +1360,7 @@ public class Program {
      * @param environment environment
      */
     void setEnvironment(List<String> environment) {
-        this.environment = environment;
+        config.setEnvironment(environment);
     }
 
     /**
@@ -1412,7 +1369,7 @@ public class Program {
      * @param withoutSignalHandler without signal handler
      */
     void setWithoutSignalHandler(boolean withoutSignalHandler) {
-        this.withoutSignalHandler = withoutSignalHandler;
+        config.setWithoutSignalHandler(withoutSignalHandler);
     }
 
     /**
@@ -1421,7 +1378,7 @@ public class Program {
      * @param withoutCatchPanics without catch panics
      */
     void setWithoutCatchPanics(boolean withoutCatchPanics) {
-        this.withoutCatchPanics = withoutCatchPanics;
+        config.setWithoutCatchPanics(withoutCatchPanics);
     }
 
     /**
@@ -1430,7 +1387,7 @@ public class Program {
      * @param ignoreSignals ignore signals
      */
     void setIgnoreSignals(boolean ignoreSignals) {
-        this.ignoreSignals.set(ignoreSignals);
+        config.setIgnoreSignals(ignoreSignals);
     }
 
     /**
@@ -1439,7 +1396,7 @@ public class Program {
      * @param withoutBracketedPaste without bracketed paste
      */
     void setWithoutBracketedPaste(boolean withoutBracketedPaste) {
-        this.withoutBracketedPaste = withoutBracketedPaste;
+        config.setWithoutBracketedPaste(withoutBracketedPaste);
     }
 
     /**
@@ -1448,7 +1405,7 @@ public class Program {
      * @param withoutRenderer without renderer
      */
     void setWithoutRenderer(boolean withoutRenderer) {
-        this.withoutRenderer = withoutRenderer;
+        config.setWithoutRenderer(withoutRenderer);
     }
 
     /**
@@ -1461,7 +1418,7 @@ public class Program {
      *      bubbletea.WithANSICompressor (Go docs)</a>
      */
     void setAnsiCompressor(boolean ansiCompressor) {
-        setAnsiCompressorInternal(ansiCompressor);
+        config.setAnsiCompressorInternal(ansiCompressor);
     }
 
     /**
@@ -1470,10 +1427,7 @@ public class Program {
      * @param ansiCompressor ansi compressor
      */
     void setAnsiCompressorInternal(boolean ansiCompressor) {
-        if (this.ansiCompressor == ansiCompressor) {
-            return;
-        }
-        this.ansiCompressor = ansiCompressor;
+        config.setAnsiCompressorInternal(ansiCompressor);
     }
 
     /**
@@ -1482,7 +1436,7 @@ public class Program {
      * @param filter filter
      */
     void setFilter(BiFunction<Model, Message, Message> filter) {
-        this.filter = filter;
+        config.setFilter(filter);
     }
 
     /**
@@ -1491,7 +1445,7 @@ public class Program {
      * @param fps fps
      */
     void setFps(int fps) {
-        this.fps = fps;
+        config.setFps(fps);
     }
 
     /**
@@ -1500,6 +1454,6 @@ public class Program {
      * @param cancelSignal cancel signal
      */
     void setCancelSignal(CompletableFuture<?> cancelSignal) {
-        this.cancelSignal = cancelSignal;
+        config.setCancelSignal(cancelSignal);
     }
 }
