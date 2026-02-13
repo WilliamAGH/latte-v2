@@ -161,7 +161,7 @@ public class ListSimpleExample implements Model {
     @Override
     public UpdateResult<? extends Model> update(Message msg) {
         if (msg instanceof WindowSizeMessage windowSizeMessage) {
-            return UpdateResult.from(this, list.setWidth(windowSizeMessage.width()));
+            return UpdateResult.from(this, list.setSize(windowSizeMessage.width(), windowSizeMessage.height()));
         }
 
         if (msg instanceof KeyPressMessage keyPressMessage) {
