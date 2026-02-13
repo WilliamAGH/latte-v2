@@ -64,7 +64,7 @@ public class SpinnerExample implements Model {
      */
     @Override
     public String view() {
-        return "\n\n   %s Loading forever...press q to quit\n\n".formatted(spinner.view());
+        return "%n%n   %s Loading forever...press q to quit%n%n".formatted(spinner.view());
     }
 
     /**

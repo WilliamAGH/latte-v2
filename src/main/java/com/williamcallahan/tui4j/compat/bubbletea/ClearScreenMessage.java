@@ -13,5 +13,6 @@ public class ClearScreenMessage implements Message {
      * Creates a clear screen message.
      */
     public ClearScreenMessage() {
+        // Marker message — carries no state
     }
 }
