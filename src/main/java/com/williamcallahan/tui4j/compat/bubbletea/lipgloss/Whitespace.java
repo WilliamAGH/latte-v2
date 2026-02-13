@@ -73,7 +73,7 @@ public class Whitespace {
     @Deprecated(since = "0.3.0")
     public static WhitespaceOption WithWhitespaceForeground(com.williamcallahan.tui4j.compat.bubbletea.lipgloss.color.TerminalColor color) {
         return whitespace -> com.williamcallahan.tui4j.compat.lipgloss.Whitespace
-            .WithWhitespaceForeground(adaptColor(color))
+            .WithWhitespaceForeground(color)
             .apply(whitespace.delegate);
     }
 
@@ -86,7 +86,7 @@ public class Whitespace {
     @Deprecated(since = "0.3.0")
     public static WhitespaceOption WithWhitespaceBackground(com.williamcallahan.tui4j.compat.bubbletea.lipgloss.color.TerminalColor color) {
         return whitespace -> com.williamcallahan.tui4j.compat.lipgloss.Whitespace
-            .WithWhitespaceBackground(adaptColor(color))
+            .WithWhitespaceBackground(color)
             .apply(whitespace.delegate);
     }
 
@@ -150,34 +150,4 @@ public class Whitespace {
         return canonicalOptions;
     }
 
-    /**
-     * Adapts a Bubble Tea terminal color to the canonical lipgloss terminal color interface.
-     *
-     * @param color bubbletea terminal color
-     * @return canonical terminal color
-     */
-    private static com.williamcallahan.tui4j.compat.lipgloss.color.TerminalColor adaptColor(com.williamcallahan.tui4j.compat.bubbletea.lipgloss.color.TerminalColor color) {
-        if (color == null) {
-            return null;
-        }
-        return new com.williamcallahan.tui4j.compat.lipgloss.color.TerminalColor() {
-            /** {@inheritDoc} */
-            @Override
-            public org.jline.utils.AttributedStyle applyAsBackground(
-                org.jline.utils.AttributedStyle style,
-                com.williamcallahan.tui4j.compat.lipgloss.Renderer renderer
-            ) {
-                return color.applyAsBackground(style, renderer);
-            }
-
-            /** {@inheritDoc} */
-            @Override
-            public org.jline.utils.AttributedStyle applyAsForeground(
-                org.jline.utils.AttributedStyle style,
-                com.williamcallahan.tui4j.compat.lipgloss.Renderer renderer
-            ) {
-                return color.applyAsForeground(style, renderer);
-            }
-        };
-    }
 }
