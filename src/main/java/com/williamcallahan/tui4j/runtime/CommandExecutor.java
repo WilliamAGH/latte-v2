@@ -40,10 +40,14 @@ public class CommandExecutor {
     public CompletableFuture<Void> executeIfPresent(Command command,
                                                     Consumer<Message> messageConsumer,
                                                     Consumer<Throwable> errorConsumer) {
-        if (command != null) {
+        if (!Command.isNone(command)) {
             return CompletableFuture
                     .supplyAsync(command::execute, executorService)
-                    .thenAccept(messageConsumer)
+                    .thenAccept(msg -> {
+                        if (msg != null) {
+                            messageConsumer.accept(msg);
+                        }
+                    })
                     .exceptionally(ex -> {
                         errorConsumer.accept(ex);
                         return null;

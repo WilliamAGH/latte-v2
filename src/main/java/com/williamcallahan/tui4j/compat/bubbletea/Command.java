@@ -4,7 +4,6 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -19,12 +18,38 @@ import java.util.stream.Collectors;
  * Port of github.com/charmbracelet/bubbletea/commands.go.
  */
 public interface Command {
+
+    /** Sentinel command representing "no command to execute" (Go's nil Cmd). */
+    Command NO_OP = () -> null;
+
     /**
      * Executes the command and returns a message.
      *
      * @return message to deliver
      */
     Message execute();
+
+    /**
+     * Returns a no-op command sentinel, equivalent to Go's nil Cmd.
+     * <p>
+     * Use this instead of returning {@code null} from methods whose return
+     * type is {@link Command}.
+     *
+     * @return no-op command
+     */
+    static Command none() {
+        return NO_OP;
+    }
+
+    /**
+     * Checks whether a command is absent (null or the no-op sentinel).
+     *
+     * @param command command to check
+     * @return true if the command should not be executed
+     */
+    static boolean isNone(Command command) {
+        return command == null || command == NO_OP;
+    }
 
     /**
      * Batches commands into a single message.
@@ -35,7 +60,7 @@ public interface Command {
     static Command batch(Collection<Command> commands) {
         Command[] filteredCommands = commands
             .stream()
-            .filter(Objects::nonNull)
+            .filter(c -> !isNone(c))
             .toArray(Command[]::new);
         return () -> new BatchMessage(filteredCommands);
     }
@@ -48,7 +73,7 @@ public interface Command {
      */
     static Command batch(Command... commands) {
         Command[] filteredCommands = Arrays.stream(commands)
-            .filter(Objects::nonNull)
+            .filter(c -> !isNone(c))
             .toArray(Command[]::new);
         return () -> new BatchMessage(filteredCommands);
     }
@@ -110,7 +135,8 @@ public interface Command {
                 timer.cancel();
                 return fn.apply(time);
             } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+                Thread.currentThread().interrupt();
+                throw new IllegalStateException("Tick command interrupted", e);
             }
         };
     }
@@ -145,7 +171,8 @@ public interface Command {
                 timer.cancel();
                 return fn.apply(time);
             } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+                Thread.currentThread().interrupt();
+                throw new IllegalStateException("Every command interrupted", e);
             }
         };
     }
@@ -219,7 +246,7 @@ public interface Command {
          */
         @Override
         public void run() {
-            queue.offer(LocalDateTime.now());
+            queue.add(LocalDateTime.now());
         }
     }
 
