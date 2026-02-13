@@ -44,12 +44,10 @@ public class FocusBlurExample implements Model {
             this.focused = false;
         } else if (msg instanceof KeyPressMessage keyPress) {
 
-            switch (keyPress.key()) {
-                case "t":
-                    this.reporting = !this.reporting;
-                    break;
-                case "q":
-                    return UpdateResult.from(this, QuitMessage::new);
+            if ("t".equals(keyPress.key())) {
+                this.reporting = !this.reporting;
+            } else if ("q".equals(keyPress.key())) {
+                return UpdateResult.from(this, QuitMessage::new);
             }
         }
         return UpdateResult.from(this);
