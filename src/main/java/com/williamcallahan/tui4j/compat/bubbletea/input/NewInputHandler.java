@@ -87,12 +87,12 @@ public class NewInputHandler implements InputHandler {
             while (running) {
                 int numRead = reader.read(buffer, 0, BUFFER_SIZE);
                 if (numRead < 0) {
-                    continue;
+                    break;
                 }
 
                 char[] inputChunk = Arrays.copyOfRange(buffer, 0, numRead);
                 if (leftover.length > 0) {
-                    inputChunk = append(leftover, inputChunk);
+                    inputChunk = InputChars.append(leftover, inputChunk);
                     leftover = new char[0];
                 }
 
@@ -100,7 +100,7 @@ public class NewInputHandler implements InputHandler {
                 while (i < inputChunk.length) {
                     int processed = processOneMessage(Arrays.copyOfRange(inputChunk, i, inputChunk.length));
                     if (processed == 0) {
-                        leftover = append(leftover, Arrays.copyOfRange(inputChunk, i, inputChunk.length));
+                        leftover = InputChars.append(leftover, Arrays.copyOfRange(inputChunk, i, inputChunk.length));
                         break;
                     }
                     i += processed;
@@ -120,7 +120,7 @@ public class NewInputHandler implements InputHandler {
 
         if (inBracketedPaste) {
             // Check if we have the end tag at the beginning
-            if (startsWith(input, BP_END)) {
+            if (InputChars.startsWith(input, BP_END)) {
                 inBracketedPaste = false;
                 String content = pasteBuffer.toString();
                 pasteBuffer.setLength(0);
@@ -129,7 +129,7 @@ public class NewInputHandler implements InputHandler {
             }
 
             // Check if end tag is in the middle
-            int endIdx = indexOf(input, BP_END);
+            int endIdx = InputChars.indexOf(input, BP_END);
             if (endIdx != -1) {
                 pasteBuffer.append(input, 0, endIdx);
                 return endIdx; // Next iteration will hit the startsWith check
@@ -139,7 +139,7 @@ public class NewInputHandler implements InputHandler {
             int safeLen = input.length;
             // Check for partial match at end to avoid splitting the tag
             for (int len = 1; len < BP_END.length(); len++) {
-                if (endsWith(input, BP_END.substring(0, len))) {
+                if (InputChars.endsWith(input, BP_END.substring(0, len))) {
                     safeLen = input.length - len;
                     break;
                 }
@@ -172,7 +172,7 @@ public class NewInputHandler implements InputHandler {
             }
 
             // Detect bracketed paste start
-            if (startsWith(input, BP_START)) {
+            if (InputChars.startsWith(input, BP_START)) {
                 inBracketedPaste = true;
                 pasteBuffer.setLength(0);
                 return BP_START.length();
@@ -317,38 +317,4 @@ public class NewInputHandler implements InputHandler {
         }
     }
 
-    private char[] append(char[] firstArray, char[] secondArray) {
-        char[] result = Arrays.copyOf(firstArray, firstArray.length + secondArray.length);
-        System.arraycopy(secondArray, 0, result, firstArray.length, secondArray.length);
-        return result;
-    }
-
-    private static boolean startsWith(char[] input, String prefix) {
-        if (input.length < prefix.length()) {
-            return false;
-        }
-        for (int i = 0; i < prefix.length(); i++) {
-            if (input[i] != prefix.charAt(i)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private static boolean endsWith(char[] input, String suffix) {
-        if (input.length < suffix.length()) {
-            return false;
-        }
-        for (int i = 0; i < suffix.length(); i++) {
-            if (input[input.length - suffix.length() + i] != suffix.charAt(i)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private static int indexOf(char[] input, String search) {
-        String inputStr = new String(input);
-        return inputStr.indexOf(search);
-    }
 }
