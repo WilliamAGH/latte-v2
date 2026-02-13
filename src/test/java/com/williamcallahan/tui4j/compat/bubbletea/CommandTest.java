@@ -59,5 +59,45 @@ class CommandTest {
         assertThat(msg).isInstanceOf(OpenUrlMessage.class);
         assertThat(((OpenUrlMessage) msg).url()).isEqualTo(url);
     }
+
+    @Test
+    @DisplayName("Command.none() returns the NO_OP sentinel")
+    void test_NoneReturnsSentinel() {
+        assertThat(Command.none()).isSameAs(Command.NO_OP);
+    }
+
+    @Test
+    @DisplayName("Command.none() execute returns null")
+    void test_NoneExecuteReturnsNull() {
+        assertThat(Command.none().execute()).isNull();
+    }
+
+    @Test
+    @DisplayName("Command.isNone() returns true for null")
+    void test_IsNoneNull() {
+        assertThat(Command.isNone(null)).isTrue();
+    }
+
+    @Test
+    @DisplayName("Command.isNone() returns true for Command.none()")
+    void test_IsNoneForSentinel() {
+        assertThat(Command.isNone(Command.none())).isTrue();
+    }
+
+    @Test
+    @DisplayName("Command.isNone() returns false for a real command")
+    void test_IsNoneForRealCommand() {
+        assertThat(Command.isNone(Command.quit())).isFalse();
+    }
+
+    @Test
+    @DisplayName("batch() filters out null and none commands")
+    void test_BatchFiltersNoneCommands() {
+        Command real = Command.quit();
+        Command batched = Command.batch(real, Command.none(), null);
+        Message msg = batched.execute();
+        assertThat(msg).isInstanceOf(BatchMessage.class);
+        assertThat(((BatchMessage) msg).commands()).containsExactly(real);
+    }
 }
 
