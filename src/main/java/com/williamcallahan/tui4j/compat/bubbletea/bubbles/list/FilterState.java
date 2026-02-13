@@ -31,6 +31,20 @@ public enum FilterState {
     }
 
     /**
+     * Converts to the canonical {@link com.williamcallahan.tui4j.compat.bubbles.list.FilterState}.
+     *
+     * @return canonical filter state
+     */
+    @Deprecated(since = "0.3.0")
+    public com.williamcallahan.tui4j.compat.bubbles.list.FilterState toCanonical() {
+        return switch (this) {
+            case Unfiltered -> com.williamcallahan.tui4j.compat.bubbles.list.FilterState.Unfiltered;
+            case Filtering -> com.williamcallahan.tui4j.compat.bubbles.list.FilterState.Filtering;
+            case FilterApplied -> com.williamcallahan.tui4j.compat.bubbles.list.FilterState.FilterApplied;
+        };
+    }
+
+    /**
      * Returns the display name for this state.
      *
      * @return display name
