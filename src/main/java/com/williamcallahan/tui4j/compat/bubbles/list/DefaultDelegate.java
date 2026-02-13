@@ -103,7 +103,7 @@ public class DefaultDelegate implements ItemDelegate, KeyMap {
     @Override
     public Command update(Message msg, List listModel) {
         if (updateFunction == null) {
-            return null;
+            return Command.none();
         }
         return updateFunction.update(msg, listModel);
     }

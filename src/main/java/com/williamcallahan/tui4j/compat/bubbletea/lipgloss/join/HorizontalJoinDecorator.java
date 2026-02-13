@@ -28,7 +28,9 @@ public final class HorizontalJoinDecorator {
      * @param position vertical alignment position
      * @param blocks   blocks to join
      * @return joined block string
+     * @deprecated Use {@link com.williamcallahan.tui4j.compat.lipgloss.join.HorizontalJoinDecorator#joinHorizontal(Position, String...)} instead.
      */
+    @Deprecated(since = "0.3.0")
     public static String joinHorizontal(Position position, String... blocks) {
         return com.williamcallahan.tui4j.compat.lipgloss.join.HorizontalJoinDecorator
             .joinHorizontal(position, blocks);

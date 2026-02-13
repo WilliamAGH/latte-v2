@@ -1,15 +1,12 @@
-package com.williamcallahan.tui4j.examples.compat.lipgloss.tree;
+package examples.compat.lipgloss.tree;
 
-import com.williamcallahan.tui4j.compat.lipgloss.Tree;
+import com.williamcallahan.tui4j.compat.lipgloss.tree.Tree;
 import com.williamcallahan.tui4j.compat.lipgloss.Style;
 import com.williamcallahan.tui4j.compat.lipgloss.color.Color;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.stream.Stream;
 
 /**
  * Example program demonstrating lipgloss tree from file system.
@@ -44,7 +41,7 @@ public class TreeFilesExample {
                     continue;
                 }
 
-                Tree branch = Tree.root(name);
+                Tree branch = Tree.withRoot(name);
                 root.child(branch);
 
                 String branchPath = Paths.get(path, name).toString();
@@ -74,7 +71,7 @@ public class TreeFilesExample {
 
         String pwd = Paths.get(".").toAbsolutePath().normalize().toString();
 
-        Tree t = Tree.root(pwd)
+        Tree t = Tree.withRoot(pwd)
                 .enumeratorStyle(enumeratorStyle)
                 .rootStyle(rootStyle)
                 .itemStyle(itemStyle);

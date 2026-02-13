@@ -14,8 +14,6 @@ import com.williamcallahan.tui4j.term.TerminalInfo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.lang.reflect.Method;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -33,18 +31,18 @@ class ListTest {
     void testStatusBarItemName() {
         List list = createList(new TestItem("foo"), new TestItem("bar"));
 
-        assertThat(statusView(list)).contains("2 items");
+        assertThat(list.view()).contains("2 items");
 
         updateItems(list, new TestItem("foo"));
 
-        assertThat(statusView(list)).contains("1 item");
+        assertThat(list.view()).contains("1 item");
     }
 
     @Test
     void testStatusBarWithoutItems() {
         List list = createList();
 
-        assertThat(statusView(list)).contains("No items");
+        assertThat(list.view()).contains("No items");
     }
 
     @Test
@@ -52,13 +50,13 @@ class ListTest {
         List list = createList(new TestItem("foo"), new TestItem("bar"));
         list.setStatusBarItemName("connection", "connections");
 
-        assertThat(statusView(list)).contains("2 connections");
+        assertThat(list.view()).contains("2 connections");
 
         updateItems(list, new TestItem("foo"));
-        assertThat(statusView(list)).contains("1 connection");
+        assertThat(list.view()).contains("1 connection");
 
         updateItems(list);
-        assertThat(statusView(list)).contains("No connections");
+        assertThat(list.view()).contains("No connections");
     }
 
     @Test
@@ -126,7 +124,7 @@ class ListTest {
         List list = new List(dataSource, new TestDelegate(), 10, 5);
         applyCommand(list, list.init());
 
-        assertThat(populatedView(list)).doesNotContain("No items.");
+        assertThat(list.view()).doesNotContain("No items.");
     }
 
     @Test
@@ -150,10 +148,8 @@ class ListTest {
         List list = new List(dataSource, new TestDelegate(), 10, 5);
         applyCommand(list, list.init());
 
-        assertThat(list.nextPage()).isNull();
-        assertThat(list.prevPage()).isNull();
-        assertThat(keyMap(list).nextPage().isEnabled()).isFalse();
-        assertThat(keyMap(list).prevPage().isEnabled()).isFalse();
+        assertThat(Command.isNone(list.nextPage())).isTrue();
+        assertThat(Command.isNone(list.prevPage())).isTrue();
     }
 
     @Test
@@ -197,7 +193,7 @@ class ListTest {
     }
 
     private static void applyCommand(List list, Command command) {
-        if (command == null) {
+        if (Command.isNone(command)) {
             return;
         }
         applyMessage(list, command.execute());
@@ -250,38 +246,8 @@ class ListTest {
         }
 
         com.williamcallahan.tui4j.compat.bubbletea.UpdateResult<List> result = list.update(msg);
-        if (result != null && result.command() != null) {
+        if (result != null && !Command.isNone(result.command())) {
             applyCommand(list, result.command());
-        }
-    }
-
-    private static String statusView(List list) {
-        try {
-            Method method = List.class.getDeclaredMethod("statusView");
-            method.setAccessible(true);
-            return (String) method.invoke(list);
-        } catch (ReflectiveOperationException e) {
-            throw new IllegalStateException("Failed to read status view", e);
-        }
-    }
-
-    private static String populatedView(List list) {
-        try {
-            Method method = List.class.getDeclaredMethod("populatedView");
-            method.setAccessible(true);
-            return (String) method.invoke(list);
-        } catch (ReflectiveOperationException e) {
-            throw new IllegalStateException("Failed to read populated view", e);
-        }
-    }
-
-    private static KeyMap keyMap(List list) {
-        try {
-            var field = List.class.getDeclaredField("keys");
-            field.setAccessible(true);
-            return (KeyMap) field.get(list);
-        } catch (ReflectiveOperationException e) {
-            throw new IllegalStateException("Failed to read key map", e);
         }
     }
 
@@ -326,7 +292,7 @@ class ListTest {
 
         @Override
         public Command update(Message msg, List listModel) {
-            return null;
+            return Command.none();
         }
     }
 }

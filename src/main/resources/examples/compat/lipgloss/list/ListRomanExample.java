@@ -1,7 +1,7 @@
-package com.williamcallahan.tui4j.examples.compat.lipgloss.list;
+package examples.compat.lipgloss.list;
 
-import com.williamcallahan.tui4j.compat.lipgloss.list.List;
-import com.williamcallahan.tui4j.compat.lipgloss.list.Enumerator;
+import com.williamcallahan.tui4j.compat.lipgloss.List;
+import com.williamcallahan.tui4j.compat.lipgloss.ListEnumerator;
 import com.williamcallahan.tui4j.compat.lipgloss.Style;
 import com.williamcallahan.tui4j.compat.lipgloss.color.Color;
 
@@ -29,9 +29,9 @@ public class ListRomanExample {
                 "Nyx",
                 "Mac",
                 "Milk"
-        ).enumerator(Enumerator.ROMAN)
+        ).enumerator(ListEnumerator.roman())
          .enumeratorStyle(enumeratorStyle)
-         .itemStyle(itemStyle);
+         .itemStyleFunc((children, i) -> itemStyle);
 
         System.out.println(l);
     }

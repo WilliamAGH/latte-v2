@@ -1,9 +1,10 @@
-package com.williamcallahan.tui4j.examples.compat.lipgloss.table;
+package examples.compat.lipgloss.table;
 
-import com.williamcallahan.tui4j.compat.lipgloss.Table;
+import com.williamcallahan.tui4j.compat.lipgloss.Position;
 import com.williamcallahan.tui4j.compat.lipgloss.Style;
+import com.williamcallahan.tui4j.compat.lipgloss.border.StandardBorder;
 import com.williamcallahan.tui4j.compat.lipgloss.color.Color;
-import com.williamcallahan.tui4j.compat.lipgloss.Table.Border;
+import com.williamcallahan.tui4j.compat.lipgloss.table.Table;
 
 /**
  * Example program demonstrating lipgloss table with chess board.
@@ -32,8 +33,8 @@ public class TableChessExample {
     public static void main(String[] args) {
         Style labelStyle = Style.newStyle().foreground(Color.color("241"));
 
-        Table t = new Table()
-                .border(Border.NORMAL)
+        Table t = Table.create()
+                .border(StandardBorder.NormalBorder)
                 .borderRow(true)
                 .borderColumn(true)
                 .rows(BOARD)
@@ -44,7 +45,7 @@ public class TableChessExample {
 
         System.out.println(
                 Style.newStyle()
-                        .alignHorizontal(Style.Align.RIGHT)
+                        .alignHorizontal(Position.Right)
                         .render(String.join("\n", files, t.render(), ranks))
         );
     }

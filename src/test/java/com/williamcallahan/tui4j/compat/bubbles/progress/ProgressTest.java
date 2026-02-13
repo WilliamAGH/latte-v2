@@ -131,7 +131,7 @@ class ProgressTest {
         double beforePercentShown = progress.percentShown();
 
         FrameMessage frameMsg = new FrameMessage(-1, progress.tag());
-        UpdateResult<Progress> result = progress.update(frameMsg);
+        progress.update(frameMsg);
 
         assertThat(progress.percentShown()).isEqualTo(beforePercentShown);
     }
@@ -143,7 +143,7 @@ class ProgressTest {
         double beforePercentShown = progress.percentShown();
 
         FrameMessage frameMsg = new FrameMessage(progress.id(), -1);
-        UpdateResult<Progress> result = progress.update(frameMsg);
+        progress.update(frameMsg);
 
         assertThat(progress.percentShown()).isEqualTo(beforePercentShown);
     }

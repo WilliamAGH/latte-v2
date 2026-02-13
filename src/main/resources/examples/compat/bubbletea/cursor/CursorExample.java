@@ -1,4 +1,4 @@
-package com.williamcallahan.tui4j.examples.cursor;
+package examples.compat.bubbletea.cursor;
 
 import com.williamcallahan.tui4j.compat.bubbletea.Command;
 import com.williamcallahan.tui4j.compat.bubbletea.Message;

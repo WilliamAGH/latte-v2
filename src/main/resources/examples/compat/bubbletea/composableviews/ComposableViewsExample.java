@@ -1,4 +1,4 @@
-package com.williamcallahan.tui4j.examples.composableviews;
+package examples.compat.bubbletea.composableviews;
 
 import com.williamcallahan.tui4j.compat.bubbletea.Command;
 import com.williamcallahan.tui4j.compat.bubbletea.Message;

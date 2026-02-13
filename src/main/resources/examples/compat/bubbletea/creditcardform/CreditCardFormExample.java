@@ -1,4 +1,4 @@
-package com.williamcallahan.tui4j.examples.creditcardform;
+package examples.compat.bubbletea.creditcardform;
 
 import com.williamcallahan.tui4j.compat.bubbletea.Command;
 import com.williamcallahan.tui4j.compat.bubbletea.Message;

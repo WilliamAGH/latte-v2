@@ -39,7 +39,6 @@ public class NewInputHandler implements InputHandler {
 
     private static final String BP_START = "\u001b[200~";
     private static final String BP_END = "\u001b[201~";
-    private static final int MOUSE_EVENT_X10_LEN = 6;
 
     private boolean inBracketedPaste = false;
     private final StringBuilder pasteBuffer = new StringBuilder();

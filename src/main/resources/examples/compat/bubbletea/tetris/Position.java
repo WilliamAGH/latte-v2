@@ -1,4 +1,4 @@
-package com.williamcallahan.tui4j.examples.tetris;
+package examples.compat.bubbletea.tetris;
 
 /**
  * Example program for position.

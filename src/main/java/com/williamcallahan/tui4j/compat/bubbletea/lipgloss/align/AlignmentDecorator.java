@@ -31,6 +31,7 @@ public final class AlignmentDecorator {
      * @param height   available height
      * @return aligned text
      */
+    @Deprecated(since = "0.3.0")
     public static String alignTextVertical(String input, Position position, int height) {
         return com.williamcallahan.tui4j.compat.lipgloss.align.AlignmentDecorator
             .alignTextVertical(input, position, height);
@@ -45,6 +46,7 @@ public final class AlignmentDecorator {
      * @param attributedStyle style to preserve for padding
      * @return aligned text
      */
+    @Deprecated(since = "0.3.0")
     public static String alignTextHorizontal(
         String input,
         Position position,

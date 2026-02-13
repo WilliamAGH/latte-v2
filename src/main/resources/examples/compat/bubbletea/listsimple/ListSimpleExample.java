@@ -1,4 +1,4 @@
-package com.williamcallahan.tui4j.examples.listsimple;
+package examples.compat.bubbletea.listsimple;
 
 import com.williamcallahan.tui4j.compat.bubbletea.Command;
 import com.williamcallahan.tui4j.compat.bubbletea.Message;

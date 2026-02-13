@@ -1,4 +1,4 @@
-package com.williamcallahan.tui4j.examples.focusblur;
+package examples.compat.bubbletea.focusblur;
 
 import com.williamcallahan.tui4j.compat.bubbletea.Command;
 import com.williamcallahan.tui4j.compat.bubbletea.Message;

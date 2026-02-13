@@ -23,7 +23,7 @@ class ProgramOptionsTest {
         Program program = new Program(null, ProgramOption.withOutput(output),
                 ProgramOption.withInput(new ByteArrayInputStream(new byte[0])));
 
-        assertThat(getField(program, "output", ByteArrayOutputStream.class)).isSameAs(output);
+        assertThat(getConfigField(program, "output", ByteArrayOutputStream.class)).isSameAs(output);
     }
 
     @Test
@@ -32,8 +32,8 @@ class ProgramOptionsTest {
         Program program = new Program(null, ProgramOption.withInput(input),
                 ProgramOption.withOutput(new ByteArrayOutputStream()));
 
-        assertThat(getField(program, "input", ByteArrayInputStream.class)).isSameAs(input);
-        assertThat(getBoolean(program, "inputDisabled")).isFalse();
+        assertThat(getConfigField(program, "input", ByteArrayInputStream.class)).isSameAs(input);
+        assertThat(getConfigBoolean(program, "inputDisabled")).isFalse();
     }
 
     @Test
@@ -43,7 +43,7 @@ class ProgramOptionsTest {
                 ProgramOption.withInput(new ByteArrayInputStream(new byte[0])),
                 ProgramOption.withOutput(new ByteArrayOutputStream()));
 
-        Object renderer = getField(program, "renderer", Object.class);
+        Object renderer = getCoreField(program, "renderer", Object.class);
         assertThat(renderer).isInstanceOf(NilRenderer.class);
     }
 
@@ -54,7 +54,7 @@ class ProgramOptionsTest {
                 ProgramOption.withInput(new ByteArrayInputStream(new byte[0])),
                 ProgramOption.withOutput(new ByteArrayOutputStream()));
 
-        AtomicBoolean ignoreSignals = getField(program, "ignoreSignals", AtomicBoolean.class);
+        AtomicBoolean ignoreSignals = getConfigField(program, "ignoreSignals", AtomicBoolean.class);
         assertThat(ignoreSignals.get()).isTrue();
     }
 
@@ -66,7 +66,7 @@ class ProgramOptionsTest {
                 ProgramOption.withInput(new ByteArrayInputStream(new byte[0])),
                 ProgramOption.withOutput(new ByteArrayOutputStream()));
 
-        assertThat(getField(program, "filter", BiFunction.class)).isSameAs(filter);
+        assertThat(getConfigField(program, "filter", BiFunction.class)).isSameAs(filter);
     }
 
     @Test
@@ -77,7 +77,7 @@ class ProgramOptionsTest {
                 ProgramOption.withInput(new ByteArrayInputStream(new byte[0])),
                 ProgramOption.withOutput(new ByteArrayOutputStream()));
 
-        CompletableFuture<?> actualCancelSignal = getField(program, "cancelSignal", CompletableFuture.class);
+        CompletableFuture<?> actualCancelSignal = getConfigField(program, "cancelSignal", CompletableFuture.class);
         assertThat(actualCancelSignal).isSameAs(cancelSignal);
     }
 
@@ -89,7 +89,7 @@ class ProgramOptionsTest {
                     ProgramOption.withInput(new ByteArrayInputStream(new byte[0])),
                     ProgramOption.withOutput(new ByteArrayOutputStream()));
 
-            assertThat(getBoolean(program, "useInputTTY")).isTrue();
+            assertThat(getConfigBoolean(program, "useInputTTY")).isTrue();
         } catch (RuntimeException e) {
             // In CI environments without TTY, Program.openInputTTY() fails with FileNotFoundException.
             // This exception proves withInputTTY() was applied - if it weren't, openInputTTY() wouldn't be called.
@@ -109,10 +109,10 @@ class ProgramOptionsTest {
                 ProgramOption.withInput(new ByteArrayInputStream(new byte[0])),
                 ProgramOption.withOutput(new ByteArrayOutputStream()));
 
-        assertThat(getBoolean(program, "enableAltScreen")).isTrue();
-        assertThat(getBoolean(program, "withoutBracketedPaste")).isTrue();
-        assertThat(getBoolean(program, "withoutCatchPanics")).isTrue();
-        assertThat(getBoolean(program, "withoutSignalHandler")).isTrue();
+        assertThat(getConfigBoolean(program, "enableAltScreen")).isTrue();
+        assertThat(getConfigBoolean(program, "withoutBracketedPaste")).isTrue();
+        assertThat(getConfigBoolean(program, "withoutCatchPanics")).isTrue();
+        assertThat(getConfigBoolean(program, "withoutSignalHandler")).isTrue();
     }
 
     @Test
@@ -123,8 +123,8 @@ class ProgramOptionsTest {
                 ProgramOption.withInput(new ByteArrayInputStream(new byte[0])),
                 ProgramOption.withOutput(new ByteArrayOutputStream()));
 
-        assertThat(getBoolean(cellMotion, "enableMouseCellMotion")).isTrue();
-        assertThat(getBoolean(cellMotion, "enableMouseAllMotion")).isFalse();
+        assertThat(getConfigBoolean(cellMotion, "enableMouseCellMotion")).isTrue();
+        assertThat(getConfigBoolean(cellMotion, "enableMouseAllMotion")).isFalse();
 
         Program allMotion = new Program(null,
                 ProgramOption.withMouseCellMotion(),
@@ -132,21 +132,47 @@ class ProgramOptionsTest {
                 ProgramOption.withInput(new ByteArrayInputStream(new byte[0])),
                 ProgramOption.withOutput(new ByteArrayOutputStream()));
 
-        assertThat(getBoolean(allMotion, "enableMouseAllMotion")).isTrue();
-        assertThat(getBoolean(allMotion, "enableMouseCellMotion")).isFalse();
+        assertThat(getConfigBoolean(allMotion, "enableMouseAllMotion")).isTrue();
+        assertThat(getConfigBoolean(allMotion, "enableMouseCellMotion")).isFalse();
     }
 
-    private static <T> T getField(Program program, String name, Class<T> type) {
+    /**
+     * Reads a field directly from ProgramCore (runtime state lives there).
+     */
+    private static <T> T getCoreField(Program program, String name, Class<T> type) {
         try {
-            Field field = Program.class.getDeclaredField(name);
+            Field coreField = Program.class.getDeclaredField("core");
+            coreField.setAccessible(true);
+            Object core = coreField.get(program);
+
+            Field field = ProgramCore.class.getDeclaredField(name);
             field.setAccessible(true);
-            return type.cast(field.get(program));
+            return type.cast(field.get(core));
         } catch (ReflectiveOperationException e) {
             throw new IllegalStateException("Failed to read field: " + name, e);
         }
     }
 
-    private static boolean getBoolean(Program program, String name) {
-        return getField(program, name, Boolean.class);
+    /**
+     * Reads a field from ProgramConfiguration via Program's config field.
+     */
+    private static <T> T getConfigField(Program program, String name, Class<T> type) {
+        try {
+            Field configField = Program.class.getDeclaredField("config");
+            configField.setAccessible(true);
+            Object config = configField.get(program);
+            Field field = ProgramConfiguration.class.getDeclaredField(name);
+            field.setAccessible(true);
+            return type.cast(field.get(config));
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalStateException("Failed to read config field: " + name, e);
+        }
+    }
+
+    /**
+     * Reads a boolean config field from ProgramConfiguration.
+     */
+    private static boolean getConfigBoolean(Program program, String name) {
+        return getConfigField(program, name, Boolean.class);
     }
 }

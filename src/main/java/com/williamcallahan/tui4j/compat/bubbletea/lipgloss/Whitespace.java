@@ -21,6 +21,7 @@ public class Whitespace {
      *
      * @param style style
      */
+    @Deprecated(since = "0.3.0")
     public Whitespace(Style style) {
         this.delegate = new com.williamcallahan.tui4j.compat.lipgloss.Whitespace(style);
     }
@@ -39,6 +40,7 @@ public class Whitespace {
      *
      * @return canonical whitespace
      */
+    @Deprecated(since = "0.3.0")
     com.williamcallahan.tui4j.compat.lipgloss.Whitespace toCanonical() {
         return delegate;
     }
@@ -50,12 +52,15 @@ public class Whitespace {
      *
      * @since 0.3.0
      */
+    @Deprecated(since = "0.3.0")
     public interface WhitespaceOption {
         /**
          * Applies this option to the whitespace instance.
          *
          * @param whitespace whitespace instance
+         * @deprecated Use {@link com.williamcallahan.tui4j.compat.lipgloss.Whitespace.WhitespaceOption} instead.
          */
+        @Deprecated(since = "0.3.0")
         void apply(Whitespace whitespace);
     }
 
@@ -65,6 +70,7 @@ public class Whitespace {
      * @param color foreground color
      * @return whitespace option
      */
+    @Deprecated(since = "0.3.0")
     public static WhitespaceOption WithWhitespaceForeground(com.williamcallahan.tui4j.compat.bubbletea.lipgloss.color.TerminalColor color) {
         return whitespace -> com.williamcallahan.tui4j.compat.lipgloss.Whitespace
             .WithWhitespaceForeground(adaptColor(color))
@@ -77,6 +83,7 @@ public class Whitespace {
      * @param color background color
      * @return whitespace option
      */
+    @Deprecated(since = "0.3.0")
     public static WhitespaceOption WithWhitespaceBackground(com.williamcallahan.tui4j.compat.bubbletea.lipgloss.color.TerminalColor color) {
         return whitespace -> com.williamcallahan.tui4j.compat.lipgloss.Whitespace
             .WithWhitespaceBackground(adaptColor(color))
@@ -89,6 +96,7 @@ public class Whitespace {
      * @param chars whitespace characters
      * @return whitespace option
      */
+    @Deprecated(since = "0.3.0")
     public static WhitespaceOption WithWhitespaceChars(String chars) {
         return whitespace -> com.williamcallahan.tui4j.compat.lipgloss.Whitespace
             .WithWhitespaceChars(chars)
@@ -102,6 +110,7 @@ public class Whitespace {
      * @param options whitespace options
      * @return whitespace instance
      */
+    @Deprecated(since = "0.3.0")
     public static Whitespace newWhiteSpace(Renderer renderer, WhitespaceOption... options) {
         com.williamcallahan.tui4j.compat.lipgloss.Whitespace canonical =
             com.williamcallahan.tui4j.compat.lipgloss.Whitespace
@@ -115,6 +124,7 @@ public class Whitespace {
      * @param width width
      * @return rendered whitespace
      */
+    @Deprecated(since = "0.3.0")
     public String render(int width) {
         return delegate.render(width);
     }
@@ -125,6 +135,7 @@ public class Whitespace {
      * @param options legacy whitespace options
      * @return canonical whitespace options
      */
+    @Deprecated(since = "0.3.0")
     static com.williamcallahan.tui4j.compat.lipgloss.Whitespace.WhitespaceOption[] toCanonicalOptions(
         WhitespaceOption... options) {
         if (options == null || options.length == 0) {

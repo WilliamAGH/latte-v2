@@ -1,4 +1,4 @@
-package com.williamcallahan.tui4j.examples.compat.bubbles.help;
+package examples.compat.bubbles.help;
 
 import com.williamcallahan.tui4j.compat.bubbletea.Command;
 import com.williamcallahan.tui4j.compat.bubbletea.Message;
@@ -10,7 +10,7 @@ import com.williamcallahan.tui4j.compat.bubbletea.QuitMessage;
 import com.williamcallahan.tui4j.compat.bubbletea.WindowSizeMessage;
 import com.williamcallahan.tui4j.compat.bubbles.help.Help;
 import com.williamcallahan.tui4j.compat.bubbles.key.Binding;
-import com.williamcallahan.tui4j.compat.bubbles.key.Binding.BindingOption;
+import com.williamcallahan.tui4j.compat.bubbles.help.KeyMap;
 import com.williamcallahan.tui4j.compat.lipgloss.Style;
 import com.williamcallahan.tui4j.compat.lipgloss.color.Color;
 
@@ -26,12 +26,27 @@ public class HelpExample implements Model {
     private final Help help = new Help();
     private final Style inputStyle = Style.newStyle().foreground(Color.color("#FF75B7"));
 
-    private Binding upBinding = Binding.create(new BindingOption.WithKeys("up", "k"), new BindingOption.WithHelp("↑/k", "move up"));
-    private Binding downBinding = Binding.create(new BindingOption.WithKeys("down", "j"), new BindingOption.WithHelp("↓/j", "move down"));
-    private Binding leftBinding = Binding.create(new BindingOption.WithKeys("left", "h"), new BindingOption.WithHelp("←/h", "move left"));
-    private Binding rightBinding = Binding.create(new BindingOption.WithKeys("right", "l"), new BindingOption.WithHelp("→/l", "move right"));
-    private Binding helpBinding = Binding.create(new BindingOption.WithKeys("?"), new BindingOption.WithHelp("?", "toggle help"));
-    private Binding quitBinding = Binding.create(new BindingOption.WithKeys("q", "esc", "ctrl+c"), new BindingOption.WithHelp("q", "quit"));
+    private final Binding upBinding = new Binding(Binding.withKeys("up", "k"), Binding.withHelp("↑/k", "move up"));
+    private final Binding downBinding = new Binding(Binding.withKeys("down", "j"), Binding.withHelp("↓/j", "move down"));
+    private final Binding leftBinding = new Binding(Binding.withKeys("left", "h"), Binding.withHelp("←/h", "move left"));
+    private final Binding rightBinding = new Binding(Binding.withKeys("right", "l"), Binding.withHelp("→/l", "move right"));
+    private final Binding helpBinding = new Binding(Binding.withKeys("?"), Binding.withHelp("?", "toggle help"));
+    private final Binding quitBinding = new Binding(Binding.withKeys("q", "esc", "ctrl+c"), Binding.withHelp("q", "quit"));
+
+    private final KeyMap keyMap = new KeyMap() {
+        @Override
+        public Binding[] shortHelp() {
+            return new Binding[]{upBinding, downBinding, leftBinding, rightBinding, helpBinding, quitBinding};
+        }
+
+        @Override
+        public Binding[][] fullHelp() {
+            return new Binding[][]{
+                {upBinding, downBinding, leftBinding, rightBinding},
+                {helpBinding, quitBinding}
+            };
+        }
+    };
 
     private String lastKey;
     private boolean quitting;
@@ -114,12 +129,9 @@ public class HelpExample implements Model {
             status = "You chose: " + inputStyle.render(lastKey);
         }
 
-        String helpView = help.view(java.util.List.of(
-                upBinding, downBinding, leftBinding, rightBinding,
-                helpBinding, quitBinding
-        ));
+        String helpView = help.render(keyMap);
 
-        int newlines = 8 - status.lines().count() - helpView.lines().count();
+        int newlines = (int) (8 - status.lines().count() - helpView.lines().count());
         String padding = "\n".repeat(Math.max(0, newlines));
 
         return "\n" + status + padding + helpView;

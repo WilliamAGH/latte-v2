@@ -1,7 +1,5 @@
 package com.williamcallahan.tui4j.compat.bubbletea.lipgloss.tree;
 
-import java.util.List;
-
 /**
  * @deprecated Deprecated in tui4j as of 0.3.0 because this is a compatibility shim for a relocated type; use {@link com.williamcallahan.tui4j.compat.lipgloss.tree.Node} instead.
  * This transitional shim is temporary and will be removed in an upcoming release.
@@ -14,7 +12,9 @@ public interface Node extends com.williamcallahan.tui4j.compat.lipgloss.tree.Nod
      * Handles value for this component.
      *
      * @return result
+     * @deprecated Use {@link com.williamcallahan.tui4j.compat.lipgloss.tree.Node#value()} instead.
      */
+    @Deprecated(since = "0.3.0")
     @Override
     String value();
 
@@ -22,7 +22,9 @@ public interface Node extends com.williamcallahan.tui4j.compat.lipgloss.tree.Nod
      * Handles children for this component.
      *
      * @return result
+     * @deprecated Use {@link com.williamcallahan.tui4j.compat.lipgloss.tree.Node#children()} instead.
      */
+    @Deprecated(since = "0.3.0")
     @Override
     Children children();
 }

@@ -41,10 +41,10 @@ public class Progress implements Model {
     private Style percentageStyle;
 
     private Spring spring;
+    private boolean springCustomized;
     private double percentShown;
     private double targetPercent;
     private double velocity;
-    private boolean springCustomized;
 
     private boolean useRamp;
     private RGB rampColorA;
@@ -67,8 +67,8 @@ public class Progress implements Model {
         this.showPercentage = true;
         this.percentFormat = " %3.0f%%";
         this.percentageStyle = Style.newStyle();
-
-        setSpringOptions(DEFAULT_FREQUENCY, DEFAULT_DAMPING);
+        this.spring = null;
+        this.springCustomized = false;
     }
 
     private static int nextId() {
@@ -238,6 +238,15 @@ public class Progress implements Model {
     public void setSpringOptions(double frequency, double damping) {
         this.spring = new Spring(frequency, damping);
         this.springCustomized = true;
+    }
+
+    /**
+     * Returns whether spring options have been customized.
+     *
+     * @return {@code true} when custom spring options have been set
+     */
+    public boolean isSpringCustomized() {
+        return springCustomized;
     }
 
     /**
@@ -443,9 +452,9 @@ public class Progress implements Model {
 
     private void barView(StringBuilder b, double percent, int textWidth) {
         int tw = Math.max(0, width - textWidth);
-        int fw = (int) Math.round((double) tw * percent);
+        int fw = (int) Math.round(tw * percent);
 
-        fw = Math.max(0, Math.min(tw, fw));
+        fw = Math.clamp(fw, 0, tw);
 
         if (useRamp) {
             for (int i = 0; i < fw; i++) {
@@ -523,9 +532,9 @@ public class Progress implements Model {
         int gIdx = Math.round((float) g / 255 * 5);
         int bIdx = Math.round((float) b / 255 * 5);
 
-        rIdx = Math.min(5, Math.max(0, rIdx));
-        gIdx = Math.min(5, Math.max(0, gIdx));
-        bIdx = Math.min(5, Math.max(0, bIdx));
+        rIdx = Math.clamp(rIdx, 0, 5);
+        gIdx = Math.clamp(gIdx, 0, 5);
+        bIdx = Math.clamp(bIdx, 0, 5);
 
         return 16 + 36 * rIdx + 6 * gIdx + bIdx;
     }
@@ -534,7 +543,7 @@ public class Progress implements Model {
         if (!showPercentage) {
             return "";
         }
-        percent = Math.max(0, Math.min(1, percent));
+        percent = Math.clamp(percent, 0.0, 1.0);
         String percentage = String.format(percentFormat, percent * 100);
         if (percentageStyle != null) {
             percentage = percentageStyle.copy().inline(true).render(percentage);
@@ -555,6 +564,11 @@ public class Progress implements Model {
             return UpdateResult.from(this);
         }
 
+        // Lazy initialization: apply default spring options if not customized
+        if (!springCustomized) {
+            setSpringOptions(DEFAULT_FREQUENCY, DEFAULT_DAMPING);
+        }
+
         Spring.SpringUpdateResult result = spring.update(percentShown, velocity, targetPercent);
         this.percentShown = result.position();
         this.velocity = result.velocity();
@@ -568,7 +582,7 @@ public class Progress implements Model {
      * @return animation command
      */
     public Command setPercent(double p) {
-        this.targetPercent = Math.max(0, Math.min(1, p));
+        this.targetPercent = Math.clamp(p, 0.0, 1.0);
         this.tag++;
         return nextFrame();
     }

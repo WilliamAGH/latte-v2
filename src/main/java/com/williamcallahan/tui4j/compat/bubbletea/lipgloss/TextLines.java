@@ -27,6 +27,7 @@ public class TextLines {
      * @param text text to split
      * @return text-lines helper
      */
+    @Deprecated(since = "0.3.0")
     public static TextLines fromText(String text) {
         return new TextLines(com.williamcallahan.tui4j.compat.lipgloss.TextLines.fromText(text));
     }
@@ -36,6 +37,7 @@ public class TextLines {
      *
      * @return widest line length
      */
+    @Deprecated(since = "0.3.0")
     public int widestLineLength() {
         return delegate.widestLineLength();
     }
@@ -45,6 +47,7 @@ public class TextLines {
      *
      * @return lines
      */
+    @Deprecated(since = "0.3.0")
     public String[] lines() {
         return delegate.lines();
     }

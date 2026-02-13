@@ -12,12 +12,16 @@ import org.jline.utils.AttributedCharSequence;
 @Deprecated(since = "0.3.0")
 public enum ColorProfile {
     /** TrueColor, 24-bit color profile. */
+    @Deprecated(since = "0.3.0")
     TrueColor(AttributedCharSequence.TRUE_COLORS),
     /** ANSI256, 8-bit color profile. */
+    @Deprecated(since = "0.3.0")
     ANSI256(256),
     /** ANSI, 4-bit color profile. */
+    @Deprecated(since = "0.3.0")
     ANSI(16),
     /** Ascii, uncolored profile. */
+    @Deprecated(since = "0.3.0")
     Ascii(1);
 
     private final int colorsCount;
@@ -33,6 +37,7 @@ public enum ColorProfile {
      * @param color color string
      * @return terminal color, or null when parsing fails
      */
+    @Deprecated(since = "0.3.0")
     public com.williamcallahan.tui4j.compat.lipgloss.color.TerminalColor color(
         String color
     ) {
@@ -75,6 +80,7 @@ public enum ColorProfile {
      * @param terminalColor terminal color
      * @return compatible terminal color
      */
+    @Deprecated(since = "0.3.0")
     public com.williamcallahan.tui4j.compat.lipgloss.color.TerminalColor convert(
         TerminalColor terminalColor
     ) {
@@ -126,6 +132,7 @@ public enum ColorProfile {
      *
      * @return color count
      */
+    @Deprecated(since = "0.3.0")
     public int colorsCount() {
         return colorsCount;
     }

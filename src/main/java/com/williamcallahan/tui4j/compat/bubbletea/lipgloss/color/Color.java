@@ -21,6 +21,7 @@ public final class Color implements TerminalColor {
      * @param color color string
      * @return color instance
      */
+    @Deprecated(since = "0.3.0")
     public static Color color(String color) {
         return new Color(color);
     }
@@ -29,12 +30,14 @@ public final class Color implements TerminalColor {
         this.delegate = com.williamcallahan.tui4j.compat.lipgloss.color.Color.color(color);
     }
 
+    @Deprecated(since = "0.3.0")
     @Override
     public AttributedStyle applyAsBackground(AttributedStyle style,
             com.williamcallahan.tui4j.compat.lipgloss.Renderer renderer) {
         return delegate.applyAsBackground(style, renderer);
     }
 
+    @Deprecated(since = "0.3.0")
     @Override
     public AttributedStyle applyAsForeground(AttributedStyle style,
             com.williamcallahan.tui4j.compat.lipgloss.Renderer renderer) {
@@ -46,6 +49,8 @@ public final class Color implements TerminalColor {
      *
      * @return canonical Color
      */
+    @Deprecated(since = "0.3.0")
+    @Override
     public com.williamcallahan.tui4j.compat.lipgloss.color.Color toCanonical() {
         return delegate;
     }

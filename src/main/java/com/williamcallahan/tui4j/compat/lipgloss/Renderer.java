@@ -2,8 +2,6 @@ package com.williamcallahan.tui4j.compat.lipgloss;
 
 import com.williamcallahan.tui4j.ansi.TextWidth;
 import com.williamcallahan.tui4j.compat.lipgloss.color.ColorProfile;
-import com.williamcallahan.tui4j.compat.lipgloss.Output;
-
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 

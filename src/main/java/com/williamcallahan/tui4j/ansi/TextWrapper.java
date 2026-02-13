@@ -270,13 +270,6 @@ public class TextWrapper {
         wordLen = 0;
     }
 
-    /**
-     * Handles add new line for this component.
-     */
-    private void addNewLine() {
-        addNewLine(false);
-    }
-
     private void addNewLine(boolean preserveStyle) {
         if (preserveStyle && activeStyle.length() > 0) {
             buf.append("\033[m");

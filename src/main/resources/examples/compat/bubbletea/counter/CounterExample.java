@@ -1,4 +1,4 @@
-package com.williamcallahan.tui4j.examples.counter;
+package examples.compat.bubbletea.counter;
 
 import com.williamcallahan.tui4j.compat.bubbletea.Command;
 import com.williamcallahan.tui4j.compat.bubbletea.KeyPressMessage;

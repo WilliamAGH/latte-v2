@@ -1,8 +1,8 @@
-package com.williamcallahan.tui4j.examples.compat.lipgloss.table;
+package examples.compat.lipgloss.table;
 
-import com.williamcallahan.tui4j.compat.lipgloss.Table;
 import com.williamcallahan.tui4j.compat.lipgloss.Style;
 import com.williamcallahan.tui4j.compat.lipgloss.color.Color;
+import com.williamcallahan.tui4j.compat.lipgloss.table.Table;
 
 /**
  * Example program demonstrating lipgloss table with simple rows.
@@ -19,7 +19,7 @@ public class TableAnsiExample {
      * @param value text to style
      * @return styled text
      */
-    private static Style dim(String value) {
+    private static String dim(String value) {
         return Style.newStyle().foreground(Color.color("240")).render(value);
     }
 
@@ -29,7 +29,7 @@ public class TableAnsiExample {
      * @param args ignored
      */
     public static void main(String[] args) {
-        Table t = new Table()
+        Table t = Table.create()
                 .row("Bubble Tea", dim("Milky"))
                 .row("Milk Tea", dim("Also milky"))
                 .row("Actual milk", dim("Milky as well"));

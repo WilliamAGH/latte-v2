@@ -1,9 +1,9 @@
-package com.williamcallahan.tui4j.examples.compat.lipgloss.tree;
+package examples.compat.lipgloss.tree;
 
-import com.williamcallahan.tui4j.compat.lipgloss.Tree;
 import com.williamcallahan.tui4j.compat.lipgloss.Style;
 import com.williamcallahan.tui4j.compat.lipgloss.color.Color;
-import com.williamcallahan.tui4j.compat.lipgloss.tree.Enumerator;
+import com.williamcallahan.tui4j.compat.lipgloss.tree.Tree;
+import com.williamcallahan.tui4j.compat.lipgloss.tree.TreeEnumerator;
 
 /**
  * Example program demonstrating lipgloss tree with makeup products.
@@ -24,16 +24,16 @@ public class TreeMakeupExample {
      * @param args ignored
      */
     public static void main(String[] args) {
-        Tree t = Tree.root("✜ Makeup")
-                .enumerator(Enumerator.ROUNDED)
+        Tree t = Tree.withRoot("✜ Makeup")
+                .enumerator(new TreeEnumerator.RounderEnumerator())
                 .enumeratorStyle(ENUMERATOR_STYLE)
                 .rootStyle(ROOT_STYLE)
                 .itemStyle(ITEM_STYLE)
                 .child(
                         "Glossier",
                         "Fenty Beauty",
-                        Tree.root()
-                                        .enumerator(Enumerator.ROUNDED)
+                        new Tree()
+                                        .enumerator(new TreeEnumerator.RounderEnumerator())
                                         .child("Gloss Bomb Universal Lip Luminizer", "Hot Cheeks Velour Blushlighter"),
                         "Nyx",
                         "Mac",

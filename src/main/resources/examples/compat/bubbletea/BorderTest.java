@@ -1,4 +1,4 @@
-package com.williamcallahan.tui4j.examples;
+package examples.compat.bubbletea;
 
 import com.williamcallahan.tui4j.compat.lipgloss.Style;
 import com.williamcallahan.tui4j.compat.lipgloss.border.StandardBorder;

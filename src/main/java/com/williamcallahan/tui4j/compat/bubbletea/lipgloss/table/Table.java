@@ -21,6 +21,7 @@ public class Table extends com.williamcallahan.tui4j.compat.lipgloss.table.Table
      *
      * @param renderer the renderer
      */
+    @Deprecated(since = "0.3.0")
     public Table(com.williamcallahan.tui4j.compat.bubbletea.lipgloss.Renderer renderer) {
         super(renderer.toCanonical());
     }
@@ -30,6 +31,7 @@ public class Table extends com.williamcallahan.tui4j.compat.lipgloss.table.Table
      *
      * @return the new Table
      */
+    @Deprecated(since = "0.3.0")
     public static Table create() {
         return new Table(com.williamcallahan.tui4j.compat.bubbletea.lipgloss.Renderer.defaultRenderer());
     }

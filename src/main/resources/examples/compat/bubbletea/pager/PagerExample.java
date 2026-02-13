@@ -1,4 +1,4 @@
-package com.williamcallahan.tui4j.examples.pager;
+package examples.compat.bubbletea.pager;
 
 import com.williamcallahan.tui4j.compat.bubbletea.Command;
 import com.williamcallahan.tui4j.compat.bubbletea.Message;

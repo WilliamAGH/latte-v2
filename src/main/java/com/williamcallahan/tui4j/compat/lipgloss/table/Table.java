@@ -51,15 +51,12 @@ public class Table {
     private int[] widths;
     private int[] heights;
 
-    private final Renderer renderer;
-
     /**
      * Creates a table with the specified renderer.
      *
-     * @param renderer renderer for color profile detection
+     * @param renderer renderer for color profile detection (currently unused; retained for API stability [FS1g])
      */
     public Table(Renderer renderer) {
-        this.renderer = renderer;
         this.border = createDefaultBorder();
         this.borderStyle = Style.newStyle();
         this.data = new StringData();
@@ -556,14 +553,7 @@ public class Table {
             cells.add(rightBorder);
         }
 
-        for (int i = 0; i < cells.size(); i++) {
-            // Match Go's strings.TrimRight(cell, "\n") - removes ALL trailing newlines
-            String cell = cells.get(i);
-            while (cell.endsWith("\n")) {
-                cell = cell.substring(0, cell.length() - 1);
-            }
-            cells.set(i, cell);
-        }
+        trimCellNewlines(cells);
 
         s
             .append(
@@ -571,25 +561,52 @@ public class Table {
             )
             .append("\n");
 
-        if (
-            borderRow && data != null && index < data.rows() - 1 && !isOverflow
-        ) {
-            if (borderLeft) {
-                s.append(borderStyle.render(border.middleLeft()));
-            }
-            for (int i = 0; i < widths.length; i++) {
-                s.append(borderStyle.render(border.bottom().repeat(widths[i])));
-                if (i < widths.length - 1 && borderColumn) {
-                    s.append(borderStyle.render(border.middle()));
-                }
-            }
-            if (borderRight) {
-                s.append(borderStyle.render(border.middleRight()));
-            }
-            s.append("\n");
-        }
+        appendRowSeparator(s, index, isOverflow);
 
         return s.toString();
+    }
+
+    /**
+     * Strips trailing newline characters from every cell string.
+     * Matches Go's {@code strings.TrimRight(cell, "\n")} behavior.
+     *
+     * @param cells mutable cell list to trim in place
+     */
+    private void trimCellNewlines(List<String> cells) {
+        // Match Go's strings.TrimRight(cell, "\n") - removes ALL trailing newlines
+        for (int i = 0; i < cells.size(); i++) {
+            String cell = cells.get(i);
+            while (cell.endsWith("\n")) {
+                cell = cell.substring(0, cell.length() - 1);
+            }
+            cells.set(i, cell);
+        }
+    }
+
+    /**
+     * Appends a horizontal row separator when border rows are enabled.
+     *
+     * @param s target builder
+     * @param index current data row index
+     * @param isOverflow true when rendering the overflow indicator row
+     */
+    private void appendRowSeparator(StringBuilder s, int index, boolean isOverflow) {
+        if (!borderRow || data == null || index >= data.rows() - 1 || isOverflow) {
+            return;
+        }
+        if (borderLeft) {
+            s.append(borderStyle.render(border.middleLeft()));
+        }
+        for (int i = 0; i < widths.length; i++) {
+            s.append(borderStyle.render(border.bottom().repeat(widths[i])));
+            if (i < widths.length - 1 && borderColumn) {
+                s.append(borderStyle.render(border.middle()));
+            }
+        }
+        if (borderRight) {
+            s.append(borderStyle.render(border.middleRight()));
+        }
+        s.append("\n");
     }
 
     private String truncateCell(String cell, int rowIndex, int colIndex) {

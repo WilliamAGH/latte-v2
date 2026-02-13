@@ -1,9 +1,9 @@
-package com.williamcallahan.tui4j.examples.compat.lipgloss.tree;
+package examples.compat.lipgloss.tree;
 
-import com.williamcallahan.tui4j.compat.lipgloss.Tree;
 import com.williamcallahan.tui4j.compat.lipgloss.Style;
 import com.williamcallahan.tui4j.compat.lipgloss.color.Color;
-import com.williamcallahan.tui4j.compat.lipgloss.tree.Enumerator;
+import com.williamcallahan.tui4j.compat.lipgloss.tree.Tree;
+import com.williamcallahan.tui4j.compat.lipgloss.tree.TreeEnumerator;
 
 /**
  * Example program demonstrating lipgloss tree with expandable/collapsible directories.
@@ -109,19 +109,19 @@ public class TreeToggleExample {
     public static void main(String[] args) {
         Styles s = new Styles();
 
-        Tree t = Tree.root(new Dir("~/charm", true, s))
-                .enumerator(Enumerator.ROUNDED)
+        Tree t = Tree.withRoot(new Dir("~/charm", true, s))
+                .enumerator(new TreeEnumerator.RounderEnumerator())
                 .enumeratorStyle(s.enumerator)
                 .child(
                         new Dir("ayman", false, s),
-                        Tree.root(new Dir("bash", true, s))
+                        Tree.withRoot(new Dir("bash", true, s))
                                 .child(
-                                        Tree.root(new Dir("tools", true, s))
+                                        Tree.withRoot(new Dir("tools", true, s))
                                                 .child(new File("zsh", s), new File("doom-emacs", s))
                                 ),
-                        Tree.root(new Dir("carlos", true, s))
+                        Tree.withRoot(new Dir("carlos", true, s))
                                 .child(
-                                        Tree.root(new Dir("emotes", true, s))
+                                        Tree.withRoot(new Dir("emotes", true, s))
                                                 .child(new File("chefkiss.png", s), new File("kekw.png", s))
                                 ),
                         new Dir("maas", false, s)

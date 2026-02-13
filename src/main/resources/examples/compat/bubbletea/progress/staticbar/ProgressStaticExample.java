@@ -1,4 +1,4 @@
-package com.williamcallahan.tui4j.examples.progress.staticbar;
+package examples.compat.bubbletea.progress.staticbar;
 
 import com.williamcallahan.tui4j.compat.bubbletea.Command;
 import com.williamcallahan.tui4j.compat.bubbletea.Message;
@@ -20,7 +20,6 @@ public class ProgressStaticExample implements Model {
     private final List<Progress> progressBars;
     private final List<String> labels;
     private int selectedIndex;
-    private boolean quitting;
 
     /**
      * Creates ProgressStaticExample to keep example ready for use.
@@ -29,7 +28,6 @@ public class ProgressStaticExample implements Model {
         this.progressBars = new ArrayList<>();
         this.labels = new ArrayList<>();
         this.selectedIndex = 0;
-        this.quitting = false;
 
         progressBars.add(new Progress()
                 .withWidth(40)
@@ -93,7 +91,6 @@ public class ProgressStaticExample implements Model {
         if (msg instanceof KeyPressMessage keyPressMessage) {
             String key = keyPressMessage.key();
             if ("q".equals(key) || "Q".equals(key) || "ctrl+c".equals(key)) {
-                quitting = true;
                 return new UpdateResult<>(this, QuitMessage::new);
             }
             if ("j".equals(key) || "down".equals(key) || " ".equals(key)) {

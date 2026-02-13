@@ -1,4 +1,4 @@
-package com.williamcallahan.tui4j.examples.tableresize;
+package examples.compat.bubbletea.tableresize;
 
 import com.williamcallahan.tui4j.compat.bubbletea.Command;
 import com.williamcallahan.tui4j.compat.bubbletea.Model;

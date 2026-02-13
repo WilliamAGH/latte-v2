@@ -1,4 +1,4 @@
-package com.williamcallahan.tui4j.examples.filepicker;
+package examples.compat.bubbletea.filepicker;
 
 import com.williamcallahan.tui4j.compat.bubbletea.Command;
 import com.williamcallahan.tui4j.compat.bubbletea.Message;
@@ -12,8 +12,6 @@ import com.williamcallahan.tui4j.compat.bubbles.key.Binding;
 import com.williamcallahan.tui4j.compat.lipgloss.Style;
 import com.williamcallahan.tui4j.compat.bubbletea.KeyPressMessage;
 import com.williamcallahan.tui4j.compat.lipgloss.color.Color;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 /**
  * Demonstrates the file picker component with help bindings.
@@ -27,7 +25,6 @@ public class FilePickerExample implements Model {
     private String selectedFile;
     private boolean quitting;
     private String errorMessage;
-    private long errorTimestamp;
 
     /**
      * Configures the file picker and help bindings.
@@ -44,7 +41,6 @@ public class FilePickerExample implements Model {
         this.selectedFile = "";
         this.quitting = false;
         this.errorMessage = null;
-        this.errorTimestamp = 0;
     }
 
     /**
@@ -65,11 +61,10 @@ public class FilePickerExample implements Model {
      */
     @Override
     public UpdateResult<? extends Model> update(Message msg) {
-        if (msg instanceof KeyPressMessage keyPressMessage) {
-            if (Binding.matches(keyPressMessage, keys.quit())) {
-                quitting = true;
-                return UpdateResult.from(this, Command.quit());
-            }
+        if (msg instanceof KeyPressMessage keyPressMessage
+                && Binding.matches(keyPressMessage, keys.quit())) {
+            quitting = true;
+            return UpdateResult.from(this, Command.quit());
         }
 
         UpdateResult<FilePicker> result = filePicker.update(msg);
@@ -189,96 +184,6 @@ public class FilePickerExample implements Model {
                     Binding.withKeys("q", "esc", "ctrl+c"),
                     Binding.withHelp("q", "quit")
             );
-        }
-
-        /**
-         * Returns the binding for moving up.
-         *
-         * @return up binding
-         */
-        private Binding up() {
-            return up;
-        }
-
-        /**
-         * Returns the binding for moving down.
-         *
-         * @return down binding
-         */
-        private Binding down() {
-            return down;
-        }
-
-        /**
-         * Returns the binding for jumping to the top.
-         *
-         * @return home binding
-         */
-        private Binding home() {
-            return home;
-        }
-
-        /**
-         * Returns the binding for jumping to the bottom.
-         *
-         * @return end binding
-         */
-        private Binding end() {
-            return end;
-        }
-
-        /**
-         * Returns the binding for paging up.
-         *
-         * @return page up binding
-         */
-        private Binding pageUp() {
-            return pageUp;
-        }
-
-        /**
-         * Returns the binding for paging down.
-         *
-         * @return page down binding
-         */
-        private Binding pageDown() {
-            return pageDown;
-        }
-
-        /**
-         * Returns the binding for opening a directory or selecting a file.
-         *
-         * @return open binding
-         */
-        private Binding open() {
-            return open;
-        }
-
-        /**
-         * Returns the binding for moving to the parent directory.
-         *
-         * @return back binding
-         */
-        private Binding back() {
-            return back;
-        }
-
-        /**
-         * Returns the binding for marking a selection.
-         *
-         * @return select binding
-         */
-        private Binding select() {
-            return select;
-        }
-
-        /**
-         * Returns the binding for toggling hidden files.
-         *
-         * @return toggle binding
-         */
-        private Binding toggleHidden() {
-            return toggleHidden;
         }
 
         /**

@@ -1,6 +1,5 @@
 package com.williamcallahan.tui4j.compat.lipgloss;
 
-import com.williamcallahan.tui4j.compat.lipgloss.Renderer;
 import org.jline.utils.AttributedCharSequence.ForceMode;
 import org.jline.utils.AttributedString;
 import org.jline.utils.AttributedStyle;

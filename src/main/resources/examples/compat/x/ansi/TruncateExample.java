@@ -1,7 +1,9 @@
-package com.williamcallahan.tui4j.examples.compat.x.ansi;
+package examples.compat.x.ansi;
 
-import com.williamcallahan.tui4j.compat.x.ansi.Truncate;
+import com.williamcallahan.tui4j.compat.x.ansi.Cut;
 import com.williamcallahan.tui4j.compat.x.ansi.StringWidth;
+import com.williamcallahan.tui4j.compat.x.ansi.Strip;
+import com.williamcallahan.tui4j.compat.x.ansi.Truncate;
 
 /**
  * Example program demonstrating ANSI-aware string truncation.
@@ -35,15 +37,14 @@ public class TruncateExample {
         System.out.println("Width: " + StringWidth.stringWidth(truncatedAnsi));
 
         System.out.println("\n=== Truncate from Left ===");
-        String prefixText = "... " + longText.substring(0, 30);
         System.out.println(Truncate.truncateLeft(longText, 50, "..."));
 
         System.out.println("\n=== Cut by Range ===");
-        String cutText = Truncate.cut(ansiText, 10, 30);
+        String cutText = Cut.cut(ansiText, 10, 30);
         System.out.println("Cut [10,30): " + cutText);
 
         System.out.println("\n=== Strip ANSI Codes ===");
-        String stripped = Truncate.strip(ansiText);
+        String stripped = Strip.strip(ansiText);
         System.out.println("Original: " + ansiText);
         System.out.println("Stripped: " + stripped);
     }

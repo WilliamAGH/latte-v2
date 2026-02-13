@@ -1,4 +1,4 @@
-package com.williamcallahan.tui4j.examples.stopwatch;
+package examples.compat.bubbletea.stopwatch;
 
 import com.williamcallahan.tui4j.compat.bubbletea.Command;
 import com.williamcallahan.tui4j.compat.bubbletea.Message;

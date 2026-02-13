@@ -1,4 +1,4 @@
-package com.williamcallahan.tui4j.examples.fireworks;
+package examples.compat.bubbletea.fireworks;
 
 import com.williamcallahan.tui4j.compat.bubbletea.Command;
 import com.williamcallahan.tui4j.compat.bubbletea.Message;
