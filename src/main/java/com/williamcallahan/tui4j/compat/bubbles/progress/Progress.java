@@ -565,8 +565,8 @@ public class Progress implements Model {
         }
 
         // Lazy initialization: apply default spring options if not customized
-        if (!springCustomized) {
-            setSpringOptions(DEFAULT_FREQUENCY, DEFAULT_DAMPING);
+        if (spring == null) {
+            this.spring = new Spring(DEFAULT_FREQUENCY, DEFAULT_DAMPING);
         }
 
         Spring.SpringUpdateResult result = spring.update(percentShown, velocity, targetPercent);
