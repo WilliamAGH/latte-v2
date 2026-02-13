@@ -41,10 +41,10 @@ public class Progress implements Model {
     private Style percentageStyle;
 
     private Spring spring;
+    private boolean springCustomized;
     private double percentShown;
     private double targetPercent;
     private double velocity;
-    private boolean springCustomized;
 
     private boolean useRamp;
     private RGB rampColorA;
@@ -67,8 +67,8 @@ public class Progress implements Model {
         this.showPercentage = true;
         this.percentFormat = " %3.0f%%";
         this.percentageStyle = Style.newStyle();
-
-        setSpringOptions(DEFAULT_FREQUENCY, DEFAULT_DAMPING);
+        this.spring = null;
+        this.springCustomized = false;
     }
 
     private static int nextId() {
@@ -238,6 +238,15 @@ public class Progress implements Model {
     public void setSpringOptions(double frequency, double damping) {
         this.spring = new Spring(frequency, damping);
         this.springCustomized = true;
+    }
+
+    /**
+     * Returns whether spring options have been customized.
+     *
+     * @return {@code true} when custom spring options have been set
+     */
+    public boolean isSpringCustomized() {
+        return springCustomized;
     }
 
     /**
@@ -553,6 +562,11 @@ public class Progress implements Model {
 
         if (!isAnimating()) {
             return UpdateResult.from(this);
+        }
+
+        // Lazy initialization: apply default spring options if not customized
+        if (!springCustomized) {
+            setSpringOptions(DEFAULT_FREQUENCY, DEFAULT_DAMPING);
         }
 
         Spring.SpringUpdateResult result = spring.update(percentShown, velocity, targetPercent);
