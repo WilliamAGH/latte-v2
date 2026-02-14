@@ -14,6 +14,8 @@ public interface RGBSupplier {
      * Returns the RGB value for this color.
      *
      * @return RGB value
+     * @deprecated Use {@link com.williamcallahan.tui4j.compat.lipgloss.color.RGBSupplier#rgb()} instead.
      */
+    @Deprecated(since = "0.3.0")
     com.williamcallahan.tui4j.compat.lipgloss.color.RGB rgb();
 }

@@ -22,6 +22,7 @@ public record HSL(float h, float s, float l) {
      *
      * @return canonical HSL
      */
+    @Deprecated(since = "0.3.0")
     public com.williamcallahan.tui4j.compat.lipgloss.color.HSL toCanonical() {
         return new com.williamcallahan.tui4j.compat.lipgloss.color.HSL(h, s, l);
     }
@@ -32,6 +33,7 @@ public record HSL(float h, float s, float l) {
      * @param canonical the canonical HSL
      * @return deprecated HSL shim
      */
+    @Deprecated(since = "0.3.0")
     public static HSL fromCanonical(com.williamcallahan.tui4j.compat.lipgloss.color.HSL canonical) {
         return new HSL(canonical.h(), canonical.s(), canonical.l());
     }
@@ -41,6 +43,7 @@ public record HSL(float h, float s, float l) {
      *
      * @return true if lightness is below 0.5
      */
+    @Deprecated(since = "0.3.0")
     public boolean isDark() {
         return l < 0.5;
     }
@@ -51,6 +54,7 @@ public record HSL(float h, float s, float l) {
      * @param other the other HSL color
      * @return the Euclidean distance
      */
+    @Deprecated(since = "0.3.0")
     public float distance(HSL other) {
         return toCanonical().distance(other.toCanonical());
     }

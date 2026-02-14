@@ -1,4 +1,4 @@
-package com.williamcallahan.tui4j.examples.showcases;
+package examples.showcases;
 
 import com.williamcallahan.tui4j.compat.bubbletea.Command;
 import com.williamcallahan.tui4j.compat.bubbletea.Message;
@@ -16,13 +16,13 @@ import com.williamcallahan.tui4j.compat.lipgloss.Position;
 import com.williamcallahan.tui4j.compat.lipgloss.Style;
 import com.williamcallahan.tui4j.compat.lipgloss.border.StandardBorder;
 import com.williamcallahan.tui4j.compat.lipgloss.color.AdaptiveColor;
-import com.williamcallahan.tui4j.compat.lipgloss.color.Color;
 import com.williamcallahan.tui4j.compat.lipgloss.join.HorizontalJoinDecorator;
 import com.williamcallahan.tui4j.compat.lipgloss.join.VerticalJoinDecorator;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.EnumMap;
+import java.util.Random;
 import java.util.List;
 import java.util.Map;
 
@@ -44,7 +44,6 @@ public class PulseExample implements Model {
     private static final AdaptiveColor PULSE_PINK = new AdaptiveColor("#FF5F87", "#FF5F87");
     private static final AdaptiveColor PULSE_PURPLE = new AdaptiveColor("#AF5FFF", "#AF5FFF");
     private static final AdaptiveColor PULSE_VIOLET = new AdaptiveColor("#875FFF", "#875FFF");
-    private static final AdaptiveColor PULSE_MAGENTA = new AdaptiveColor("#FF00FF", "#FF00FF");
 
     // UI colors
     private static final AdaptiveColor BG_DARK = new AdaptiveColor("#1A1A2E", "#1A1A2E");
@@ -243,7 +242,8 @@ public class PulseExample implements Model {
     );
 
     // Mock data
-    private final String sessionId = "pulse-" + String.format("%04x", (int)(Math.random() * 0xFFFF));
+    private static final Random RANDOM = new Random();
+    private final String sessionId = "pulse-" + String.format("%04x", RANDOM.nextInt(0xFFFF));
     private int tokenCount = 0;
 
     // ═══════════════════════════════════════════════════════════════════════════
@@ -359,20 +359,23 @@ public class PulseExample implements Model {
                 case "G":
                     scrollActiveViewportToBottom();
                     return UpdateResult.from(this);
+
+                default:
+                    break;
             }
         }
 
         // Update spinner
         UpdateResult<? extends Model> spinnerResult = spinner.update(msg);
         this.spinner = spinnerResult.model();
-        tokenCount += (int)(Math.random() * 3);
+        tokenCount += RANDOM.nextInt(3);
 
         return UpdateResult.from(this, spinnerResult.command());
     }
 
     private UpdateResult<? extends Model> handlePaletteInput(KeyPressMessage key) {
         switch (key.key()) {
-            case "esc", "ctrl+p":
+            case "esc", "ctrl+p", "enter":
                 paletteOpen = false;
                 return UpdateResult.from(this);
 
@@ -384,10 +387,8 @@ public class PulseExample implements Model {
                 paletteSelection = (paletteSelection - 1 + paletteCommands.size()) % paletteCommands.size();
                 return UpdateResult.from(this);
 
-            case "enter":
-                paletteOpen = false;
-                // Execute command (mock)
-                return UpdateResult.from(this);
+            default:
+                break;
         }
         return UpdateResult.from(this);
     }
@@ -530,9 +531,14 @@ public class PulseExample implements Model {
         };
 
         for (int i = 0; i < steps.length; i++) {
-            String icon = (i < 2) ? Style.newStyle().foreground(DIFF_ADD).render("✓") :
-                          (i == 2) ? spinner.view() :
-                          Style.newStyle().foreground(TEXT_DIM).render("○");
+            String icon;
+            if (i < 2) {
+                icon = Style.newStyle().foreground(DIFF_ADD).render("✓");
+            } else if (i == 2) {
+                icon = spinner.view();
+            } else {
+                icon = Style.newStyle().foreground(TEXT_DIM).render("○");
+            }
             String text = (i <= 2)
                     ? Style.newStyle().foreground(TEXT_PRIMARY).render(steps[i])
                     : Style.newStyle().foreground(TEXT_DIM).render(steps[i]);
@@ -609,7 +615,6 @@ public class PulseExample implements Model {
             if (i >= padTop && i < padTop + paletteLines.length) {
                 int pIdx = i - padTop;
                 // Overlay palette line onto background
-                String line = bgLines[i];
                 String pLine = " ".repeat(padLeft) + paletteLines[pIdx];
                 result.append(pLine);
             } else {
@@ -636,21 +641,26 @@ public class PulseExample implements Model {
                msgStyle.render("Add a dark mode toggle to the settings page.\n" +
                               "It should persist the preference to localStorage.") + "\n\n" +
                aiStyle.render("Pulse") + " " + spinner.view() + "\n" +
-               msgStyle.render("I'll implement a dark mode toggle for you. Here's my plan:\n\n" +
-                              "1. Add a toggle switch component to Settings\n" +
-                              "2. Create a theme context for state management\n" +
-                              "3. Persist preference to localStorage\n" +
-                              "4. Apply theme class to document root\n\n" +
-                              "Let me start by modifying the Settings component...") + "\n\n" +
+               msgStyle.render("""
+                       I'll implement a dark mode toggle for you. Here's my plan:
+
+                       1. Add a toggle switch component to Settings
+                       2. Create a theme context for state management
+                       3. Persist preference to localStorage
+                       4. Apply theme class to document root
+
+                       Let me start by modifying the Settings component...""") + "\n\n" +
                userStyle.render("You") + "\n" +
                msgStyle.render("Looks good! Please proceed.") + "\n\n" +
                aiStyle.render("Pulse") + "\n" +
-               msgStyle.render("Done! I've made the following changes:\n" +
-                              "• Added ThemeContext with useTheme hook\n" +
-                              "• Created DarkModeToggle component\n" +
-                              "• Updated Settings.jsx with toggle\n" +
-                              "• Added CSS variables for both themes\n\n" +
-                              "The toggle now persists across sessions.");
+               msgStyle.render("""
+                       Done! I've made the following changes:
+                       • Added ThemeContext with useTheme hook
+                       • Created DarkModeToggle component
+                       • Updated Settings.jsx with toggle
+                       • Added CSS variables for both themes
+
+                       The toggle now persists across sessions.""");
     }
 
     private String generateCodeContent() {

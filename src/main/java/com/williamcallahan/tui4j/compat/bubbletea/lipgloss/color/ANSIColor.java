@@ -22,6 +22,7 @@ public final class ANSIColor implements TerminalColor, RGBSupplier {
      *
      * @param colorCode ANSI color code (0-15)
      */
+    @Deprecated(since = "0.3.0")
     public ANSIColor(int colorCode) {
         this.delegate =
             new com.williamcallahan.tui4j.compat.lipgloss.color.ANSIColor(
@@ -36,6 +37,7 @@ public final class ANSIColor implements TerminalColor, RGBSupplier {
      * @param renderer renderer context
      * @return updated style
      */
+    @Deprecated(since = "0.3.0")
     @Override
     public AttributedStyle applyAsBackground(
         AttributedStyle style,
@@ -51,6 +53,7 @@ public final class ANSIColor implements TerminalColor, RGBSupplier {
      * @param renderer canonical renderer context
      * @return updated style
      */
+    @Deprecated(since = "0.3.0")
     @Override
     public AttributedStyle applyAsBackground(
         AttributedStyle style,
@@ -66,6 +69,7 @@ public final class ANSIColor implements TerminalColor, RGBSupplier {
      * @param renderer renderer context
      * @return updated style
      */
+    @Deprecated(since = "0.3.0")
     @Override
     public AttributedStyle applyAsForeground(
         AttributedStyle style,
@@ -81,6 +85,7 @@ public final class ANSIColor implements TerminalColor, RGBSupplier {
      * @param renderer canonical renderer context
      * @return updated style
      */
+    @Deprecated(since = "0.3.0")
     @Override
     public AttributedStyle applyAsForeground(
         AttributedStyle style,
@@ -94,6 +99,7 @@ public final class ANSIColor implements TerminalColor, RGBSupplier {
      *
      * @return RGB value
      */
+    @Deprecated(since = "0.3.0")
     @Override
     public com.williamcallahan.tui4j.compat.lipgloss.color.RGB rgb() {
         return delegate.rgb();
@@ -104,6 +110,7 @@ public final class ANSIColor implements TerminalColor, RGBSupplier {
      *
      * @return color code
      */
+    @Deprecated(since = "0.3.0")
     public int value() {
         return delegate.value();
     }
@@ -113,6 +120,7 @@ public final class ANSIColor implements TerminalColor, RGBSupplier {
      *
      * @return canonical ANSI color
      */
+    @Deprecated(since = "0.3.0")
     public com.williamcallahan.tui4j.compat.lipgloss.color.ANSIColor toCanonical() {
         return delegate;
     }

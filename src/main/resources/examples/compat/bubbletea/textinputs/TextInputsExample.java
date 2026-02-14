@@ -1,4 +1,4 @@
-package com.williamcallahan.tui4j.examples.textinputs;
+package examples.compat.bubbletea.textinputs;
 
 import com.williamcallahan.tui4j.compat.bubbletea.Command;
 import com.williamcallahan.tui4j.compat.bubbletea.Message;

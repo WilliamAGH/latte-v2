@@ -9,42 +9,54 @@ package com.williamcallahan.tui4j.compat.bubbletea.lipgloss.border;
 @Deprecated(since = "0.3.0")
 public class StandardBorder extends com.williamcallahan.tui4j.compat.lipgloss.border.StandardBorder {
     /** Border with no visible lines. */
-    public static com.williamcallahan.tui4j.compat.lipgloss.border.Border NoBorder =
+    @Deprecated(since = "0.3.0")
+    public static final com.williamcallahan.tui4j.compat.lipgloss.border.Border NoBorder =
         com.williamcallahan.tui4j.compat.lipgloss.border.StandardBorder.NoBorder;
     /** Single-line box border. */
-    public static com.williamcallahan.tui4j.compat.lipgloss.border.Border NormalBorder =
+    @Deprecated(since = "0.3.0")
+    public static final com.williamcallahan.tui4j.compat.lipgloss.border.Border NormalBorder =
         com.williamcallahan.tui4j.compat.lipgloss.border.StandardBorder.NormalBorder;
     /** Rounded corner border. */
-    public static com.williamcallahan.tui4j.compat.lipgloss.border.Border RoundedBorder =
+    @Deprecated(since = "0.3.0")
+    public static final com.williamcallahan.tui4j.compat.lipgloss.border.Border RoundedBorder =
         com.williamcallahan.tui4j.compat.lipgloss.border.StandardBorder.RoundedBorder;
     /** Solid block border. */
-    public static com.williamcallahan.tui4j.compat.lipgloss.border.Border BlockBorder =
+    @Deprecated(since = "0.3.0")
+    public static final com.williamcallahan.tui4j.compat.lipgloss.border.Border BlockBorder =
         com.williamcallahan.tui4j.compat.lipgloss.border.StandardBorder.BlockBorder;
     /** Outer half-block border. */
-    public static com.williamcallahan.tui4j.compat.lipgloss.border.Border OuterHalfBlockBorder =
+    @Deprecated(since = "0.3.0")
+    public static final com.williamcallahan.tui4j.compat.lipgloss.border.Border OuterHalfBlockBorder =
         com.williamcallahan.tui4j.compat.lipgloss.border.StandardBorder.OuterHalfBlockBorder;
     /** Inner half-block border. */
-    public static com.williamcallahan.tui4j.compat.lipgloss.border.Border InnerHalfBlockBorder =
+    @Deprecated(since = "0.3.0")
+    public static final com.williamcallahan.tui4j.compat.lipgloss.border.Border InnerHalfBlockBorder =
         com.williamcallahan.tui4j.compat.lipgloss.border.StandardBorder.InnerHalfBlockBorder;
     /** Thick line border. */
-    public static com.williamcallahan.tui4j.compat.lipgloss.border.Border ThickBorder =
+    @Deprecated(since = "0.3.0")
+    public static final com.williamcallahan.tui4j.compat.lipgloss.border.Border ThickBorder =
         com.williamcallahan.tui4j.compat.lipgloss.border.StandardBorder.ThickBorder;
     /** Double line border. */
-    public static com.williamcallahan.tui4j.compat.lipgloss.border.Border DoubleBorder =
+    @Deprecated(since = "0.3.0")
+    public static final com.williamcallahan.tui4j.compat.lipgloss.border.Border DoubleBorder =
         com.williamcallahan.tui4j.compat.lipgloss.border.StandardBorder.DoubleBorder;
     /** Hidden border (spaces). */
-    public static com.williamcallahan.tui4j.compat.lipgloss.border.Border HiddenBorder =
+    @Deprecated(since = "0.3.0")
+    public static final com.williamcallahan.tui4j.compat.lipgloss.border.Border HiddenBorder =
         com.williamcallahan.tui4j.compat.lipgloss.border.StandardBorder.HiddenBorder;
     /** Markdown table border. */
-    public static com.williamcallahan.tui4j.compat.lipgloss.border.Border MarkdownBorder =
+    @Deprecated(since = "0.3.0")
+    public static final com.williamcallahan.tui4j.compat.lipgloss.border.Border MarkdownBorder =
         com.williamcallahan.tui4j.compat.lipgloss.border.StandardBorder.MarkdownBorder;
     /** ASCII line border. */
-    public static com.williamcallahan.tui4j.compat.lipgloss.border.Border ASCIIBorder =
+    @Deprecated(since = "0.3.0")
+    public static final com.williamcallahan.tui4j.compat.lipgloss.border.Border ASCIIBorder =
         com.williamcallahan.tui4j.compat.lipgloss.border.StandardBorder.ASCIIBorder;
 
     /**
      * Creates a standard border shim.
      */
+    @Deprecated(since = "0.3.0")
     public StandardBorder() {
         super();
     }

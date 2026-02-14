@@ -18,16 +18,19 @@ public final class NoColor implements TerminalColor {
     /**
      * Creates NoColor.
      */
+    @Deprecated(since = "0.3.0")
     public NoColor() {
         this.delegate = new com.williamcallahan.tui4j.compat.lipgloss.color.NoColor();
     }
 
+    @Deprecated(since = "0.3.0")
     @Override
     public AttributedStyle applyAsBackground(AttributedStyle style,
             com.williamcallahan.tui4j.compat.lipgloss.Renderer renderer) {
         return delegate.applyAsBackground(style, renderer);
     }
 
+    @Deprecated(since = "0.3.0")
     @Override
     public AttributedStyle applyAsForeground(AttributedStyle style,
             com.williamcallahan.tui4j.compat.lipgloss.Renderer renderer) {
@@ -39,6 +42,7 @@ public final class NoColor implements TerminalColor {
      *
      * @return canonical NoColor
      */
+    @Deprecated(since = "0.3.0")
     @Override
     public com.williamcallahan.tui4j.compat.lipgloss.color.NoColor toCanonical() {
         return delegate;

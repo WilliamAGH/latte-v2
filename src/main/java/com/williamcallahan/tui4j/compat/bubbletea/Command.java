@@ -4,11 +4,6 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Objects;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -19,12 +14,38 @@ import java.util.stream.Collectors;
  * Port of github.com/charmbracelet/bubbletea/commands.go.
  */
 public interface Command {
+
+    /** Sentinel command representing "no command to execute" (Go's nil Cmd). */
+    Command NO_OP = () -> null;
+
     /**
      * Executes the command and returns a message.
      *
      * @return message to deliver
      */
     Message execute();
+
+    /**
+     * Returns a no-op command sentinel, equivalent to Go's nil Cmd.
+     * <p>
+     * Use this instead of returning {@code null} from methods whose return
+     * type is {@link Command}.
+     *
+     * @return no-op command
+     */
+    static Command none() {
+        return NO_OP;
+    }
+
+    /**
+     * Checks whether a command is absent (null or the no-op sentinel).
+     *
+     * @param command command to check
+     * @return true if the command should not be executed
+     */
+    static boolean isNone(Command command) {
+        return command == null || command == NO_OP;
+    }
 
     /**
      * Batches commands into a single message.
@@ -35,7 +56,7 @@ public interface Command {
     static Command batch(Collection<Command> commands) {
         Command[] filteredCommands = commands
             .stream()
-            .filter(Objects::nonNull)
+            .filter(c -> !isNone(c))
             .toArray(Command[]::new);
         return () -> new BatchMessage(filteredCommands);
     }
@@ -48,7 +69,7 @@ public interface Command {
      */
     static Command batch(Command... commands) {
         Command[] filteredCommands = Arrays.stream(commands)
-            .filter(Objects::nonNull)
+            .filter(c -> !isNone(c))
             .toArray(Command[]::new);
         return () -> new BatchMessage(filteredCommands);
     }
@@ -95,24 +116,8 @@ public interface Command {
      * @param fn       function to map time to message
      * @return tick command
      */
-    static Command tick(
-        Duration duration,
-        Function<LocalDateTime, Message> fn
-    ) {
-        return () -> {
-            BlockingQueue<LocalDateTime> queue = new ArrayBlockingQueue<>(1);
-            Timer timer = new Timer(true);
-
-            timer.schedule(new TimeEnqueueTask(queue), duration.toMillis());
-
-            try {
-                LocalDateTime time = queue.take();
-                timer.cancel();
-                return fn.apply(time);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-        };
+    static Command tick(Duration duration, Function<LocalDateTime, Message> fn) {
+        return CommandTimer.tick(duration, fn);
     }
 
     /**
@@ -122,32 +127,8 @@ public interface Command {
      * @param fn function to map time to message
      * @return every command
      */
-    static Command every(
-        Duration duration,
-        Function<LocalDateTime, Message> fn
-    ) {
-        return () -> {
-            long millis = duration.toMillis();
-            if (millis <= 0) {
-                return fn.apply(LocalDateTime.now());
-            }
-
-            long now = System.currentTimeMillis();
-            long next = ((now / millis) + 1) * millis;
-            long delay = Math.max(0, next - now);
-
-            BlockingQueue<LocalDateTime> queue = new ArrayBlockingQueue<>(1);
-            Timer timer = new Timer(true);
-            timer.schedule(new TimeEnqueueTask(queue), delay);
-
-            try {
-                LocalDateTime time = queue.take();
-                timer.cancel();
-                return fn.apply(time);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-        };
+    static Command every(Duration duration, Function<LocalDateTime, Message> fn) {
+        return CommandTimer.every(duration, fn);
     }
 
     /**
@@ -196,31 +177,6 @@ public interface Command {
      */
     static Command setWidowTitle(String title) {
         return setWindowTitle(title);
-    }
-
-    /**
-     * Enqueues the current time for timer-based commands.
-     */
-    final class TimeEnqueueTask extends TimerTask {
-
-        private final BlockingQueue<LocalDateTime> queue;
-
-        /**
-         * Creates a timer task that delivers a single timestamp.
-         *
-         * @param queue queue receiving the timestamp
-         */
-        private TimeEnqueueTask(BlockingQueue<LocalDateTime> queue) {
-            this.queue = queue;
-        }
-
-        /**
-         * Delivers the current time to the waiting command.
-         */
-        @Override
-        public void run() {
-            queue.offer(LocalDateTime.now());
-        }
     }
 
     /**

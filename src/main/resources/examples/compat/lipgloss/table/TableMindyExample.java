@@ -1,7 +1,10 @@
-package com.williamcallahan.tui4j.examples.compat.lipgloss.table;
+package examples.compat.lipgloss.table;
 
-import com.williamcallahan.tui4j.compat.lipgloss.Table;
+import com.williamcallahan.tui4j.compat.lipgloss.Position;
+import com.williamcallahan.tui4j.compat.lipgloss.Style;
+import com.williamcallahan.tui4j.compat.lipgloss.border.StandardBorder;
 import com.williamcallahan.tui4j.compat.lipgloss.color.Color;
+import com.williamcallahan.tui4j.compat.lipgloss.table.Table;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,16 +28,16 @@ public class TableMindyExample {
      * @param end last color code to include
      * @return row data for the table
      */
-    private static List<String[]> makeRow(int start, int end) {
-        List<String[]> row = new ArrayList<>();
+    private static String[] makeRow(int start, int end) {
+        java.util.List<String> row = new ArrayList<>();
         for (int i = start; i <= end; i++) {
             row.add(String.valueOf(i));
             row.add("");
         }
-        for (int i = row.size(); i < ROW_LENGTH; i++) {
+        while (row.size() < ROW_LENGTH) {
             row.add("");
         }
-        return row;
+        return row.toArray(new String[0]);
     }
 
     /**
@@ -42,7 +45,7 @@ public class TableMindyExample {
      *
      * @return spacer row data
      */
-    private static List<String[]> makeEmptyRow() {
+    private static String[] makeEmptyRow() {
         return makeRow(0, -1);
     }
 
@@ -52,34 +55,37 @@ public class TableMindyExample {
      * @param args ignored
      */
     public static void main(String[] args) {
-        Style labelStyle = Style.newStyle().width(3).alignHorizontal(Style.Align.RIGHT);
+        Style labelStyle = Style.newStyle().width(3).alignHorizontal(Position.Right);
         Style swatchStyle = Style.newStyle().width(6);
 
         List<String[]> data = new ArrayList<>();
 
         for (int i = 0; i < 13; i += 8) {
-            data.addAll(makeRow(i, i + 5));
+            data.add(makeRow(i, i + 5));
         }
         data.add(makeEmptyRow());
 
         for (int i = 6; i < 15; i += 8) {
-            data.addAll(makeRow(i, i + 1));
+            data.add(makeRow(i, i + 1));
         }
         data.add(makeEmptyRow());
 
         for (int i = 16; i < 231; i += 6) {
-            data.addAll(makeRow(i, i + 5));
+            data.add(makeRow(i, i + 5));
         }
         data.add(makeEmptyRow());
 
         for (int i = 232; i < 256; i += 6) {
-            data.addAll(makeRow(i, i + 5));
+            data.add(makeRow(i, i + 5));
         }
 
-        Table t = new Table()
-                .border(Table.Border.HIDDEN)
-                .rows(data)
+        Table t = Table.create()
+                .border(StandardBorder.HiddenBorder)
+                .rows(data.toArray(new String[0][]))
                 .styleFunc((row, col) -> {
+                    if (row < 0 || row >= data.size()) {
+                        return labelStyle;
+                    }
                     String colorCode = data.get(row)[col - (col % 2)];
 
                     if (col % 2 == 0) {

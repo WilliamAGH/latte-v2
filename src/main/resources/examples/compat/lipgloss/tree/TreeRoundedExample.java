@@ -1,9 +1,9 @@
-package com.williamcallahan.tui4j.examples.compat.lipgloss.tree;
+package examples.compat.lipgloss.tree;
 
-import com.williamcallahan.tui4j.compat.lipgloss.Tree;
 import com.williamcallahan.tui4j.compat.lipgloss.Style;
 import com.williamcallahan.tui4j.compat.lipgloss.color.Color;
-import com.williamcallahan.tui4j.compat.lipgloss.tree.Enumerator;
+import com.williamcallahan.tui4j.compat.lipgloss.tree.Tree;
+import com.williamcallahan.tui4j.compat.lipgloss.tree.TreeEnumerator;
 
 /**
  * Example program demonstrating lipgloss tree component.
@@ -23,18 +23,18 @@ public class TreeRoundedExample {
         Style itemStyle = Style.newStyle().marginRight(1);
         Style enumeratorStyle = Style.newStyle().foreground(Color.color("8")).marginRight(1);
 
-        Tree t = Tree.root("Groceries")
+        Tree t = Tree.withRoot("Groceries")
                 .child(
-                        Tree.root("Fruits")
+                        Tree.withRoot("Fruits")
                                 .child("Blood Orange", "Papaya", "Dragonfruit", "Yuzu"),
-                        Tree.root("Items")
+                        Tree.withRoot("Items")
                                 .child("Cat Food", "Nutella", "Powdered Sugar"),
-                        Tree.root("Veggies")
+                        Tree.withRoot("Veggies")
                                 .child("Leek", "Artichoke")
                 )
                 .itemStyle(itemStyle)
                 .enumeratorStyle(enumeratorStyle)
-                .enumerator(Enumerator.ROUNDED);
+                .enumerator(new TreeEnumerator.RounderEnumerator());
 
         System.out.println(t);
     }

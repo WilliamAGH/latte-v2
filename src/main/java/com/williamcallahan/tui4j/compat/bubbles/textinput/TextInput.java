@@ -149,7 +149,7 @@ public class TextInput implements Model {
             this.value = runes;
         }
 
-        if ((pos == 0 && empty) | pos > value.length) {
+        if ((pos == 0 && empty) || pos > value.length) {
             setCursor(value.length);
         }
         handleOverflow();
@@ -639,28 +639,28 @@ public class TextInput implements Model {
 
         Style styleText = textStyle.copy().inline(true);
 
-        char[] value = Arrays.copyOfRange(this.value, offset, offsetRight);
-        int pos = Math.max(0, this.pos - offset);
+        char[] visibleValue = Arrays.copyOfRange(this.value, offset, offsetRight);
+        int displayPos = Math.max(0, this.pos - offset);
         String v = styleText.render(
                 echoTransform(
-                        String.valueOf(Arrays.copyOfRange(value, 0, pos))
+                        String.valueOf(Arrays.copyOfRange(visibleValue, 0, displayPos))
                 )
         );
 
-        if (pos < value.length) {
-            String character = echoTransform(String.valueOf(value[pos]));
+        if (displayPos < visibleValue.length) {
+            String character = echoTransform(String.valueOf(visibleValue[displayPos]));
             cursor.setChar(character);
 
             v += cursor.view();
-            v += styleText.render(echoTransform(String.valueOf(Arrays.copyOfRange(value, pos + 1, value.length))));
+            v += styleText.render(echoTransform(String.valueOf(Arrays.copyOfRange(visibleValue, displayPos + 1, visibleValue.length))));
             v += completionView(0);
         } else {
             if (canAcceptSuggestion()) {
                 char[] suggestion = matchedSuggestions[currentSuggestionIndex];
 
-                if (value.length < suggestion.length) {
+                if (visibleValue.length < suggestion.length) {
                     cursor.setTextStyle(this.completionStyle.copy());
-                    cursor.setChar(echoTransform(String.valueOf(suggestion[pos])));
+                    cursor.setChar(echoTransform(String.valueOf(suggestion[displayPos])));
                     v += cursor.view();
                     v += completionView(1);
                 } else {
@@ -673,10 +673,10 @@ public class TextInput implements Model {
             }
         }
 
-        int valWidth = Size.width(String.valueOf(value));
+        int valWidth = Size.width(String.valueOf(visibleValue));
         if (width > 0 && valWidth < width) {
             int padding = Math.max(0, this.width - valWidth);
-            if (valWidth + padding <= this.width && pos < value.length) {
+            if (valWidth + padding <= this.width && displayPos < visibleValue.length) {
                 padding++;
             }
             v += styleText.render(" ".repeat(padding));
@@ -695,11 +695,11 @@ public class TextInput implements Model {
         Style style = placeholderStyle.copy().inline(true);
 
         char[] p = new char[width + 1];
-        char[] placeholder = this.placeholder.toCharArray();
-        if (placeholder.length > width + 1) {
-            p = new char[placeholder.length];
+        char[] placeholderChars = this.placeholder.toCharArray();
+        if (placeholderChars.length > width + 1) {
+            p = new char[placeholderChars.length];
         }
-        System.arraycopy(placeholder, 0, p, 0, placeholder.length);
+        System.arraycopy(placeholderChars, 0, p, 0, placeholderChars.length);
 
         cursor.setTextStyle(placeholderStyle.copy());
         cursor.setChar(String.valueOf(p[0]));
@@ -744,15 +744,15 @@ public class TextInput implements Model {
      * @return completion view
      */
     public String completionView(int offset) {
-        char[] value = this.value;
+        char[] currentValue = this.value;
         Style style = placeholderStyle.copy().inline(true);
 
         if (canAcceptSuggestion()) {
             char[] suggestion = matchedSuggestions[currentSuggestionIndex];
-            if (value.length < suggestion.length) {
+            if (currentValue.length < suggestion.length) {
                 return style.render(
                         String.valueOf(
-                                Arrays.copyOfRange(suggestion, value.length + offset, suggestion.length)
+                                Arrays.copyOfRange(suggestion, currentValue.length + offset, suggestion.length)
                         )
                 );
             }
@@ -820,11 +820,11 @@ public class TextInput implements Model {
     }
 
     private String[] getSuggestions(char[][] sugs) {
-        String[] suggestions = new String[sugs.length];
+        String[] result = new String[sugs.length];
         for (int i = 0; i < sugs.length; i++) {
-            suggestions[i] = new String(sugs[i]);
+            result[i] = new String(sugs[i]);
         }
-        return suggestions;
+        return result;
     }
 
     /**

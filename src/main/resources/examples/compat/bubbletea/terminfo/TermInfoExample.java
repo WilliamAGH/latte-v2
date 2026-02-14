@@ -1,4 +1,4 @@
-package com.williamcallahan.tui4j.examples.terminfo;
+package examples.compat.bubbletea.terminfo;
 
 import com.williamcallahan.tui4j.compat.bubbletea.Command;
 import com.williamcallahan.tui4j.compat.bubbletea.Message;

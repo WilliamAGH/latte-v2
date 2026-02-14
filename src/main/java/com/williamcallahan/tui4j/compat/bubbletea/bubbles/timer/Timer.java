@@ -1,11 +1,6 @@
 package com.williamcallahan.tui4j.compat.bubbletea.bubbles.timer;
 
-import com.williamcallahan.tui4j.compat.bubbletea.Command;
-import com.williamcallahan.tui4j.compat.bubbletea.Message;
-import com.williamcallahan.tui4j.compat.bubbletea.Model;
-import com.williamcallahan.tui4j.compat.bubbletea.UpdateResult;
 import java.time.Duration;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @deprecated Deprecated in tui4j as of 0.3.0 because this type moved; use {@link com.williamcallahan.tui4j.compat.bubbles.timer.Timer} instead.

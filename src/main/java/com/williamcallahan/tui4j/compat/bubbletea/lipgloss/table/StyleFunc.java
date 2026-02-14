@@ -18,6 +18,7 @@ public interface StyleFunc extends com.williamcallahan.tui4j.compat.lipgloss.tab
      * @param col column index
      * @return style for the cell
      */
+    @Deprecated(since = "0.3.0")
     @Override
     com.williamcallahan.tui4j.compat.bubbletea.lipgloss.Style apply(int row, int col);
 }

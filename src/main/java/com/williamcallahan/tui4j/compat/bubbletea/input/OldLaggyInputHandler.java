@@ -12,6 +12,7 @@ import org.jline.terminal.Terminal;
 import org.jline.utils.NonBlockingReader;
 
 import com.williamcallahan.tui4j.compat.bubbletea.Message;
+import com.williamcallahan.tui4j.compat.bubbletea.ProgramException;
 import com.williamcallahan.tui4j.compat.bubbletea.input.key.ExtendedSequences;
 import com.williamcallahan.tui4j.compat.bubbletea.input.key.Key;
 import com.williamcallahan.tui4j.compat.bubbletea.input.key.KeyAliases;
@@ -86,7 +87,7 @@ public class OldLaggyInputHandler implements InputHandler {
             while (running) {
                 int input = reader.read();
                 if (input == -1)
-                    continue;
+                    break;
 
                 if (input == '\u001b') { // ESC character
                     // Try to read the next character with a timeout
@@ -95,7 +96,6 @@ public class OldLaggyInputHandler implements InputHandler {
                         // If no character follows within timeout, it's a standalone ESC
                         messageConsumer
                                 .accept(new KeyPressMessage(new Key(KeyAliases.getKeyType(KeyAliases.KeyAlias.KeyEscape))));
-                        continue;
                     } else {
                         handleControlSequence(reader, (char) nextChar);
                     }
@@ -117,7 +117,7 @@ public class OldLaggyInputHandler implements InputHandler {
             }
         } catch (IOException e) {
             if (!Thread.currentThread().isInterrupted()) {
-                throw new RuntimeException("Unable to initialize keyboard input", e);
+                throw new ProgramException("Unable to initialize keyboard input", e);
             }
         }
     }
@@ -170,23 +170,27 @@ public class OldLaggyInputHandler implements InputHandler {
             case '<': // SGR Mouse Event
                 handleSGRMouseEvent(reader);
                 return;
+            default:
+                break;
         }
 
-        // If not matched, continue reading the rest of the sequence
+        readRemainingSequence(reader, sequence);
+    }
+
+    /**
+     * Reads remaining characters of an unresolved CSI sequence and emits the resulting message.
+     *
+     * @param reader    terminal reader
+     * @param sequence  sequence buffer built so far
+     */
+    private void readRemainingSequence(NonBlockingReader reader, StringBuilder sequence) throws IOException {
         while (true) {
             int ch = reader.read(READ_TIMEOUT_MS);
             if (ch <= 0)
                 break;
 
             if (ch == 27) {
-                Key key = ExtendedSequences.getKey(sequence.toString());
-                if (key != null) {
-                    messageConsumer.accept(new KeyPressMessage(key));
-                } else {
-                    messageConsumer.accept(
-                            new KeyPressMessage(new Key(KeyType.KeyRunes, sequence.toString().toCharArray(), altPressed)));
-                }
-
+                emitKeyOrRunes(sequence);
                 if (altPressed) {
                     altPressed = false;
                 }
@@ -195,12 +199,26 @@ public class OldLaggyInputHandler implements InputHandler {
             sequence.append((char) ch);
         }
 
-        // Attempt to resolve the sequence
         Key key = ExtendedSequences.getKey(sequence.toString());
         if (key != null) {
             messageConsumer.accept(new KeyPressMessage(key));
         } else {
             messageConsumer.accept(new UnknownSequenceMessage(sequence.toString()));
+        }
+    }
+
+    /**
+     * Emits a key press for the given sequence, resolving via {@link ExtendedSequences} or falling back to runes.
+     *
+     * @param sequence escape sequence to resolve
+     */
+    private void emitKeyOrRunes(StringBuilder sequence) {
+        Key key = ExtendedSequences.getKey(sequence.toString());
+        if (key != null) {
+            messageConsumer.accept(new KeyPressMessage(key));
+        } else {
+            messageConsumer.accept(
+                    new KeyPressMessage(new Key(KeyType.KeyRunes, sequence.toString().toCharArray(), altPressed)));
         }
     }
 

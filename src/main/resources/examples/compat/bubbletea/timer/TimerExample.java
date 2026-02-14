@@ -1,4 +1,4 @@
-package com.williamcallahan.tui4j.examples.timer;
+package examples.compat.bubbletea.timer;
 
 import com.williamcallahan.tui4j.compat.bubbletea.Command;
 import com.williamcallahan.tui4j.compat.bubbletea.Message;

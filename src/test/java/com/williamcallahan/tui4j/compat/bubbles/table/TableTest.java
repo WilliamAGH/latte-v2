@@ -43,7 +43,7 @@ class TableTest {
     void testDefaults() {
         Table table = Table.create();
 
-        assertThat(table.cursor()).isEqualTo(0);
+        assertThat(table.cursor()).isZero();
         assertThat(table.getColumns()).isEmpty();
         assertThat(table.getRows()).isEmpty();
         assertThat(table.width()).isEqualTo(80);

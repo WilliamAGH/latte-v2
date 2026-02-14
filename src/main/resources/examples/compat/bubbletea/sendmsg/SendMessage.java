@@ -1,4 +1,4 @@
-package com.williamcallahan.tui4j.examples.sendmsg;
+package examples.compat.bubbletea.sendmsg;
 
 import com.williamcallahan.tui4j.compat.bubbletea.Message;
 import java.time.Duration;

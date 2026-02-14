@@ -1,4 +1,4 @@
-package com.williamcallahan.tui4j.examples.mouse;
+package examples.compat.bubbletea.mouse;
 
 import com.williamcallahan.tui4j.compat.bubbletea.Command;
 import com.williamcallahan.tui4j.compat.bubbletea.Message;

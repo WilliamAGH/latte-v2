@@ -25,6 +25,7 @@ public class Renderer {
      *
      * @return default renderer
      */
+    @Deprecated(since = "0.3.0")
     public static Renderer defaultRenderer() {
         return DEFAULT_RENDERER;
     }
@@ -34,6 +35,7 @@ public class Renderer {
      *
      * @param output output destination
      */
+    @Deprecated(since = "0.3.0")
     public Renderer(com.williamcallahan.tui4j.compat.bubbletea.lipgloss.term.Output output) {
         this.delegate = new com.williamcallahan.tui4j.compat.lipgloss.Renderer(output.toCanonical());
     }
@@ -48,6 +50,7 @@ public class Renderer {
      * @param renderer canonical renderer
      * @return bubbletea renderer wrapper
      */
+    @Deprecated(since = "0.3.0")
     public static Renderer fromCanonical(com.williamcallahan.tui4j.compat.lipgloss.Renderer renderer) {
         if (renderer == null) {
             return null;
@@ -60,6 +63,7 @@ public class Renderer {
      *
      * @return canonical renderer
      */
+    @Deprecated(since = "0.3.0")
     public com.williamcallahan.tui4j.compat.lipgloss.Renderer toCanonical() {
         return delegate;
     }
@@ -71,6 +75,7 @@ public class Renderer {
      *
      * @param environment list of environment variables in "KEY=VALUE" format
      */
+    @Deprecated(since = "0.3.0")
     public void setEnvironment(List<String> environment) {
         // No-op: canonical Renderer does not support setEnvironment
     }
@@ -80,6 +85,7 @@ public class Renderer {
      *
      * @return new style
      */
+    @Deprecated(since = "0.3.0")
     public Style newStyle() {
         return new Style(this);
     }
@@ -89,6 +95,7 @@ public class Renderer {
      *
      * @return true when the background is dark
      */
+    @Deprecated(since = "0.3.0")
     public boolean hasDarkBackground() {
         return delegate.hasDarkBackground();
     }
@@ -98,6 +105,7 @@ public class Renderer {
      *
      * @return color profile
      */
+    @Deprecated(since = "0.3.0")
     public com.williamcallahan.tui4j.compat.lipgloss.color.ColorProfile colorProfile() {
         return delegate.colorProfile();
     }
@@ -107,6 +115,7 @@ public class Renderer {
      *
      * @param colorProfile color profile
      */
+    @Deprecated(since = "0.3.0")
     public void setColorProfile(
         com.williamcallahan.tui4j.compat.bubbletea.lipgloss.color.ColorProfile colorProfile
     ) {
@@ -118,6 +127,7 @@ public class Renderer {
      *
      * @param hasDarkBackground whether the background is dark
      */
+    @Deprecated(since = "0.3.0")
     public void setHasDarkBackground(boolean hasDarkBackground) {
         delegate.setHasDarkBackground(hasDarkBackground);
     }
@@ -133,6 +143,7 @@ public class Renderer {
      * @param options whitespace options
      * @return placed text
      */
+    @Deprecated(since = "0.3.0")
     public String place(int width, int height, com.williamcallahan.tui4j.compat.lipgloss.Position hPos, com.williamcallahan.tui4j.compat.lipgloss.Position vPos, String input, Whitespace.WhitespaceOption... options) {
         return delegate.place(width, height, hPos, vPos, input, Whitespace.toCanonicalOptions(options));
     }
@@ -146,6 +157,7 @@ public class Renderer {
      * @param options whitespace options
      * @return placed text
      */
+    @Deprecated(since = "0.3.0")
     public String placeVertical(int height, com.williamcallahan.tui4j.compat.lipgloss.Position position, String input, Whitespace.WhitespaceOption... options) {
         return delegate.placeVertical(height, position, input, Whitespace.toCanonicalOptions(options));
     }
@@ -159,6 +171,7 @@ public class Renderer {
      * @param options whitespace options
      * @return placed text
      */
+    @Deprecated(since = "0.3.0")
     public String placeHorizontal(int width, com.williamcallahan.tui4j.compat.lipgloss.Position position, String input, Whitespace.WhitespaceOption... options) {
         return delegate.placeHorizontal(width, position, input, Whitespace.toCanonicalOptions(options));
     }

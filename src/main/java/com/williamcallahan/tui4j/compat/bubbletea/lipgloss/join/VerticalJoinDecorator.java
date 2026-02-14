@@ -21,7 +21,9 @@ public class VerticalJoinDecorator extends com.williamcallahan.tui4j.compat.lipg
      * @param position position to align within the widest block
      * @param blocks   blocks to join
      * @return joined block string
+     * @deprecated Use {@link com.williamcallahan.tui4j.compat.lipgloss.join.VerticalJoinDecorator#joinVertical} instead.
      */
+    @Deprecated(since = "0.3.0")
     public static String joinVertical(
         com.williamcallahan.tui4j.compat.bubbletea.lipgloss.Position position,
         String... blocks
@@ -35,7 +37,9 @@ public class VerticalJoinDecorator extends com.williamcallahan.tui4j.compat.lipg
      * @param position position to align within the widest block
      * @param blocks blocks to join
      * @return joined block string
+     * @deprecated Use {@link com.williamcallahan.tui4j.compat.lipgloss.join.VerticalJoinDecorator#joinVertical} instead.
      */
+    @Deprecated(since = "0.3.0")
     public static String joinVertical(com.williamcallahan.tui4j.compat.lipgloss.Position position, String... blocks) {
         return com.williamcallahan.tui4j.compat.lipgloss.join.VerticalJoinDecorator
             .joinVertical(position, blocks);

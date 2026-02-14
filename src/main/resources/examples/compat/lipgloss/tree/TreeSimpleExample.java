@@ -1,6 +1,6 @@
-package com.williamcallahan.tui4j.examples.compat.lipgloss.tree;
+package examples.compat.lipgloss.tree;
 
-import com.williamcallahan.tui4j.compat.lipgloss.Tree;
+import com.williamcallahan.tui4j.compat.lipgloss.tree.Tree;
 
 /**
  * Example program demonstrating lipgloss tree component.
@@ -17,16 +17,16 @@ public class TreeSimpleExample {
      * @param args ignored
      */
     public static void main(String[] args) {
-        Tree t = Tree.root(".")
+        Tree t = Tree.withRoot(".")
                 .child(
-                        Tree.root("macOS")
+                        Tree.withRoot("macOS")
                                 .child(
                                         "Linux",
                                         "NixOS",
                                         "Arch Linux (btw)",
                                         "Void Linux"
                                 ),
-                        Tree.root("BSD")
+                        Tree.withRoot("BSD")
                                 .child(
                                         "FreeBSD",
                                         "OpenBSD"

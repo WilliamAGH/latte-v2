@@ -1,4 +1,4 @@
-package com.williamcallahan.tui4j.examples.progress.packagemanager;
+package examples.compat.bubbletea.progress.packagemanager;
 
 import com.williamcallahan.tui4j.compat.bubbletea.Command;
 import com.williamcallahan.tui4j.compat.bubbletea.Message;
@@ -13,7 +13,6 @@ import com.williamcallahan.tui4j.compat.bubbles.spinner.Spinner;
 import com.williamcallahan.tui4j.compat.bubbles.spinner.SpinnerType;
 
 import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,7 +27,6 @@ public class PackageManagerExample implements Model {
     private final List<PackageTask> tasks;
     private final Spinner spinner;
     private int selectedTaskIndex;
-    private boolean quitting;
     private boolean complete;
     private String statusMessage;
 
@@ -42,7 +40,6 @@ public class PackageManagerExample implements Model {
                 .withDefaultGradient();
         this.tasks = new ArrayList<>();
         this.selectedTaskIndex = 0;
-        this.quitting = false;
         this.complete = false;
         this.statusMessage = "Initializing...";
         this.spinner = new Spinner(SpinnerType.DOT);
@@ -74,7 +71,6 @@ public class PackageManagerExample implements Model {
         if (msg instanceof KeyPressMessage keyPressMessage) {
             String key = keyPressMessage.key();
             if ("q".equals(key) || "Q".equals(key) || "ctrl+c".equals(key)) {
-                quitting = true;
                 return new UpdateResult<>(this, QuitMessage::new);
             }
             if ("j".equals(key) || "down".equals(key)) {
@@ -149,7 +145,8 @@ public class PackageManagerExample implements Model {
         sb.append("  [");
         for (int i = 0; i < tasks.size(); i++) {
             PackageTask task = tasks.get(i);
-            char statusChar = task.isComplete() ? '✓' : (task.isActive() ? '●' : '○');
+            char activeOrPending = task.isActive() ? '●' : '○';
+            char statusChar = task.isComplete() ? '✓' : activeOrPending;
             sb.append(statusChar);
             if (i < tasks.size() - 1) sb.append(" ");
         }
@@ -168,7 +165,8 @@ public class PackageManagerExample implements Model {
         for (int i = 0; i < tasks.size(); i++) {
             PackageTask task = tasks.get(i);
             String prefix = i == selectedTaskIndex ? ">" : " ";
-            String indicator = task.isComplete() ? "✓" : (task.isActive() ? "…" : " ");
+            String activeOrBlank = task.isActive() ? "…" : " ";
+            String indicator = task.isComplete() ? "✓" : activeOrBlank;
             String expand = task.isExpanded() ? "▼" : "▶";
 
             sb.append(prefix).append(" ").append(indicator).append(" ").append(expand).append(" ")
@@ -213,7 +211,6 @@ public class PackageManagerExample implements Model {
         private double progress;
         private boolean complete;
         private boolean expanded;
-        private LocalDateTime lastUpdate;
         private double speedMultiplier;
 
         /**
@@ -230,7 +227,6 @@ public class PackageManagerExample implements Model {
             this.progress = 0;
             this.complete = false;
             this.expanded = false;
-            this.lastUpdate = LocalDateTime.now();
             this.speedMultiplier = 0.8 + Math.random() * 0.4;
         }
 
@@ -242,7 +238,6 @@ public class PackageManagerExample implements Model {
 
             double increment = baseSpeed * speedMultiplier * 0.01;
             progress = Math.min(progress + increment, 1.0);
-            lastUpdate = LocalDateTime.now();
 
             if (progress >= 1.0) {
                 complete = true;

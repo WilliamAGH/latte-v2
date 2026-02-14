@@ -1,4 +1,4 @@
-package com.williamcallahan.tui4j.examples.autocomplete;
+package examples.compat.bubbletea.autocomplete;
 
 import com.williamcallahan.tui4j.compat.bubbletea.Command;
 import com.williamcallahan.tui4j.compat.bubbletea.Message;
@@ -13,7 +13,6 @@ import com.williamcallahan.tui4j.compat.bubbles.textinput.TextInput;
 import com.williamcallahan.tui4j.compat.lipgloss.Style;
 import com.williamcallahan.tui4j.compat.lipgloss.color.Color;
 
-import java.util.List;
 
 /**
  * Example program demonstrating text input suggestions with autocomplete keys.
@@ -161,24 +160,6 @@ public class AutocompleteExample implements Model {
          */
         private Binding complete() {
             return complete;
-        }
-
-        /**
-         * Returns the binding for moving to the next suggestion.
-         *
-         * @return next binding
-         */
-        private Binding next() {
-            return next;
-        }
-
-        /**
-         * Returns the binding for moving to the previous suggestion.
-         *
-         * @return previous binding
-         */
-        private Binding prev() {
-            return prev;
         }
 
         /**

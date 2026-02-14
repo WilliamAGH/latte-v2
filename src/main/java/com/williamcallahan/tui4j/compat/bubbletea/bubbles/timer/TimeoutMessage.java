@@ -27,6 +27,7 @@ public class TimeoutMessage implements Message {
      *
      * @return timer id
      */
+    @Deprecated(since = "0.3.0")
     public int id() {
         return delegate.id();
     }
@@ -36,6 +37,7 @@ public class TimeoutMessage implements Message {
      *
      * @return canonical TimeoutMessage
      */
+    @Deprecated(since = "0.3.0")
     public com.williamcallahan.tui4j.compat.bubbles.timer.TimeoutMessage toCanonical() {
         return delegate;
     }

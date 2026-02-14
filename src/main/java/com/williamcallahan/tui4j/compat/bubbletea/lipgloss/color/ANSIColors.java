@@ -16,7 +16,8 @@ public final class ANSIColors {
     /**
      * ANSI 16-color and 256-color hex palette.
      */
-    public static final String[] ANSI_HEX = com.williamcallahan.tui4j.compat.lipgloss.color.ANSIColors.ANSI_HEX;
+    @Deprecated(since = "0.3.0")
+    public static final String[] ANSI_HEX = com.williamcallahan.tui4j.compat.lipgloss.color.ANSIColors.ANSI_HEX.clone();
 
     /**
      * Prevents instantiation of the deprecated shim.

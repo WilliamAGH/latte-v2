@@ -1,6 +1,5 @@
 package com.williamcallahan.tui4j.compat.lipgloss;
 
-import com.williamcallahan.tui4j.compat.lipgloss.Style;
 import com.williamcallahan.tui4j.compat.lipgloss.tree.StyleFunction;
 import com.williamcallahan.tui4j.compat.lipgloss.tree.Tree;
 import com.williamcallahan.tui4j.compat.lipgloss.tree.TreeEnumerator;

@@ -20,6 +20,7 @@ public class StringData extends Data {
     /**
      * Creates empty StringData.
      */
+    @Deprecated(since = "0.3.0")
     public StringData() {
         super(new String[0], new String[0][0]);
         this.delegate = new com.williamcallahan.tui4j.compat.lipgloss.table.StringData();
@@ -31,6 +32,7 @@ public class StringData extends Data {
      *
      * @param data data
      */
+    @Deprecated(since = "0.3.0")
     public StringData(String data) {
         super(new String[0], new String[0][0]);
         this.delegate = new com.williamcallahan.tui4j.compat.lipgloss.table.StringData();
@@ -48,6 +50,7 @@ public class StringData extends Data {
      *
      * @param rows the rows
      */
+    @Deprecated(since = "0.3.0")
     public StringData(List<List<String>> rows) {
         super(new String[0], new String[0][0]);
         this.delegate = new com.williamcallahan.tui4j.compat.lipgloss.table.StringData(rows);
@@ -59,6 +62,7 @@ public class StringData extends Data {
      *
      * @param rows the rows
      */
+    @Deprecated(since = "0.3.0")
     public StringData(String[]... rows) {
         super(new String[0], new String[0][0]);
         this.delegate = new com.williamcallahan.tui4j.compat.lipgloss.table.StringData(rows);
@@ -70,6 +74,7 @@ public class StringData extends Data {
      *
      * @return result
      */
+    @Deprecated(since = "0.3.0")
     public String data() {
         return rawData == null ? "" : rawData;
     }
@@ -80,6 +85,7 @@ public class StringData extends Data {
      * @param row row
      * @return result
      */
+    @Deprecated(since = "0.3.0")
     public StringData append(String... row) {
         delegate.append(row);
         return this;
@@ -91,6 +97,7 @@ public class StringData extends Data {
      * @param row row
      * @return result
      */
+    @Deprecated(since = "0.3.0")
     public StringData item(String... row) {
         delegate.item(row);
         return this;
@@ -101,6 +108,7 @@ public class StringData extends Data {
      *
      * @return result
      */
+    @Deprecated(since = "0.3.0")
     public StringData clear() {
         delegate.clear();
         return this;
@@ -113,6 +121,7 @@ public class StringData extends Data {
      * @param cell cell index
      * @return cell contents
      */
+    @Deprecated(since = "0.3.0")
     @Override
     public String at(int row, int cell) {
         return delegate.at(row, cell);
@@ -123,6 +132,7 @@ public class StringData extends Data {
      *
      * @return row count
      */
+    @Deprecated(since = "0.3.0")
     @Override
     public int rows() {
         return delegate.rows();
@@ -133,6 +143,7 @@ public class StringData extends Data {
      *
      * @return column count
      */
+    @Deprecated(since = "0.3.0")
     @Override
     public int columns() {
         return delegate.columns();
@@ -143,6 +154,7 @@ public class StringData extends Data {
      *
      * @return header labels
      */
+    @Deprecated(since = "0.3.0")
     @Override
     public String[] headers() {
         return new String[0];
@@ -153,6 +165,7 @@ public class StringData extends Data {
      *
      * @return row data
      */
+    @Deprecated(since = "0.3.0")
     @Override
     public String[][] getRows() {
         return new String[0][0];

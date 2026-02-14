@@ -2,8 +2,6 @@ package com.williamcallahan.tui4j.compat.bubbles.list;
 
 import com.williamcallahan.tui4j.compat.bubbles.key.Binding;
 
-import com.williamcallahan.tui4j.compat.bubbles.help.Help;
-
 /**
  * Port of Bubbles keys.
  * Bubble Tea: bubbletea/examples/list-simple/main.go

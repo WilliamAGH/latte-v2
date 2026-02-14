@@ -16,7 +16,6 @@ import java.util.List;
 final class TableResizer {
 
     private final int tableWidth;
-    private final int tableHeight;
     private final List<String> headers;
     private final String[][] allRows;
     private final List<ResizerColumn> columns = new ArrayList<>();
@@ -36,7 +35,6 @@ final class TableResizer {
      */
     TableResizer(int tableWidth, int tableHeight, List<String> headers, String[][] rows) {
         this.tableWidth = tableWidth;
-        this.tableHeight = tableHeight;
         this.headers = headers == null ? List.of() : headers;
 
         if (this.headers.isEmpty()) {

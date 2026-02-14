@@ -99,7 +99,8 @@ public final class Whitespace {
         int j = 0;
         StringBuilder builder = new StringBuilder();
         int zeroWidthCount = 0;
-        for (int i = 0; i < width;) {
+        int i = 0;
+        while (i < width) {
             int cp = codePoints[j];
             String glyph = new String(Character.toChars(cp));
             builder.append(glyph);

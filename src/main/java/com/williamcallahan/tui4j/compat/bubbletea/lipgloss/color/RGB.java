@@ -20,6 +20,7 @@ public record RGB(float r, float g, float b) {
      *
      * @return canonical RGB
      */
+    @Deprecated(since = "0.3.0")
     public com.williamcallahan.tui4j.compat.lipgloss.color.RGB toCanonical() {
         return new com.williamcallahan.tui4j.compat.lipgloss.color.RGB(r, g, b);
     }
@@ -30,6 +31,7 @@ public record RGB(float r, float g, float b) {
      * @param canonical the canonical RGB
      * @return deprecated RGB shim
      */
+    @Deprecated(since = "0.3.0")
     public static RGB fromCanonical(com.williamcallahan.tui4j.compat.lipgloss.color.RGB canonical) {
         return new RGB(canonical.r(), canonical.g(), canonical.b());
     }
@@ -39,6 +41,7 @@ public record RGB(float r, float g, float b) {
      *
      * @return black RGB
      */
+    @Deprecated(since = "0.3.0")
     public static RGB black() {
         return new RGB(0, 0, 0);
     }
@@ -49,6 +52,7 @@ public record RGB(float r, float g, float b) {
      * @param hexValue the hex color value (e.g., "#FF0000" or "FF0000")
      * @return the RGB color
      */
+    @Deprecated(since = "0.3.0")
     public static RGB fromHexString(String hexValue) {
         var canonical = com.williamcallahan.tui4j.compat.lipgloss.color.RGB.fromHexString(hexValue);
         return fromCanonical(canonical);
@@ -59,6 +63,7 @@ public record RGB(float r, float g, float b) {
      *
      * @return the ANSI 256 color
      */
+    @Deprecated(since = "0.3.0")
     public com.williamcallahan.tui4j.compat.lipgloss.color.ANSI256Color toANSI256Color() {
         return toCanonical().toANSI256Color();
     }
@@ -68,6 +73,7 @@ public record RGB(float r, float g, float b) {
      *
      * @return the HSL representation
      */
+    @Deprecated(since = "0.3.0")
     public com.williamcallahan.tui4j.compat.lipgloss.color.HSL toHSL() {
         return toCanonical().toHSL();
     }
@@ -78,6 +84,7 @@ public record RGB(float r, float g, float b) {
      * @param other other RGB value
      * @return distance
      */
+    @Deprecated(since = "0.3.0")
     public float distanceHSLuv(RGB other) {
         return toCanonical().distanceHSLuv(other.toCanonical());
     }
@@ -87,6 +94,7 @@ public record RGB(float r, float g, float b) {
      *
      * @return color apply strategy
      */
+    @Deprecated(since = "0.3.0")
     public com.williamcallahan.tui4j.compat.lipgloss.color.ColorApplyStrategy asColorApplyStrategy() {
         return toCanonical().asColorApplyStrategy();
     }
@@ -96,6 +104,7 @@ public record RGB(float r, float g, float b) {
      *
      * @return integer RGB value
      */
+    @Deprecated(since = "0.3.0")
     public int toInt() {
         return toCanonical().toInt();
     }
@@ -105,6 +114,7 @@ public record RGB(float r, float g, float b) {
      *
      * @return formatted RGB string
      */
+    @Deprecated(since = "0.3.0")
     @Override
     public String toString() {
         return toCanonical().toString();

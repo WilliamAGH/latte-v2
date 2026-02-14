@@ -7,8 +7,6 @@ import com.williamcallahan.tui4j.compat.lipgloss.border.Border;
 import com.williamcallahan.tui4j.compat.lipgloss.color.ColorProfile;
 import com.williamcallahan.tui4j.compat.lipgloss.color.NoColor;
 import com.williamcallahan.tui4j.compat.lipgloss.color.TerminalColor;
-import com.williamcallahan.tui4j.compat.lipgloss.MarginDecorator;
-import com.williamcallahan.tui4j.compat.lipgloss.PaddingDecorator;
 import org.jline.utils.AttributedCharSequence.ForceMode;
 import org.jline.utils.AttributedString;
 import org.jline.utils.AttributedStyle;
@@ -27,7 +25,7 @@ import static com.williamcallahan.tui4j.compat.lipgloss.Renderer.defaultRenderer
  * Port of `lipgloss/style.go`.
  * Provides a chainable API for coloring, sizing, padding, and aligning text content.
  */
-public class Style implements Cloneable {
+public class Style {
 
     /**
      * Creates a new style using the default renderer.
@@ -95,6 +93,60 @@ public class Style implements Cloneable {
      */
     public Style(Renderer renderer) {
         this.renderer = renderer;
+    }
+
+    /**
+     * Copy constructor that duplicates all styling properties from the source.
+     * Protected to allow deprecated shim subclasses to support {@link #copy()}.
+     *
+     * @param source style to copy from
+     */
+    protected Style(Style source) {
+        this.renderer = source.renderer;
+        this.value = source.value;
+        this.transformFunction = source.transformFunction;
+        this.background = source.background;
+        this.foreground = source.foreground;
+        this.bold = source.bold;
+        this.italic = source.italic;
+        this.underline = source.underline;
+        this.blink = source.blink;
+        this.faint = source.faint;
+        this.reverse = source.reverse;
+        this.inline = source.inline;
+        this.width = source.width;
+        this.height = source.height;
+        this.maxWidth = source.maxWidth;
+        this.maxHeight = source.maxHeight;
+        this.ellipsis = source.ellipsis;
+        this.horizontalAlign = source.horizontalAlign;
+        this.verticalAlign = source.verticalAlign;
+        this.topPadding = source.topPadding;
+        this.rightPadding = source.rightPadding;
+        this.bottomPadding = source.bottomPadding;
+        this.leftPadding = source.leftPadding;
+        this.marginBackgroundColor = source.marginBackgroundColor;
+        this.topMargin = source.topMargin;
+        this.rightMargin = source.rightMargin;
+        this.bottomMargin = source.bottomMargin;
+        this.leftMargin = source.leftMargin;
+        this.borderDecoration = source.borderDecoration;
+        this.borderTop = source.borderTop;
+        this.borderRight = source.borderRight;
+        this.borderBottom = source.borderBottom;
+        this.borderLeft = source.borderLeft;
+        this.borderTopSet = source.borderTopSet;
+        this.borderRightSet = source.borderRightSet;
+        this.borderBottomSet = source.borderBottomSet;
+        this.borderLeftSet = source.borderLeftSet;
+        this.borderTopForeground = source.borderTopForeground;
+        this.borderRightForeground = source.borderRightForeground;
+        this.borderBottomForeground = source.borderBottomForeground;
+        this.borderLeftForeground = source.borderLeftForeground;
+        this.borderTopBackground = source.borderTopBackground;
+        this.borderRightBackground = source.borderRightBackground;
+        this.borderBottomBackground = source.borderBottomBackground;
+        this.borderLeftBackground = source.borderLeftBackground;
     }
 
     /**
@@ -776,10 +828,10 @@ public class Style implements Cloneable {
             string = transformFunction.apply(string);
         }
 
-        string = string.replaceAll("\r\n", "\n");
+        string = string.replace("\r\n", "\n");
 
         if (inline) {
-            string = string.replaceAll("\n", "");
+            string = string.replace("\n", "");
         }
 
         if (!inline && width > 0) {
@@ -1058,22 +1110,13 @@ public class Style implements Cloneable {
         return borderDecoration.getRightSize();
     }
 
-    @Override
-    protected Object clone() throws CloneNotSupportedException {
-        return super.clone();
-    }
-
     /**
      * Creates a copy of this style.
      *
      * @return copied style
      */
     public Style copy() {
-        try {
-            return (Style) clone();
-        } catch (CloneNotSupportedException e) {
-            throw new RuntimeException(e);
-        }
+        return new Style(this);
     }
 
     /**

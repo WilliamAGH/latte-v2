@@ -1,6 +1,7 @@
-package com.williamcallahan.tui4j.examples.compat.lipgloss.list;
+package examples.compat.lipgloss.list;
 
-import com.williamcallahan.tui4j.compat.lipgloss.list.List;
+import com.williamcallahan.tui4j.compat.lipgloss.List;
+import com.williamcallahan.tui4j.compat.lipgloss.ListEnumerator;
 
 /**
  * Example program demonstrating lipgloss list component.
@@ -25,7 +26,7 @@ public class ListSimpleExample {
                         "D",
                         "E",
                         "F"
-                ).enumerator(List.Enumerator.ROMAN),
+                ).enumerator(ListEnumerator.roman()),
                 "G"
         );
 

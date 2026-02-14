@@ -731,7 +731,8 @@ class TableTest {
 
         table.clearRows();
         table.row("French", "Bonjour", "Salut");
-        table.render();
+        String rendered = table.render();
+        assertThat(rendered).contains("French");
     }
 
     @Test

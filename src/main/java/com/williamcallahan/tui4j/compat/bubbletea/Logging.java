@@ -114,8 +114,8 @@ public final class Logging {
         }
 
         @Override
-        public String format(LogRecord record) {
-            return prefix + record.getMessage() + System.lineSeparator();
+        public String format(LogRecord logRecord) {
+            return prefix + logRecord.getMessage() + System.lineSeparator();
         }
     }
 }

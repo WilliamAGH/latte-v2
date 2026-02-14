@@ -14,7 +14,7 @@ plugins {
 description = "TUI4J"
 
 group = providers.gradleProperty("group").orNull ?: "com.williamcallahan"
-version = providers.gradleProperty("version").orNull ?: "0.3.1"
+version = providers.gradleProperty("version").orNull ?: "0.3.2-preview"
 
 repositories {
     mavenCentral {
@@ -137,7 +137,7 @@ configurations["examplesGenericRuntimeClasspath"].extendsFrom(
     configurations.runtimeClasspath.get()
 )
 
-    "examplesSpringImplementation"(platform("org.springframework.boot:spring-boot-dependencies:3.5.9"))
+    "examplesSpringImplementation"(platform("org.springframework.boot:spring-boot-dependencies:3.5.10"))
     "examplesSpringImplementation"(sourceSets.main.get().output)
     "examplesSpringImplementation"(libs.org.springframework.boot.spring.boot.starter.data.jpa) {
         exclude(group = "org.yaml", module = "snakeyaml")
@@ -211,6 +211,7 @@ tasks.withType<Test>().configureEach {
 
 tasks.withType<JavaCompile>().configureEach {
     options.encoding = "UTF-8"
+    options.compilerArgs.addAll(listOf("-Xlint:deprecation", "-Xlint:unchecked"))
 }
 
 tasks.withType<Javadoc>().configureEach {

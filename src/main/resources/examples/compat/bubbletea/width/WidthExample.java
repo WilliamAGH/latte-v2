@@ -1,4 +1,4 @@
-package com.williamcallahan.tui4j.examples.width;
+package examples.compat.bubbletea.width;
 
 import com.williamcallahan.tui4j.compat.bubbletea.Command;
 import com.williamcallahan.tui4j.compat.bubbletea.Message;

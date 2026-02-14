@@ -1,12 +1,5 @@
 package com.williamcallahan.tui4j.compat.bubbletea.bubbles.help;
 
-import com.williamcallahan.tui4j.compat.lipgloss.Position;
-import com.williamcallahan.tui4j.compat.bubbletea.lipgloss.Size;
-import com.williamcallahan.tui4j.compat.bubbletea.lipgloss.join.HorizontalJoinDecorator;
-import com.williamcallahan.tui4j.compat.bubbletea.bubbles.key.Binding;
-import java.util.LinkedList;
-import java.util.List;
-
 /**
  * @deprecated Deprecated in tui4j as of 0.3.0 because this type moved; use {@link com.williamcallahan.tui4j.compat.bubbles.help.Help} instead.
  * This transitional shim is temporary and will be removed in an upcoming release.

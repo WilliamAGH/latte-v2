@@ -1,4 +1,4 @@
-package com.williamcallahan.tui4j.examples.realtime;
+package examples.compat.bubbletea.realtime;
 
 import com.williamcallahan.tui4j.compat.bubbles.spinner.Spinner;
 import com.williamcallahan.tui4j.compat.bubbles.spinner.SpinnerType;

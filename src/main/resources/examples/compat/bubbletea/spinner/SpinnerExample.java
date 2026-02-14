@@ -1,4 +1,4 @@
-package com.williamcallahan.tui4j.examples.spinner;
+package examples.compat.bubbletea.spinner;
 
 import com.williamcallahan.tui4j.compat.bubbletea.Command;
 import com.williamcallahan.tui4j.compat.bubbletea.Message;
@@ -64,7 +64,7 @@ public class SpinnerExample implements Model {
      */
     @Override
     public String view() {
-        return "\n\n   %s Loading forever...press q to quit\n\n".formatted(spinner.view());
+        return "%n%n   %s Loading forever...press q to quit%n%n".formatted(spinner.view());
     }
 
     /**

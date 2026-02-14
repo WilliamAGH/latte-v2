@@ -14,6 +14,7 @@ public class PlacementDecorator extends com.williamcallahan.tui4j.compat.lipglos
      */
     @Deprecated(since = "0.3.0")
     public PlacementDecorator() {
+        // Deprecated shim constructor required for backward compatibility
     }
 
     /**
@@ -26,7 +27,9 @@ public class PlacementDecorator extends com.williamcallahan.tui4j.compat.lipglos
      * @param input   input text
      * @param options whitespace options
      * @return placed text
+     * @deprecated Use {@link com.williamcallahan.tui4j.compat.lipgloss.PlacementDecorator} instead.
      */
+    @Deprecated(since = "0.3.0")
     public static String place(
         int width,
         int height,
@@ -48,7 +51,9 @@ public class PlacementDecorator extends com.williamcallahan.tui4j.compat.lipglos
      * @param input    input text
      * @param options  whitespace options
      * @return placed text
+     * @deprecated Use {@link com.williamcallahan.tui4j.compat.lipgloss.PlacementDecorator} instead.
      */
+    @Deprecated(since = "0.3.0")
     public static String placeHorizontal(
         int width,
         com.williamcallahan.tui4j.compat.bubbletea.lipgloss.Position position,
@@ -68,7 +73,9 @@ public class PlacementDecorator extends com.williamcallahan.tui4j.compat.lipglos
      * @param input    input text
      * @param options  whitespace options
      * @return placed text
+     * @deprecated Use {@link com.williamcallahan.tui4j.compat.lipgloss.PlacementDecorator} instead.
      */
+    @Deprecated(since = "0.3.0")
     public static String placeVertical(
         int height,
         com.williamcallahan.tui4j.compat.bubbletea.lipgloss.Position position,

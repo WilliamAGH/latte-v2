@@ -1,4 +1,4 @@
-package com.williamcallahan.tui4j.examples.compat.bubbles.timer;
+package examples.compat.bubbles.timer;
 
 import com.williamcallahan.tui4j.compat.bubbletea.Command;
 import com.williamcallahan.tui4j.compat.bubbletea.Message;
@@ -12,8 +12,8 @@ import com.williamcallahan.tui4j.compat.bubbles.timer.TickMessage;
 import com.williamcallahan.tui4j.compat.bubbles.timer.StartStopMessage;
 import com.williamcallahan.tui4j.compat.bubbles.timer.TimeoutMessage;
 import com.williamcallahan.tui4j.compat.bubbles.key.Binding;
-import com.williamcallahan.tui4j.compat.bubbles.key.Binding.BindingOption;
 import com.williamcallahan.tui4j.compat.bubbles.help.Help;
+import com.williamcallahan.tui4j.compat.bubbles.help.KeyMap;
 
 import java.time.Duration;
 
@@ -29,10 +29,22 @@ public class TimerExample implements Model {
     private final Timer timer;
     private final Help help = new Help();
 
-    private Binding startBinding = Binding.create(new BindingOption.WithKeys("s"), new BindingOption.WithHelp("s", "start"));
-    private Binding stopBinding = Binding.create(new BindingOption.WithKeys("s"), new BindingOption.WithHelp("s", "stop"));
-    private Binding resetBinding = Binding.create(new BindingOption.WithKeys("r"), new BindingOption.WithHelp("r", "reset"));
-    private Binding quitBinding = Binding.create(new BindingOption.WithKeys("q", "ctrl+c"), new BindingOption.WithHelp("q", "quit"));
+    private final Binding startBinding = new Binding(Binding.withKeys("s"), Binding.withHelp("s", "start"));
+    private final Binding stopBinding = new Binding(Binding.withKeys("s"), Binding.withHelp("s", "stop"));
+    private final Binding resetBinding = new Binding(Binding.withKeys("r"), Binding.withHelp("r", "reset"));
+    private final Binding quitBinding = new Binding(Binding.withKeys("q", "ctrl+c"), Binding.withHelp("q", "quit"));
+
+    private final KeyMap keyMap = new KeyMap() {
+        @Override
+        public Binding[] shortHelp() {
+            return new Binding[]{startBinding, stopBinding, resetBinding, quitBinding};
+        }
+
+        @Override
+        public Binding[][] fullHelp() {
+            return new Binding[][]{{startBinding, stopBinding, resetBinding, quitBinding}};
+        }
+    };
 
     private boolean quitting;
 
@@ -93,7 +105,7 @@ public class TimerExample implements Model {
                     return UpdateResult.from(this);
                 }
                 case "s" -> {
-                    return UpdateResult.from(this, timer::toggle);
+                    return UpdateResult.from(this, timer.toggle());
                 }
                 default -> {
                     return UpdateResult.from(this);
@@ -120,9 +132,7 @@ public class TimerExample implements Model {
 
         if (!quitting) {
             s += "Exiting in " + s;
-            s += "\n\n" + help.shortHelpView(java.util.List.of(
-                    startBinding, stopBinding, resetBinding, quitBinding
-            ));
+            s += "\n\n" + help.render(keyMap);
         }
 
         return s;

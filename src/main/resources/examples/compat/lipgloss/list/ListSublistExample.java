@@ -1,10 +1,10 @@
-package com.williamcallahan.tui4j.examples.compat.lipgloss.list;
+package examples.compat.lipgloss.list;
 
-import com.williamcallahan.tui4j.compat.lipgloss.list.List;
-import com.williamcallahan.tui4j.compat.lipgloss.list.ItemStyleFunc;
-import com.williamcallahan.tui4j.compat.lipgloss.list.EnumeratorStyleFunc;
+import com.williamcallahan.tui4j.compat.lipgloss.List;
 import com.williamcallahan.tui4j.compat.lipgloss.Style;
+import com.williamcallahan.tui4j.compat.lipgloss.color.AdaptiveColor;
 import com.williamcallahan.tui4j.compat.lipgloss.color.Color;
+import com.williamcallahan.tui4j.compat.lipgloss.tree.StyleFunction;
 
 /**
  * Example program demonstrating lipgloss list with nested structure.
@@ -18,9 +18,6 @@ public class ListSublistExample {
     private static final Style PURPLE = Style.newStyle().foreground(Color.color("99")).marginRight(1);
     private static final Style PINK = Style.newStyle().foreground(Color.color("212")).marginRight(1);
     private static final Style BASE = Style.newStyle().marginBottom(1).marginLeft(1);
-    private static final Style FAINT = Style.newStyle().faint(true);
-    private static final String DIM = "250";
-    private static final String HIGHLIGHT = "#EE6FF8";
     private static final String SPECIAL = "#43BF6D";
 
     /**
@@ -29,18 +26,17 @@ public class ListSublistExample {
      * @param args ignored
      */
     public static void main(String[] args) {
-        ItemStyleFunc checklistStyleFunc = (items, i) -> {
+        StyleFunction checklistStyleFunc = (children, i) -> {
             Style st = BASE.copy();
             if (i == 1 || i == 2 || i == 4) {
-                st = st.strikethrough(true).foreground(Color.adaptiveColor("#969B86", "#696969"));
+                st = st.faint(true).foreground(new AdaptiveColor("#969B86", "#696969"));
             }
             return st;
         };
 
-        EnumeratorStyleFunc enumStyleFunc = (items, i) -> {
-            Style st = BASE.copy();
+        StyleFunction enumStyleFunc = (children, i) -> {
             if (i == 1 || i == 2 || i == 4) {
-                return Style.newStyle().foreground(SPECIAL).paddingRight(1);
+                return Style.newStyle().foreground(Color.color(SPECIAL)).paddingRight(1);
             }
             return Style.newStyle().paddingRight(1);
         };
@@ -61,15 +57,15 @@ public class ListSublistExample {
         };
 
         List citrusList = new List(
-                new List(items[0]),
-                new List(items[1])
+                new List((Object[]) items[0]),
+                new List((Object[]) items[1])
         ).enumeratorStyleFunc(enumStyleFunc)
          .itemStyleFunc(checklistStyleFunc)
          .enumeratorStyle(PURPLE);
 
         List vendorsList = new List(
-                new List(items[8]),
-                new List(items[9])
+                new List((Object[]) items[8]),
+                new List((Object[]) items[9])
         ).enumeratorStyleFunc(enumStyleFunc)
          .itemStyleFunc(checklistStyleFunc)
          .enumeratorStyle(PINK);

@@ -56,6 +56,18 @@ public class Style extends com.williamcallahan.tui4j.compat.lipgloss.Style {
     }
 
     /**
+     * Copy constructor that preserves the deprecated shim type.
+     * <p>
+     * Without this, {@link #copy()} would delegate to {@code super.copy()} which
+     * returns the canonical type, causing a {@link ClassCastException} on the downcast.
+     *
+     * @param source style to copy from
+     */
+    private Style(Style source) {
+        super(source);
+    }
+
+    /**
      * Sets the string value for this style.
      *
      * @param strings strings to render
@@ -761,7 +773,7 @@ public class Style extends com.williamcallahan.tui4j.compat.lipgloss.Style {
     @Deprecated(since = "0.3.1")
     @Override
     public Style copy() {
-        return (Style) super.copy();
+        return new Style(this);
     }
 
     /**

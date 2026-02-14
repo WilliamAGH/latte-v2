@@ -19,7 +19,9 @@ public interface TerminalColor extends com.williamcallahan.tui4j.compat.lipgloss
      * @param style style to update
      * @param renderer renderer context
      * @return updated style
+     * @deprecated Use {@link com.williamcallahan.tui4j.compat.lipgloss.color.TerminalColor} instead.
      */
+    @Deprecated(since = "0.3.0")
     default AttributedStyle applyAsBackground(AttributedStyle style,
         com.williamcallahan.tui4j.compat.bubbletea.lipgloss.Renderer renderer) {
         if (renderer == null) {
@@ -34,7 +36,9 @@ public interface TerminalColor extends com.williamcallahan.tui4j.compat.lipgloss
      * @param style style to update
      * @param renderer renderer context
      * @return updated style
+     * @deprecated Use {@link com.williamcallahan.tui4j.compat.lipgloss.color.TerminalColor} instead.
      */
+    @Deprecated(since = "0.3.0")
     default AttributedStyle applyAsForeground(AttributedStyle style,
         com.williamcallahan.tui4j.compat.bubbletea.lipgloss.Renderer renderer) {
         if (renderer == null) {
@@ -47,7 +51,9 @@ public interface TerminalColor extends com.williamcallahan.tui4j.compat.lipgloss
      * Returns the canonical terminal color representation for this shim.
      *
      * @return canonical terminal color
+     * @deprecated Use {@link com.williamcallahan.tui4j.compat.lipgloss.color.TerminalColor} directly.
      */
+    @Deprecated(since = "0.3.0")
     default com.williamcallahan.tui4j.compat.lipgloss.color.TerminalColor toCanonical() {
         return this;
     }

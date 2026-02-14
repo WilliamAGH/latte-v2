@@ -1,4 +1,4 @@
-package com.williamcallahan.tui4j.examples.progress.staticview;
+package examples.compat.bubbletea.progress.staticview;
 
 import com.williamcallahan.tui4j.compat.bubbletea.Command;
 import com.williamcallahan.tui4j.compat.bubbletea.Message;

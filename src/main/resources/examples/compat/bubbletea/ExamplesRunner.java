@@ -1,17 +1,17 @@
-package com.williamcallahan.tui4j.examples;
+package examples.compat.bubbletea;
 
 import com.williamcallahan.tui4j.compat.bubbletea.Command;
 import com.williamcallahan.tui4j.compat.bubbletea.Message;
 import com.williamcallahan.tui4j.compat.bubbletea.Model;
 import com.williamcallahan.tui4j.compat.bubbletea.Program;
 import com.williamcallahan.tui4j.compat.bubbletea.UpdateResult;
-import com.williamcallahan.tui4j.examples.altscreentoggle.AltScreenToggleExample;
-import com.williamcallahan.tui4j.examples.counter.CounterExample;
-import com.williamcallahan.tui4j.examples.demo.Demo;
-import com.williamcallahan.tui4j.examples.exec.ExecExample;
-import com.williamcallahan.tui4j.examples.fullscreen.FullscreenExample;
-import com.williamcallahan.tui4j.examples.split.SplitEditorsExample;
-import com.williamcallahan.tui4j.examples.tuidemoncombo.DaemonComboExample;
+import examples.compat.bubbletea.altscreentoggle.AltScreenToggleExample;
+import examples.compat.bubbletea.counter.CounterExample;
+import examples.compat.bubbletea.demo.Demo;
+import examples.compat.bubbletea.exec.ExecExample;
+import examples.compat.bubbletea.fullscreen.FullscreenExample;
+import examples.compat.bubbletea.split.SplitEditorsExample;
+import examples.compat.bubbletea.tuidemoncombo.DaemonComboExample;
 import com.williamcallahan.tui4j.compat.bubbletea.KeyPressMessage;
 import com.williamcallahan.tui4j.compat.bubbletea.QuitMessage;
 

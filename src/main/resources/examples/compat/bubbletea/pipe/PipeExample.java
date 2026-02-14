@@ -1,4 +1,4 @@
-package com.williamcallahan.tui4j.examples.pipe;
+package examples.compat.bubbletea.pipe;
 
 import com.williamcallahan.tui4j.compat.bubbletea.Command;
 import com.williamcallahan.tui4j.compat.bubbletea.Message;
@@ -55,12 +55,11 @@ public class PipeExample implements Model {
      */
     @Override
     public UpdateResult<? extends Model> update(Message msg) {
-        if (msg instanceof KeyPressMessage keyPressMessage) {
-            if (KeyAliases.getKeyType(KeyAlias.KeyEnter) == keyPressMessage.type()
+        if (msg instanceof KeyPressMessage keyPressMessage
+                && (KeyAliases.getKeyType(KeyAlias.KeyEnter) == keyPressMessage.type()
                     || KeyAliases.getKeyType(KeyAlias.KeyCtrlC) == keyPressMessage.type()
-                    || KeyType.keyESC == keyPressMessage.type()) {
-                return UpdateResult.from(this, QuitMessage::new);
-            }
+                    || KeyType.keyESC == keyPressMessage.type())) {
+            return UpdateResult.from(this, QuitMessage::new);
         }
 
         UpdateResult<? extends Model> updateResult = textInput.update(msg);
@@ -74,7 +73,7 @@ public class PipeExample implements Model {
      */
     @Override
     public String view() {
-        return "\nYou piped in: %s\n\nPress ^C, Esc, or Enter to exit".formatted(textInput.view());
+        return String.format("%nYou piped in: %s%n%nPress ^C, Esc, or Enter to exit", textInput.view());
     }
 
     /**
@@ -89,6 +88,7 @@ public class PipeExample implements Model {
             System.out.println("Try piping in some text. Example:");
             System.out.println("  echo 'Hello, World!' | java -jar tui4j-examples.jar");
             System.exit(1);
+            return;
         }
 
         new Program(new PipeExample(pipedInput.trim())).run();

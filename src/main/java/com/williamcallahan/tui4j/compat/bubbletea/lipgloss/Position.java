@@ -11,14 +11,19 @@ public final class Position {
     private final com.williamcallahan.tui4j.compat.lipgloss.Position delegate;
 
     /** Top-aligned position. */
+    @Deprecated(since = "0.3.0")
     public static final Position Top = new Position(com.williamcallahan.tui4j.compat.lipgloss.Position.Top);
     /** Bottom-aligned position. */
+    @Deprecated(since = "0.3.0")
     public static final Position Bottom = new Position(com.williamcallahan.tui4j.compat.lipgloss.Position.Bottom);
     /** Center-aligned position. */
+    @Deprecated(since = "0.3.0")
     public static final Position Center = new Position(com.williamcallahan.tui4j.compat.lipgloss.Position.Center);
     /** Left-aligned position. */
+    @Deprecated(since = "0.3.0")
     public static final Position Left = new Position(com.williamcallahan.tui4j.compat.lipgloss.Position.Left);
     /** Right-aligned position. */
+    @Deprecated(since = "0.3.0")
     public static final Position Right = new Position(com.williamcallahan.tui4j.compat.lipgloss.Position.Right);
 
     /**
@@ -40,6 +45,7 @@ public final class Position {
      *
      * @return position value
      */
+    @Deprecated(since = "0.3.0")
     public double value() {
         return delegate.value();
     }
@@ -49,6 +55,7 @@ public final class Position {
      *
      * @return canonical Position
      */
+    @Deprecated(since = "0.3.0")
     public com.williamcallahan.tui4j.compat.lipgloss.Position toNew() {
         return delegate;
     }
@@ -59,6 +66,7 @@ public final class Position {
      * @param p canonical Position
      * @return deprecated Position shim
      */
+    @Deprecated(since = "0.3.0")
     public static Position fromNew(com.williamcallahan.tui4j.compat.lipgloss.Position p) {
         if (p == null) {
             return null;

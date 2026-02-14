@@ -13,8 +13,12 @@ public class PaddingDecorator extends com.williamcallahan.tui4j.compat.lipgloss.
 
     /**
      * Creates a padding decorator instance for legacy compatibility.
+     *
+     * @deprecated Use {@link com.williamcallahan.tui4j.compat.lipgloss.PaddingDecorator} instead.
      */
+    @Deprecated(since = "0.3.0")
     public PaddingDecorator() {
+        // Deprecated shim constructor required for backward compatibility
     }
 
     /**
@@ -28,7 +32,9 @@ public class PaddingDecorator extends com.williamcallahan.tui4j.compat.lipgloss.
      * @param attributedStyle style to preserve for padding
      * @param renderer        renderer to use
      * @return padded string
+     * @deprecated Use {@link com.williamcallahan.tui4j.compat.lipgloss.PaddingDecorator#applyPadding} instead.
      */
+    @Deprecated(since = "0.3.0")
     public static String applyPadding(
         String input,
         int topPadding,
@@ -57,7 +63,9 @@ public class PaddingDecorator extends com.williamcallahan.tui4j.compat.lipgloss.
      * @param attributedStyle style to preserve for padding
      * @param renderer        renderer to use
      * @return padded string
+     * @deprecated Use {@link com.williamcallahan.tui4j.compat.lipgloss.PaddingDecorator#padLeft} instead.
      */
+    @Deprecated(since = "0.3.0")
     public static String padLeft(
         String input,
         int leftPadding,
@@ -80,7 +88,9 @@ public class PaddingDecorator extends com.williamcallahan.tui4j.compat.lipgloss.
      * @param attributedStyle style to preserve for padding
      * @param renderer        renderer to use
      * @return padded string
+     * @deprecated Use {@link com.williamcallahan.tui4j.compat.lipgloss.PaddingDecorator#padRight} instead.
      */
+    @Deprecated(since = "0.3.0")
     public static String padRight(
         String input,
         int rightPadding,
@@ -103,7 +113,9 @@ public class PaddingDecorator extends com.williamcallahan.tui4j.compat.lipgloss.
      * @param attributedStyle style to preserve for padding
      * @param renderer        renderer to use
      * @return padded string
+     * @deprecated Use {@link com.williamcallahan.tui4j.compat.lipgloss.PaddingDecorator#pad} instead.
      */
+    @Deprecated(since = "0.3.0")
     public static String pad(
         String str,
         int n,

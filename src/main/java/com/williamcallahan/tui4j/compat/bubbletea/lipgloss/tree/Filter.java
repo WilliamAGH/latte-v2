@@ -23,6 +23,7 @@ public class Filter extends com.williamcallahan.tui4j.compat.lipgloss.tree.Filte
      *
      * @param data data
      */
+    @Deprecated(since = "0.3.0")
     public Filter(Children data) {
         super(data);
     }
@@ -33,6 +34,7 @@ public class Filter extends com.williamcallahan.tui4j.compat.lipgloss.tree.Filte
      * @param index index
      * @return result
      */
+    @Deprecated(since = "0.3.0")
     @Override
     public Node at(int index) {
         return (Node) super.at(index);
@@ -44,6 +46,7 @@ public class Filter extends com.williamcallahan.tui4j.compat.lipgloss.tree.Filte
      * @param filterFunction filter function
      * @return result
      */
+    @Deprecated(since = "0.3.0")
     public Filter filter(FilterFunction filterFunction) {
         super.filter(filterFunction);
         return this;
@@ -55,6 +58,7 @@ public class Filter extends com.williamcallahan.tui4j.compat.lipgloss.tree.Filte
      * @param index index
      * @return result
      */
+    @Deprecated(since = "0.3.0")
     @Override
     public Children remove(int index) {
         return (Children) super.remove(index);
@@ -66,6 +70,7 @@ public class Filter extends com.williamcallahan.tui4j.compat.lipgloss.tree.Filte
      * @param child child
      * @return result
      */
+    @Deprecated(since = "0.3.0")
     public Children append(Node child) {
         return (Children) super.append(child);
     }

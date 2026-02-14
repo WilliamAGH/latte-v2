@@ -1,4 +1,4 @@
-package com.williamcallahan.tui4j.examples.spinners;
+package examples.compat.bubbletea.spinners;
 
 import com.williamcallahan.tui4j.compat.bubbletea.Command;
 import com.williamcallahan.tui4j.compat.bubbletea.Message;
@@ -173,8 +173,7 @@ public class SpinnersExample implements Model {
      * @return result
      */
     private int stringWidth(String s) {
-        com.williamcallahan.tui4j.ansi.TextWidth tw = new com.williamcallahan.tui4j.ansi.TextWidth();
-        return tw.measureCellWidth(s);
+        return com.williamcallahan.tui4j.ansi.TextWidth.measureCellWidth(s);
     }
 
     /**

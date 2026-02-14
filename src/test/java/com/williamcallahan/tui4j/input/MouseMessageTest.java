@@ -2,7 +2,6 @@ package com.williamcallahan.tui4j.input;
 
 import com.williamcallahan.tui4j.compat.bubbletea.input.MouseAction;
 import com.williamcallahan.tui4j.compat.bubbletea.input.MouseButton;
-import com.williamcallahan.tui4j.compat.bubbletea.input.MouseMessage;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

@@ -8,14 +8,13 @@ import com.williamcallahan.tui4j.compat.bubbletea.input.key.KeyType;
 import com.williamcallahan.tui4j.compat.bubbletea.KeyPressMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class FilePickerTest {
+class FilePickerTest {
 
     private Path tempDir;
     private FilePicker filePicker;
@@ -87,7 +86,7 @@ public class FilePickerTest {
     }
 
     @Test
-    void testUpdateWithKeyPressUp() throws Exception {
+    void testUpdateWithKeyPressUp() {
         Command cmd = filePicker.init();
         Message msg = cmd.execute();
         filePicker.update(msg);
@@ -98,7 +97,7 @@ public class FilePickerTest {
     }
 
     @Test
-    void testUpdateWithKeyPressDown() throws Exception {
+    void testUpdateWithKeyPressDown() {
         Command cmd = filePicker.init();
         Message msg = cmd.execute();
         filePicker.update(msg);

@@ -1,4 +1,4 @@
-package com.williamcallahan.tui4j.examples.http;
+package examples.compat.bubbletea.http;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;

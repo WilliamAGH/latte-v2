@@ -1,4 +1,4 @@
-package com.williamcallahan.tui4j.examples.progress.download;
+package examples.compat.bubbletea.progress.download;
 
 import com.williamcallahan.tui4j.compat.bubbletea.Command;
 import com.williamcallahan.tui4j.compat.bubbletea.Message;
@@ -26,7 +26,6 @@ public class ProgressDownloadExample implements Model {
     private final Progress progressBar;
     private final List<DownloadFile> downloads;
     private int selectedIndex;
-    private boolean quitting;
     private boolean allComplete;
 
     /**
@@ -40,7 +39,6 @@ public class ProgressDownloadExample implements Model {
                 .withFullColor("#28A745");
         this.downloads = new ArrayList<>();
         this.selectedIndex = 0;
-        this.quitting = false;
         this.allComplete = false;
 
         downloads.add(new DownloadFile("ubuntu-22.04.iso", 3800, 450));
@@ -69,7 +67,6 @@ public class ProgressDownloadExample implements Model {
         if (msg instanceof KeyPressMessage keyPressMessage) {
             String key = keyPressMessage.key();
             if ("q".equals(key) || "Q".equals(key) || "ctrl+c".equals(key)) {
-                quitting = true;
                 return new UpdateResult<>(this, QuitMessage::new);
             }
             if ("j".equals(key) || "down".equals(key)) {
@@ -95,12 +92,8 @@ public class ProgressDownloadExample implements Model {
         }
 
         if (msg instanceof DownloadTickMessage) {
-            boolean anyDownloading = false;
             for (DownloadFile download : downloads) {
                 download.update();
-                if (download.isDownloading()) {
-                    anyDownloading = true;
-                }
             }
 
             allComplete = downloads.stream().allMatch(DownloadFile::isComplete);
@@ -134,9 +127,22 @@ public class ProgressDownloadExample implements Model {
         for (int i = 0; i < downloads.size(); i++) {
             DownloadFile download = downloads.get(i);
             String prefix = i == selectedIndex ? ">" : " ";
-            String icon = download.isComplete() ? "✓" : (download.isPaused() ? "⏸" : "↓");
-            String status = download.isComplete() ? "Done" : (download.isPaused() ? "Paused" : download.getSpeedFormatted());
-            String eta = download.isComplete() ? "" : (download.isPaused() ? "Paused" : "ETA: " + download.getEtaFormatted());
+            String icon;
+            String status;
+            String eta;
+            if (download.isComplete()) {
+                icon = "✓";
+                status = "Done";
+                eta = "";
+            } else if (download.isPaused()) {
+                icon = "⏸";
+                status = "Paused";
+                eta = "Paused";
+            } else {
+                icon = "↓";
+                status = download.getSpeedFormatted();
+                eta = "ETA: " + download.getEtaFormatted();
+            }
 
             if (i == selectedIndex) {
                 sb.append(prefix).append(" ").append(icon).append(" ").append(download.getName()).append("\n");
@@ -193,8 +199,6 @@ public class ProgressDownloadExample implements Model {
         private long downloadedBytes;
         private double lastSpeed;
         private boolean paused;
-        private LocalDateTime lastUpdate;
-        private long startTime;
         private long bytesAtSpeedUpdate;
         private LocalDateTime speedUpdateTime;
 
@@ -209,10 +213,8 @@ public class ProgressDownloadExample implements Model {
             this.name = name;
             this.totalBytes = totalBytes * 1024 * 1024;
             this.downloadedBytes = 0;
-            this.lastSpeed = downloadSpeed * 1024;
+            this.lastSpeed = (double) downloadSpeed * 1024;
             this.paused = false;
-            this.lastUpdate = LocalDateTime.now();
-            this.startTime = System.currentTimeMillis();
             this.bytesAtSpeedUpdate = 0;
             this.speedUpdateTime = LocalDateTime.now();
         }
@@ -225,7 +227,6 @@ public class ProgressDownloadExample implements Model {
 
             long bytesToDownload = (long) (lastSpeed * 0.05);
             downloadedBytes = Math.min(downloadedBytes + bytesToDownload, totalBytes);
-            lastUpdate = LocalDateTime.now();
 
             updateSpeedEstimate();
         }
@@ -239,7 +240,7 @@ public class ProgressDownloadExample implements Model {
             if (elapsed > 500) {
                 long bytesDownloaded = downloadedBytes - bytesAtSpeedUpdate;
                 if (bytesDownloaded > 0) {
-                    double newSpeed = (double) bytesDownloaded / (elapsed / 1000.0);
+                    double newSpeed = bytesDownloaded / (elapsed / 1000.0);
                     lastSpeed = lastSpeed * 0.7 + newSpeed * 0.3;
                 }
                 bytesAtSpeedUpdate = downloadedBytes;
@@ -271,15 +272,6 @@ public class ProgressDownloadExample implements Model {
          */
         public double getPercent() {
             return (double) downloadedBytes / totalBytes;
-        }
-
-        /**
-         * Reports whether the download is actively progressing.
-         *
-         * @return true when downloading
-         */
-        public boolean isDownloading() {
-            return !paused && !isComplete();
         }
 
         /**
