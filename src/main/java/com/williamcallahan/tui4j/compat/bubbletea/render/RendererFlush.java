@@ -29,7 +29,7 @@ class RendererFlush {
     private final List<String> queuedMessageLines = new ArrayList<>();
     private volatile boolean needsRender = true;
     private int linesRendered = 0;
-    private boolean isInAltScreen;
+    private volatile boolean isInAltScreen;
 
     /**
      * Creates a flush pipeline for the given terminal.
@@ -40,7 +40,14 @@ class RendererFlush {
         this.terminal = terminal;
     }
 
-    // Bubble Tea: seeks to replicate bubbletea/standard_renderer.go flush behavior.
+    /**
+     * Diffs the current buffer against the last render and writes only changed lines.
+     * <p>
+     * Upstream: bubbletea/standard_renderer.go flush
+     *
+     * @param width  terminal width for truncation (0 = unlimited)
+     * @param height terminal height for overflow trimming (0 = unlimited)
+     */
     void flush(int width, int height) {
         if (!needsRender) {
             return;
@@ -48,7 +55,8 @@ class RendererFlush {
 
         renderLock.lock();
         try {
-            if (buffer.isEmpty() || buffer.toString().equals(lastRender)) {
+            if (queuedMessageLines.isEmpty()
+                && (buffer.isEmpty() || buffer.toString().equals(lastRender))) {
                 return;
             }
 
@@ -80,6 +88,7 @@ class RendererFlush {
         }
     }
 
+    /** Splits the buffer into lines and trims overflow beyond the given height. */
     private String[] splitAndTruncateHeight(int height) {
         String[] newLines = buffer.toString().split("\n");
         if (height > 0 && newLines.length > height) {
@@ -88,6 +97,7 @@ class RendererFlush {
         return newLines;
     }
 
+    /** Appends queued print-line messages to the output, skipped in alt-screen mode. */
     private boolean flushQueuedMessages(StringBuilder out, int width) {
         if (queuedMessageLines.isEmpty() || isInAltScreen) {
             return false;
@@ -104,6 +114,7 @@ class RendererFlush {
         return true;
     }
 
+    /** Emits only the lines that differ from the previous render, using cursor-down to skip unchanged ones. */
     private void renderDiffLines(StringBuilder out, String[] newLines, boolean forceRender, int width) {
         for (int i = 0; i < newLines.length; i++) {
             boolean canSkip =
@@ -136,7 +147,14 @@ class RendererFlush {
         }
     }
 
-    // Bubble Tea: seeks to replicate bubbletea/standard_renderer.go write behavior.
+    /**
+     * Replaces the render buffer with the latest view string.
+     * <p>
+     * Upstream: bubbletea/standard_renderer.go write
+     *
+     * @param view      rendered model output
+     * @param isRunning ignored when false (program shutting down)
+     */
     void write(String view, boolean isRunning) {
         if (!isRunning) return;
 
@@ -152,17 +170,41 @@ class RendererFlush {
         }
     }
 
-    // Bubble Tea: seeks to replicate bubbletea/standard_renderer.go repaint behavior.
+    /**
+     * Resets cached render state so the next flush redraws everything.
+     * <p>
+     * Acquires the render lock because external callers (e.g. StandardRenderer)
+     * may invoke this without already holding it. Internal callers that already
+     * hold the lock must use {@link #resetRenderState()} instead.
+     * <p>
+     * Upstream: bubbletea/standard_renderer.go repaint
+     */
     void repaint() {
-        lastRender = "";
-        lastRenderedLines = new String[] {};
+        renderLock.lock();
+        try {
+            resetRenderState();
+        } finally {
+            renderLock.unlock();
+        }
     }
 
-    // tui4j extension; no Bubble Tea equivalent.
+    /** Clears cached render state. Caller must already hold {@code renderLock}. */
+    private void resetRenderState() {
+        lastRender = "";
+        lastRenderedLines = new String[0];
+    }
+
+    /** Marks the renderer as needing a redraw on the next tick (tui4j extension). */
     void notifyModelChanged() {
         this.needsRender = true;
     }
 
+    /**
+     * Queues a message for printing above the rendered view on the next flush.
+     * Ignored in alt-screen mode because queued messages use inline scrollback.
+     *
+     * @param messageBody text to print (may contain newlines)
+     */
     void queuePrintLine(String messageBody) {
         if (isInAltScreen) {
             return;
@@ -172,13 +214,13 @@ class RendererFlush {
             String[] lines = messageBody.split("\n");
             queuedMessageLines.addAll(Arrays.asList(lines));
             needsRender = true;
-            repaint();
+            resetRenderState();
         } finally {
             renderLock.unlock();
         }
     }
 
-    // Bubble Tea: seeks to replicate bubbletea/standard_renderer.go showCursor behavior.
+    /** Shows the terminal cursor. Upstream: bubbletea/standard_renderer.go showCursor. */
     void showCursor() {
         renderLock.lock();
         try {
@@ -189,7 +231,7 @@ class RendererFlush {
         }
     }
 
-    // Bubble Tea: seeks to replicate bubbletea/standard_renderer.go hideCursor behavior.
+    /** Hides the terminal cursor. Upstream: bubbletea/standard_renderer.go hideCursor. */
     void hideCursor() {
         renderLock.lock();
         try {
@@ -200,19 +242,19 @@ class RendererFlush {
         }
     }
 
-    // Bubble Tea: seeks to replicate bubbletea/standard_renderer.go clearScreen behavior.
+    /** Clears the screen and resets render state. Upstream: bubbletea/standard_renderer.go clearScreen. */
     void clearScreen() {
         renderLock.lock();
         try {
             terminal.puts(InfoCmp.Capability.clear_screen);
             terminal.flush();
-            repaint();
+            resetRenderState();
         } finally {
             renderLock.unlock();
         }
     }
 
-    // Bubble Tea: seeks to replicate bubbletea/standard_renderer.go enterAltScreen behavior.
+    /** Switches to the alternate screen buffer. Upstream: bubbletea/standard_renderer.go enterAltScreen. */
     void enterAltScreen() {
         if (isInAltScreen) return;
 
@@ -224,7 +266,7 @@ class RendererFlush {
             terminal.puts(InfoCmp.Capability.clear_screen);
             terminal.puts(InfoCmp.Capability.cursor_home);
 
-            repaint();
+            resetRenderState();
             needsRender = true;
             isInAltScreen = true;
 
@@ -234,7 +276,7 @@ class RendererFlush {
         }
     }
 
-    // Bubble Tea: seeks to replicate bubbletea/standard_renderer.go exitAltScreen behavior.
+    /** Returns from the alternate screen buffer. Upstream: bubbletea/standard_renderer.go exitAltScreen. */
     void exitAltScreen() {
         if (!isInAltScreen) return;
 
@@ -242,7 +284,7 @@ class RendererFlush {
         try {
             terminal.puts(InfoCmp.Capability.exit_ca_mode);
 
-            repaint();
+            resetRenderState();
             needsRender = true;
             isInAltScreen = false;
 
@@ -252,7 +294,7 @@ class RendererFlush {
         }
     }
 
-    // Bubble Tea: seeks to replicate bubbletea/standard_renderer.go altScreen behavior.
+    /** Returns whether the terminal is currently in alternate-screen mode. */
     boolean altScreen() {
         return isInAltScreen;
     }
@@ -272,8 +314,17 @@ class RendererFlush {
         }
     }
 
-    // Bubble Tea: seeks to replicate bubbletea/standard_renderer.go setWindowTitle behavior.
+    /**
+     * Sets the terminal window title via OSC 2 escape sequence.
+     * <p>
+     * Delegates to {@link #writeToTerminal(String)} to serialize the write
+     * with other flush output.
+     * <p>
+     * Upstream: bubbletea/standard_renderer.go setWindowTitle
+     *
+     * @param title window title text
+     */
     void setWindowTitle(String title) {
-        terminal.writer().print("\u001b]2;" + title + "\u0007");
+        writeToTerminal("\u001b]2;" + title + "\u0007");
     }
 }
