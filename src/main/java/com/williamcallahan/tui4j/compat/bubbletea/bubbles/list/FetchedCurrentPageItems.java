@@ -26,6 +26,7 @@ public record FetchedCurrentPageItems(
      * Converts this deprecated message to the canonical {@link com.williamcallahan.tui4j.compat.bubbles.list.FetchedCurrentPageItems}.
      *
      * @return canonical message
+     * @deprecated Use {@link com.williamcallahan.tui4j.compat.bubbles.list.FetchedCurrentPageItems} directly.
      */
     @Deprecated(since = "0.3.0")
     @Override
@@ -36,6 +37,11 @@ public record FetchedCurrentPageItems(
         );
     }
 
+    /**
+     * Compares fetched items and post-fetch callbacks by value.
+     *
+     * @deprecated Use the canonical type directly.
+     */
     @Deprecated(since = "0.3.0")
     @Override
     public boolean equals(Object o) {
@@ -45,12 +51,22 @@ public record FetchedCurrentPageItems(
                 && Arrays.equals(postFetch, pf);
     }
 
+    /**
+     * Computes a hash using fetched items and post-fetch callbacks.
+     *
+     * @deprecated Use the canonical type directly.
+     */
     @Deprecated(since = "0.3.0")
     @Override
     public int hashCode() {
         return 31 * Objects.hashCode(fetchedItems) + Arrays.hashCode(postFetch);
     }
 
+    /**
+     * Returns a readable representation for diagnostics.
+     *
+     * @deprecated Use the canonical type directly.
+     */
     @Deprecated(since = "0.3.0")
     @Override
     public String toString() {

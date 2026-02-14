@@ -18,6 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class MessageShimCompatTest {
 
+    /** Ensures fetched page items are emitted as a Message with correct payload fields. */
     @Test
     void fetchedCurrentPageItemsIsMessage() {
         var item = new FilteredItem(
@@ -37,6 +38,7 @@ class MessageShimCompatTest {
         assertThat(msg.fetchedItems().totalPages()).isEqualTo(1);
     }
 
+    /** Validates that FetchedItems record fields are preserved correctly. */
     @Test
     void fetchedItemsRecordFieldsAreCorrect() {
         var item = new FilteredItem(
@@ -51,6 +53,7 @@ class MessageShimCompatTest {
         assertThat(fetched.totalPages()).isEqualTo(3);
     }
 
+    /** Confirms all FilterState enum constants are accessible. */
     @Test
     void filterStateEnumValuesExist() {
         assertThat(FilterState.Unfiltered).isNotNull();

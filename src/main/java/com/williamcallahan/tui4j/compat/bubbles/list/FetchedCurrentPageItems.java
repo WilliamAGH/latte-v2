@@ -17,6 +17,7 @@ public record FetchedCurrentPageItems(
         Runnable... postFetch
 ) implements Message {
 
+    /** Compares fetched items and post-fetch callbacks by value. */
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -25,11 +26,13 @@ public record FetchedCurrentPageItems(
                 && Arrays.equals(postFetch, pf);
     }
 
+    /** Computes a hash using fetched items and post-fetch callbacks. */
     @Override
     public int hashCode() {
         return 31 * Objects.hashCode(fetchedItems) + Arrays.hashCode(postFetch);
     }
 
+    /** Returns a readable representation for diagnostics. */
     @Override
     public String toString() {
         return "FetchedCurrentPageItems[fetchedItems=" + fetchedItems
