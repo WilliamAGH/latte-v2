@@ -20,6 +20,7 @@ import com.williamcallahan.tui4j.message.SetMouseCursorTextMessage;
  */
 final class RendererMessageDispatcher {
 
+    /** Prevents instantiation; all methods are static. */
     private RendererMessageDispatcher() {
     }
 
