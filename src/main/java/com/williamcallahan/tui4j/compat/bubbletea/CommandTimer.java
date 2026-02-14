@@ -35,11 +35,12 @@ final class CommandTimer {
 
             try {
                 LocalDateTime time = queue.take();
-                timer.cancel();
                 return fn.apply(time);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 throw new IllegalStateException("Tick command interrupted", e);
+            } finally {
+                timer.cancel();
             }
         };
     }
@@ -68,11 +69,12 @@ final class CommandTimer {
 
             try {
                 LocalDateTime time = queue.take();
-                timer.cancel();
                 return fn.apply(time);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 throw new IllegalStateException("Every command interrupted", e);
+            } finally {
+                timer.cancel();
             }
         };
     }
