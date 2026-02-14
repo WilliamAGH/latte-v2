@@ -206,11 +206,11 @@ class RendererFlush {
      * @param messageBody text to print (may contain newlines)
      */
     void queuePrintLine(String messageBody) {
-        if (isInAltScreen) {
-            return;
-        }
         renderLock.lock();
         try {
+            if (isInAltScreen) {
+                return;
+            }
             String[] lines = messageBody.split("\n");
             queuedMessageLines.addAll(Arrays.asList(lines));
             needsRender = true;
