@@ -29,6 +29,44 @@
 implementation 'com.williamcallahan:tui4j:0.3.1-preview'
 ```
 
+### Snapshots
+
+Snapshots are published to Sonatype's snapshot repository (separate from Maven Central releases):
+
+```text
+https://central.sonatype.com/repository/maven-snapshots/
+```
+
+Maven:
+
+```xml
+<repositories>
+    <repository>
+        <id>sonatype-snapshots</id>
+        <url>https://central.sonatype.com/repository/maven-snapshots/</url>
+        <releases>
+            <enabled>false</enabled>
+        </releases>
+        <snapshots>
+            <enabled>true</enabled>
+        </snapshots>
+    </repository>
+</repositories>
+```
+
+Gradle:
+
+```kotlin
+repositories {
+    mavenCentral()
+    maven(url = "https://central.sonatype.com/repository/maven-snapshots/")
+}
+
+dependencies {
+    implementation("com.williamcallahan:tui4j:0.3.3-SNAPSHOT")
+}
+```
+
 ## Quick Start
 
 TUI4J uses [The Elm Architecture](docs/how-to/tutorial.md): implement a `Model` with `init()`, `update()`, and `view()` methods, then run it with `Program`:
