@@ -167,18 +167,18 @@ public record Border(
                                     TerminalColor leftFg, TerminalColor leftBg,
                                     TerminalColor rightFg, TerminalColor rightBg,
                                     Renderer renderer) {
-        char[] leftRunes = chars.left().toCharArray();
+        char[] leftRunes = hasLeft ? chars.left().toCharArray() : null;
         int leftIndex = 0;
-        char[] rightRunes = chars.right().toCharArray();
+        char[] rightRunes = hasRight ? chars.right().toCharArray() : null;
         int rightIndex = 0;
 
         for (int i = 0; i < lines.length; i++) {
-            if (hasLeft) {
+            if (leftRunes != null) {
                 out.append(styleBorder(String.valueOf(leftRunes[leftIndex]), leftFg, leftBg, renderer));
                 leftIndex = (leftIndex + 1) % leftRunes.length;
             }
             out.append(lines[i]);
-            if (hasRight) {
+            if (rightRunes != null) {
                 out.append(styleBorder(String.valueOf(rightRunes[rightIndex]), rightFg, rightBg, renderer));
                 rightIndex = (rightIndex + 1) % rightRunes.length;
             }
