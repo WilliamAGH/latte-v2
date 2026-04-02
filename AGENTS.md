@@ -43,6 +43,7 @@ This is a **published Maven Central library** with downstream consumers (Brief, 
   - No `Map<String, Object>`, raw types, unchecked casts, `@SuppressWarnings`, or `eslint-disable` in production.
   - No trusting memory—verify every import/API/config against current docs.
 - [ZA1d] **Mandatory Research**: You MUST research dependency questions and correct usage. Never use legacy or `@deprecated` usage from dependencies. Ensure correct usage by reviewing related code directly in `node_modules` or Gradle caches and using online tool calls.
+- [ZA1e] No empty confirmations ("You're right", "Absolutely") before investigation; verify then cite evidence
 
 ## [GT1] Git & Permissions
 
@@ -53,6 +54,7 @@ This is a **published Maven Central library** with downstream consumers (Brief, 
 - [GT1e] Destructive git commands are prohibited unless explicitly ordered by the user (e.g., `git restore`, `git reset`, force checkout).
 - [GT1f] Treat existing staged/unstaged changes as intentional unless the user says otherwise; never “clean up” someone else’s work unprompted.
 - [GT1g] Examples of write operations that require permission: `git add`, `git commit`, `git checkout`, `git merge`, `git rebase`, `git reset`, `git restore`, `git clean`, `git cherry-pick`.
+- [GT1h] **Repository-Local Writes Only**: NEVER commit or push to this repository from a temporary clone, alternate checkout/worktree, or any other directory copy of the same repo. All git writes must be executed from this exact working tree.
 
 ## [CC1] Clean Code & DDD (Mandatory)
 
@@ -60,6 +62,18 @@ This is a **published Maven Central library** with downstream consumers (Brief, 
 - [CC1b] **DRY (Don't Repeat Yourself)**: Avoid redundant code. Reuse code where appropriate and consistent with clean code principles.
 - [CC1c] **YAGNI (You Aren't Gonna Need It)**: Do not build features or abstractions "just in case". Implement only what is required for the current task.
 - [CC1d] **Clean Architecture**: Dependencies point inward. Domain logic has zero framework imports.
+- [CC1e] **Tracer bullet**: Build one tiny end-to-end slice through all layers first; validate it works; then expand — never build horizontal layers in isolation.
+- [CC1f] **KISS**: Simplest solution that works; achieve by removing, not adding; use platform/framework defaults unless deviation is proven necessary
+
+## [SS1] Single Semantic Owner (Mandatory)
+
+- [SS1a] **One Owner**: For any governed concept, exactly one file/module may define its field inventory, names, allowed keys, dependency graph, or behavior selection.
+- [SS1b] **No Mirrors**: Tests, fixtures, docs, examples, generators, compat wrappers, and helper modules are NOT exempt; they must bind/import/project the canonical owner instead of restating it.
+- [SS1c] **Projection Rule**: Every non-canonical location may only project the canonical owner with identical governed names. Renaming governed fields in projections is prohibited.
+- [SS1d] **No Aliases**: Compatibility aliases, alternate display-name identifiers, convenience transport names, and second registries for a governed concept are prohibited.
+- [SS1e] **Stop-Work Trigger**: If an implementation requires listing the same governed fields/keys/rules in a second place, stop and redesign before editing.
+- [SS1f] **No Positional-Null Sludge**: Constructor/factory calls with repeated placeholder nulls or low-legibility optional argument trains are prohibited; use named factories/builders, parameter objects, or bind/import the canonical owner.
+- [SS1g] **Whole-List Smell**: If a file "knows the whole list" of a governed concept and it is not the canonical owner, the design is presumed wrong and must be reduced or removed.
 
 ## [ID1] Idiomatic Patterns & Defaults
 
@@ -75,6 +89,7 @@ This is a **published Maven Central library** with downstream consumers (Brief, 
 - [RC1c] **Fix Roots**: Investigate → understand → fix root causes. Do not add band-aids to silence errors.
 - [RC1d] **Dev Logging**: Dev-only logging is allowed to learn (must not change behavior, remove before shipping).
 - [RC1e] **Exceptions**: Use exceptions for exceptional cases; avoid defensive checks on trusted inputs. Do not add guard clauses or try/catch in trusted codepaths unless required by the surrounding code or error model.
+- [RC1f] BANNED slop indirection: no `*Adapter`, `*Transformer`, `*Normalizer`, `*Bridge`, `*Converter`, `*Mapper`, `*Compatibility`, `*Transition` modules that exist solely to reshape data between equivalent types; fix the type mismatch at source
 
 ## [FS1] File Creation & Clean Architecture
 
@@ -97,12 +112,13 @@ This is a **published Maven Central library** with downstream consumers (Brief, 
 ## [MO1] No Monoliths
 
 - [MO1a] No monoliths: avoid multi-concern files and catch-all modules
-- [MO1b] New work starts in new files; when touching a monolith, extract at least one seam
+- [MO1b] New work starts in new files; deliver one vertical slice end-to-end before adding the next; when touching a monolith, extract at least one seam
 - [MO1c] If safe extraction impossible, halt and ask
 - [MO1d] Strict SRP: each unit serves one actor; separate logic that changes for different reasons
 - [MO1e] Boundary rule: cross-module interaction happens only through explicit, typed contracts with dependencies pointing inward; don’t reach into other modules’ internals or mix web/use-case/domain/persistence concerns in one unit
 - [MO1f] Decision Logic: New feature → New file; Bug fix → Edit existing; Logic change → Extract/Replace
 - [MO1g] Extension (OCP): Add functionality via new classes/composition; do not modify stable code to add features
+- [MO1h] One canonical type per domain concept: never overload files with unrelated types/records/interfaces; split by domain concept, not by convenience
 -   Contract: `docs/contracts/code-change.md`
 
 ## [AB1] Abstraction Discipline
@@ -125,6 +141,7 @@ This is a **published Maven Central library** with downstream consumers (Brief, 
 - [TS1b] **Focus**: Prefer fast, focused tests; keep tests aligned with the public contract.
 - [TS1c] **Refactor-Resilient**: Unchanged behavior = passing tests regardless of internal restructuring.
 - [TS1d] **Build**: Run `./gradlew build` and confirm all tests pass before any PR.
+- [TS1e] **Contract Cleanup Handoff**: Name the canonical owner, list each duplicate owner removed, prove that tests/fixtures now bind or import the canonical owner, and explicitly call out any remaining duplicate owner as a blocker.
 
 ## [DS1] Dependency Source Verification
 
