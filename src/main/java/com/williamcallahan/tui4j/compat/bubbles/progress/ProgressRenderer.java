@@ -9,7 +9,6 @@ import com.williamcallahan.tui4j.compat.lipgloss.color.RGB;
 /**
  * Rendering and color logic for {@link Progress}.
  * <p>
- * Extracted from {@link Progress} to satisfy the 350-line ceiling [LOC1a].
  * Upstream: bubbles/progress/progress.go (view, color helpers).
  */
 final class ProgressRenderer {

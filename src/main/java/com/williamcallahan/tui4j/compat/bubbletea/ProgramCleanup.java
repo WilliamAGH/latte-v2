@@ -13,8 +13,6 @@ import org.jline.utils.InfoCmp;
 /**
  * Cleanup and terminal restoration logic for {@link Program}.
  * <p>
- * Extracted to keep {@link ProgramCore} under the repository 350 line limit.
- * <p>
  * Upstream: bubbletea/tea.go
  *
  * @see Program

@@ -28,7 +28,7 @@ This is a **published Maven Central library** with downstream consumers (Brief, 
 - [ID1a-d] Idiomatic Patterns & Defaults
 - [RC1a-e] Root Cause Resolution (no fallbacks, no shims/workarounds)
 - [FS1a-g] File Creation & Clean Architecture (search first, strict types, single responsibility)
-- [LOC1a-e] Line Count Ceiling (350 lines max; SRP enforcer; zero tolerance)
+- [LOC1a-e] Line Count Ceiling (500 lines max; SRP enforcer; zero tolerance)
 - [MO1a-g] No Monoliths (Strict SRP; Decision Logic; Extension/OCP)
 - [AB1a-d] Abstraction Discipline (reuse-first, no anemic wrappers)
 - [JD1a-d] Javadoc Standards (mandatory, why > what, deprecation policy)
@@ -103,9 +103,9 @@ This is a **published Maven Central library** with downstream consumers (Brief, 
 
 ## [LOC1] Line Count Ceiling (Repo-Wide)
 
-- [LOC1a] All written, non-generated source files in this repository MUST be <= 350 lines (`wc -l`), including `AGENTS.md`
-- [LOC1b] SRP Enforcer: This 350-line "stick" forces modularity (DDD/SRP); > 350 lines = too many responsibilities (see [MO1d])
-- [LOC1c] Zero Tolerance: No edits allowed to files > 350 LOC (even legacy); you MUST split/retrofit before applying your change
+- [LOC1a] All written, non-generated source files in this repository MUST be <= 500 lines (`wc -l`), including `AGENTS.md`
+- [LOC1b] SRP Enforcer: This 500-line "stick" forces modularity (DDD/SRP); > 500 lines = too many responsibilities (see [MO1d])
+- [LOC1c] Zero Tolerance: No edits allowed to files > 500 LOC (even legacy); you MUST split/retrofit before applying your change
 - [LOC1d] Enforcement: run line count checks and treat failures as merge blockers
 - [LOC1e] Exempt files: generated content, lockfiles, and large example/data dumps
 

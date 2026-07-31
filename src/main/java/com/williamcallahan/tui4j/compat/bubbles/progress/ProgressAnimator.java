@@ -8,7 +8,6 @@ import java.time.Duration;
 /**
  * Spring animation state and lifecycle for {@link Progress}.
  * <p>
- * Extracted from {@link Progress} to satisfy the 350-line ceiling [LOC1a].
  * Upstream: bubbles/progress/progress.go (animation fields, handleFrame, setPercent).
  */
 final class ProgressAnimator {
