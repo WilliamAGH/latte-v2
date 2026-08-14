@@ -47,14 +47,15 @@ This is a **published Maven Central library** with downstream consumers (Brief, 
 
 ## [GT1] Git & Permissions
 
-- [GT1a] All git commands require elevated permissions; never run without escalation.
+- Integration branch: `dev`.
+- [GT1a] All git WRITE commands (anything that changes the working tree, index, or history) require elevated permissions; never run them without escalation.
 - [GT1b] Never remove `.git/index.lock` automatically—stop and ask the user or seek explicit approval.
 - [GT1c] Read-only git commands (e.g., `git status`, `git diff`, `git log`, `git show`) never require permission. Any git command that writes to the working tree, index, or history requires explicit permission.
 - [GT1d] Do not skip commit signing or hooks; no `--no-verify`. No `Co-authored-by` or AI attribution.
 - [GT1e] Destructive git commands are prohibited unless explicitly ordered by the user (e.g., `git restore`, `git reset`, force checkout).
 - [GT1f] Treat existing staged/unstaged changes as intentional unless the user says otherwise; never “clean up” someone else’s work unprompted.
 - [GT1g] Examples of write operations that require permission: `git add`, `git commit`, `git checkout`, `git merge`, `git rebase`, `git reset`, `git restore`, `git clean`, `git cherry-pick`.
-- [GT1h] **Repository-Local Writes Only**: NEVER commit or push to this repository from a temporary clone, alternate checkout/worktree, or any other directory copy of the same repo. All git writes must be executed from this exact working tree.
+- [GT1h] **Repository-Local Writes Only**: Execute git writes only from this working tree or the task's dedicated worktree; task commits land in the worktree. NEVER commit or push from an unrelated clone or any other directory copy of the repo.
 
 ## [CC1] Clean Code & DDD (Mandatory)
 
@@ -140,7 +141,7 @@ This is a **published Maven Central library** with downstream consumers (Brief, 
 - [TS1a] **Coverage**: Update or add tests when behavior changes; do not change behavior without coverage.
 - [TS1b] **Focus**: Prefer fast, focused tests; keep tests aligned with the public contract.
 - [TS1c] **Refactor-Resilient**: Unchanged behavior = passing tests regardless of internal restructuring.
-- [TS1d] **Build**: Run `./gradlew build` and confirm all tests pass before any PR.
+- [TS1d] **Build**: Run `./gradlew build` and confirm all tests pass before any PR. After any push, watch the push-triggered CI run to a terminal verdict (one watcher per SHA, polls >= 60s apart); fix failures, commit, and push until green.
 - [TS1e] **Contract Cleanup Handoff**: Name the canonical owner, list each duplicate owner removed, prove that tests/fixtures now bind or import the canonical owner, and explicitly call out any remaining duplicate owner as a blocker.
 
 ## [DS1] Dependency Source Verification
