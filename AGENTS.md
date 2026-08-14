@@ -143,6 +143,7 @@ This is a **published Maven Central library** with downstream consumers (Brief, 
 - [TS1c] **Refactor-Resilient**: Unchanged behavior = passing tests regardless of internal restructuring.
 - [TS1d] **Build**: Run `./gradlew build` and confirm all tests pass before any PR. After any push, watch the push-triggered CI run to a terminal verdict (one watcher per SHA, polls >= 60s apart); fix failures, commit, and push until green.
 - [TS1e] **Contract Cleanup Handoff**: Name the canonical owner, list each duplicate owner removed, prove that tests/fixtures now bind or import the canonical owner, and explicitly call out any remaining duplicate owner as a blocker.
+- [TS1f] **Issue Materiality**: File GitHub issues only for material defects or features (behavior, correctness, security, performance, data quality, or a governed contract); fix pedantic/nitpick/style-only findings in place or drop them, never file them. Fixes and issue scope follow the minimalism bar: reuse before new code and simplify before completing, per the `ponytail` and `ce-simplify-code` skills.
 
 ## [DS1] Dependency Source Verification
 
